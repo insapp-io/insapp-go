@@ -7,15 +7,15 @@ import (
 )
 
 type Post struct {
-	ID          bson.ObjectId `bson:"_id,omitempty"`
-	Name        string        `json:"name"`
-	Association Association   `json:"association"`
-	Description string        `json:"description"`
-	Event       Event         `json:"event"`
-	Date        time.Time     `json:"date"`
-	Likes       Users         `json:"events_liked"`
-	Comments    Comments      `json:"comments"`
-	PhotoURL    string        `json:"photo_url"`
+	ID          bson.ObjectId   `bson:"_id,omitempty"`
+	Name        string          `json:"name"`
+	Association bson.ObjectId   `json:"association"`
+	Description string          `json:"description"`
+	Event       []bson.ObjectId `json:"event"`
+	Date        time.Time       `json:"date"`
+	Likes       []bson.ObjectId `json:"events_liked"`
+	Comments    Comments        `json:"comments"`
+	PhotoURL    string          `json:"photo_url"`
 }
 
 type Posts []Post
