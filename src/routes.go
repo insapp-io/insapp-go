@@ -1,6 +1,11 @@
 package main
 
-/*
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
+
 type Route struct {
 	Name        string
 	Method      string
@@ -24,4 +29,4 @@ func NewRouter() *mux.Router {
 
 var routes = Routes{
 	Route{"Index", "GET", "/", Index},
-}*/
+}
