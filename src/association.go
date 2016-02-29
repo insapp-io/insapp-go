@@ -42,11 +42,11 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	assosID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"name":        association.Name,
-		"Email":       association.Email,
-		"Description": association.Description,
-		"PohotURL":    association.PhotoURL,
-		"BgColor":     association.BgColor,
-		"FgColor":     association.FgColor,
+		"email":       association.Email,
+		"description": association.Description,
+		"photourl":    association.PhotoURL,
+		"bgcolor":     association.BgColor,
+		"fgcolor":     association.FgColor,
 	}}
 	db.Update(assosID, change)
 	var result Association
