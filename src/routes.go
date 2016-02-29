@@ -36,4 +36,11 @@ var routes = Routes{
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
 	//Route{"fdsq", "POST", "/association/{id}/{idEvent}", AddEventTest},
 	//Route{"fdsq", "DELETE", "/association/{id}/{idEvent}", RemoveEventTest},
+	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
+	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
+	Route{"AddEvent", "POST", "/event", AddEventController},
+	Route{"UpdateEvent", "PUT", "/event/{id}", UpdateEventController},
+	Route{"DeleteEvent", "DELETE", "/event/{id}", DeleteEventController},
+	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
+	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
 }
