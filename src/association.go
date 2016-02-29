@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Association defines the model of a Association
 type Association struct {
 	ID          bson.ObjectId   `bson:"_id,omitempty"`
 	Name        string          `json:"name"`
@@ -16,8 +17,10 @@ type Association struct {
 	FgColor     string          `json:"fgColor"`
 }
 
+// Associations is an array of Association
 type Associations []Association
 
+// AddAssociation will add the given association to the database
 func AddAssociation(association Association) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -29,6 +32,8 @@ func AddAssociation(association Association) Association {
 	return result
 }
 
+// UpdateAssociation will update the given association link to the given ID,
+// with the field of the given association, in the database
 func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -49,6 +54,7 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	return result
 }
 
+// DeleteAssociation will delete the given association from the database
 func DeleteAssociation(id bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -60,6 +66,7 @@ func DeleteAssociation(id bson.ObjectId) Association {
 	return result
 }
 
+// GetAssociation will return an Association object from the given ID
 func GetAssociation(id bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -70,6 +77,7 @@ func GetAssociation(id bson.ObjectId) Association {
 	return result
 }
 
+// GetAllAssociation will return an array of all the existing Association
 func GetAllAssociation() Associations {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -80,6 +88,7 @@ func GetAllAssociation() Associations {
 	return result
 }
 
+// AddEventToAssociation will add the given event ID to the given association
 func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -95,6 +104,7 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	return result
 }
 
+// RemoveEventFromAssociation will remove the given event ID from the given association
 func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()

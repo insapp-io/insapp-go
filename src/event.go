@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Event defines what an Event is
 type Event struct {
 	ID           bson.ObjectId   `bson:"_id,omitempty"`
 	Name         string          `json:"name"`
@@ -21,8 +22,10 @@ type Event struct {
 	FgColor      string          `json:"fgColor"`
 }
 
+// Events is an array of Event
 type Events []Event
 
+// GetEvent returns an Event object from the given ID
 func GetEvent(id bson.ObjectId) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -33,7 +36,9 @@ func GetEvent(id bson.ObjectId) Event {
 	return result
 }
 
-func GetFutureEvent() Events {
+// GetFutureEvents returns an array of Event objects
+// that will happen after "NOW"
+func GetFutureEvents() Events {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -44,6 +49,7 @@ func GetFutureEvent() Events {
 	return result
 }
 
+// AddEvent will add the Event event to the database
 func AddEvent(event Event) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -56,6 +62,7 @@ func AddEvent(event Event) Event {
 	return result
 }
 
+// UpdateEvent will update the Event event in the database
 func UpdateEvent(id bson.ObjectId, event Event) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -78,6 +85,7 @@ func UpdateEvent(id bson.ObjectId, event Event) Event {
 	return result
 }
 
+// DeleteEvent will delete the given Event
 func DeleteEvent(event Event) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -90,6 +98,7 @@ func DeleteEvent(event Event) Event {
 	return result
 }
 
+// AddParticipant add the given userID to the given eventID as a participant
 func AddParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -105,6 +114,7 @@ func AddParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
 	return result
 }
 
+// RemoveParticipant remove the given userID from the given eventID as a participant
 func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()

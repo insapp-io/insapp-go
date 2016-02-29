@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// GetEventController will answer a JSON of the event
+// from the given "id" in the URL. (cf Routes in routes.go)
 func GetEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	assocationID := vars["id"]
@@ -16,11 +18,15 @@ func GetEventController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// GetFutureEventsController will answer a JSON
+// containing all future events from "NOW"
 func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
-	var res = GetFutureEvent()
+	var res = GetFutureEvents()
 	json.NewEncoder(w).Encode(res)
 }
 
+// AddEventController will answer the JSON
+// of the brand new created event from the JSON body
 func AddEventController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var event Event
@@ -29,6 +35,8 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// UpdateEventController will answer the JSON
+// of the brand new modified event from the JSON body
 func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var event Event
@@ -39,6 +47,8 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// DeleteEventController will answer an empty JSON
+// if the deletation has succeed
 func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := GetEvent(bson.ObjectIdHex(vars["id"]))
@@ -46,6 +56,8 @@ func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// AddParticipantController will answer the JSON
+// of the event with the given partipant added
 func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := bson.ObjectIdHex(vars["id"])
@@ -54,6 +66,8 @@ func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// RemoveParticipantController will answer the JSON
+// of the event without the given partipant added
 func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := bson.ObjectIdHex(vars["id"])

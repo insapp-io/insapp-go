@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// GetAssociationController will answer a JSON of the association
+// linked to the given id in the URL
 func GetAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	assocationID := vars["id"]
@@ -16,11 +18,14 @@ func GetAssociationController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// GetAllAssociationsController will answer a JSON of all associations
 func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	var res = GetAllAssociation()
 	json.NewEncoder(w).Encode(res)
 }
 
+// AddAssociationController will answer a JSON of the
+// brand new created association (from the JSON Body)
 func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
@@ -29,6 +34,8 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// UpdateAssociationController will answer the JSON of the
+// modified association (from the JSON Body)
 func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
@@ -39,6 +46,8 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// DeleteAssociationController will answer a JSON of an
+// empty association if the deletation has succeed
 func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	res := DeleteAssociation(bson.ObjectIdHex(vars["id"]))
