@@ -84,7 +84,7 @@ func DeleteEvent(event Event) Event {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	db.Remove(event)
-	RemoveEventToAssociation(event.Association, event.ID)
+	RemoveEventFromAssociation(event.Association, event.ID)
 	var result Event
 	db.Find(event.ID).One(result)
 	return result

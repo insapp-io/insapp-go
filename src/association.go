@@ -49,7 +49,7 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	return result
 }
 
-func RemoveAssociation(id bson.ObjectId) Association {
+func DeleteAssociation(id bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -95,7 +95,7 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	return result
 }
 
-func RemoveEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
+func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)

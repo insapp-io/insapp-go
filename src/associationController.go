@@ -39,19 +39,8 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-/*func AddEventTest(w http.ResponseWriter, r *http.Request) {
+func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	eventID := vars["idEvent"]
-	res := AddEvent(bson.ObjectIdHex(assocationID), bson.ObjectIdHex(eventID))
+	res := DeleteAssociation(bson.ObjectIdHex(vars["id"]))
 	json.NewEncoder(w).Encode(res)
 }
-
-func RemoveEventTest(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	eventID := vars["idEvent"]
-	res := RemoveEvent(bson.ObjectIdHex(assocationID), bson.ObjectIdHex(eventID))
-	json.NewEncoder(w).Encode(res)
-}
-*/
