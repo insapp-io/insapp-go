@@ -99,23 +99,24 @@ func DeleteEvent(event Event) Event {
 }
 
 // AddParticipant add the given userID to the given eventID as a participant
-func AddParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
+func AddParticipant(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	eventID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
+	change := bson.M{"$addToSet": bson.M{
 		"participants": userID,
 	}}
 	db.Update(eventID, change)
-	var result Event
-	db.Find(bson.M{"_id": id}).One(&result)
-	return result
+	var event Event
+	db.Find(bson.M{"_id": id}).One(&event)
+	user := AddEventToUser(userID, event.ID)
+	return event, user
 }
 
 // RemoveParticipant remove the given userID from the given eventID as a participant
-func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
+func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -125,7 +126,8 @@ func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) Event {
 		"participants": userID,
 	}}
 	db.Update(eventID, change)
-	var result Event
-	db.Find(bson.M{"_id": id}).One(&result)
-	return result
+	var event Event
+	db.Find(bson.M{"_id": id}).One(&event)
+	user := RemoveEventFromUser(userID, event.ID)
+	return event, user
 }

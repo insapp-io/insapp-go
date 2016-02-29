@@ -60,18 +60,18 @@ func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 // of the event with the given partipant added
 func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	event := bson.ObjectIdHex(vars["id"])
+	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
-	res := AddParticipant(event, userID)
-	json.NewEncoder(w).Encode(res)
+	event, user := AddParticipant(eventID, userID)
+	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
 // RemoveParticipantController will answer the JSON
 // of the event without the given partipant added
 func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	event := bson.ObjectIdHex(vars["id"])
+	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
-	res := RemoveParticipant(event, userID)
-	json.NewEncoder(w).Encode(res)
+	event, user := RemoveParticipant(eventID, userID)
+	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }

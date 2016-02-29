@@ -59,7 +59,7 @@ var routes = Routes{
 	Route{"LikePost", "POST", "/post/{id}/like/{userID}", LikePostController},
 	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
 	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
-	Route{"UncommentPost", "DELETE", "/post/{id}/comment", UncommentPostController},
+	Route{"UncommentPost", "DELETE", "/post/{id}/comment/{commentID}", UncommentPostController},
 
 	//USER
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},

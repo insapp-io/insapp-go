@@ -7,16 +7,16 @@ import (
 
 // User defines how to model a User
 type User struct {
-	ID            bson.ObjectId   `bson:"_id,omitempty"`
-	Name          string          `json:"name"`
-	Username      string          `json:"username"`
-	Description   string          `json:"description"`
-	Email         string          `json:"email"`
-	EmailIsPublic bool            `json:"email_public"`
-	Promotion     string          `json:"promotion"`
-	Events        []bson.ObjectId `json:"events"`
-	PostLiked     []bson.ObjectId `json:"posts_liked"`
-	PhotoURL      string          `json:"photo_url"`
+	ID          bson.ObjectId   `bson:"_id,omitempty"`
+	Name        string          `json:"name"`
+	Username    string          `json:"username"`
+	Description string          `json:"description"`
+	Email       string          `json:"email"`
+	EmailPublic bool            `json:"emailpublic"`
+	Promotion   string          `json:"promotion"`
+	Events      []bson.ObjectId `json:"events"`
+	PostsLiked  []bson.ObjectId `json:"postsliked"`
+	PhotoURL    string          `json:"photourl"`
 }
 
 // Users is an array of User
@@ -30,7 +30,7 @@ func AddUser(user User) User {
 	db := session.DB("insapp").C("user")
 	db.Insert(user)
 	var result User
-	db.Find(bson.M{"name": user.Username}).One(&result)
+	db.Find(bson.M{"username": user.Username}).One(&result)
 	return result
 }
 
@@ -43,11 +43,11 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	db := session.DB("insapp").C("user")
 	userID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":         user.Name,
-		"description":  user.Description,
-		"email_public": user.EmailIsPublic,
-		"photourl":     user.PhotoURL,
-		"promotion":    user.Promotion,
+		"name":        user.Name,
+		"description": user.Description,
+		"emailpublic": user.EmailPublic,
+		"photourl":    user.PhotoURL,
+		"promotion":   user.Promotion,
 	}}
 	db.Update(userID, change)
 	var result User
@@ -86,8 +86,8 @@ func LikePost(id bson.ObjectId, postID bson.ObjectId) User {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	userID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
-		"posts_liked": postID,
+	change := bson.M{"$addToSet": bson.M{
+		"postsliked": postID,
 	}}
 	db.Update(userID, change)
 	var result User
@@ -104,7 +104,7 @@ func DislikePost(id bson.ObjectId, postID bson.ObjectId) User {
 	db := session.DB("insapp").C("user")
 	userID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
-		"posts_liked": postID,
+		"postsliked": postID,
 	}}
 	db.Update(userID, change)
 	var result User
@@ -120,7 +120,7 @@ func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	userID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
+	change := bson.M{"$addToSet": bson.M{
 		"events": eventID,
 	}}
 	db.Update(userID, change)

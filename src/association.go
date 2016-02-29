@@ -95,7 +95,7 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
+	change := bson.M{"$addToSet": bson.M{
 		"events": event,
 	}}
 	db.Update(assosID, change)
