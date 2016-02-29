@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -25,10 +23,7 @@ func AddAssociation(association Association) Association {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
-	fmt.Println(association.Name)
-	fmt.Println(association.Email)
-	err := db.Insert(association)
-	fmt.Println(err)
+	db.Insert(association)
 	var result Association
 	db.Find(bson.M{"name": association.Name}).One(&result)
 	return result
@@ -54,6 +49,17 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	return result
 }
 
+func DeleteAssociation(id bson.ObjectId) Association {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	db.RemoveId(id)
+	var result Association
+	db.FindId(id).One(result)
+	return result
+}
+
 func GetAssociation(id bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -74,7 +80,7 @@ func GetAllAssociation() Associations {
 	return result
 }
 
-func AddEvent(id bson.ObjectId, event bson.ObjectId) Association {
+func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -89,7 +95,7 @@ func AddEvent(id bson.ObjectId, event bson.ObjectId) Association {
 	return result
 }
 
-func RemoveEvent(id bson.ObjectId, event bson.ObjectId) Association {
+func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
