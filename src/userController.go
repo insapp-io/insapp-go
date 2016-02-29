@@ -13,8 +13,8 @@ import (
 // linked to the given id in the URL
 func GetUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	var res = GetUser(bson.ObjectIdHex(assocationID))
+	userID := vars["id"]
+	var res = GetUser(bson.ObjectIdHex(userID))
 	json.NewEncoder(w).Encode(res)
 }
 
