@@ -61,8 +61,8 @@ func LikePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	userID := vars["userID"]
-	res := LikePost(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
-	json.NewEncoder(w).Encode(res)
+	post, user := LikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
+	json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
 // DislikePostController will answer a JSON of the
@@ -71,8 +71,8 @@ func DislikePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	userID := vars["userID"]
-	res := DislikePost(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
-	json.NewEncoder(w).Encode(res)
+	post, user := DislikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
+	json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
 // CommentPostController will answer a JSON of the post
@@ -93,6 +93,7 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&comment)
 	vars := mux.Vars(r)
 	postID := vars["id"]
-	res := UncommentPost(bson.ObjectIdHex(postID), comment)
+	commentID := vars["commentID"]
+	res := UncommentPost(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
 	json.NewEncoder(w).Encode(res)
 }

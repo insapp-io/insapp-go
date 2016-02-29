@@ -13,7 +13,7 @@ type Post struct {
 	Title       string          `json:"title"`
 	Association bson.ObjectId   `json:"association"`
 	Description string          `json:"description"`
-	Event       []bson.ObjectId `json:"event"`
+	Event       bson.ObjectId   `json:"event"`
 	Date        time.Time       `json:"date"`
 	Likes       []bson.ObjectId `json:"likes"`
 	Comments    Comments        `json:"comments"`
@@ -28,6 +28,7 @@ type Comment struct {
 	ID      bson.ObjectId `bson:"_id,omitempty"`
 	User    bson.ObjectId `json:"user"`
 	Content string        `json:"content"`
+	Date    time.Time     `josn:"date"`
 }
 
 // Comments is an array of Comment
@@ -94,7 +95,7 @@ func GetLastestPosts(number int) Posts {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 	var result Posts
-	db.Find(bson.M{}).Sort("date").Limit(number).All(&result)
+	db.Find(bson.M{}).Sort("-date").Limit(number).All(&result)
 	return result
 }
 
@@ -106,7 +107,7 @@ func LikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 	postID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
+	change := bson.M{"$addToSet": bson.M{
 		"likes": userID,
 	}}
 	db.Update(postID, change)
@@ -141,8 +142,12 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+
+	comment.ID = bson.NewObjectId()
+	comment.Date = time.Now()
+
 	postID := bson.M{"_id": id}
-	change := bson.M{"$push": bson.M{
+	change := bson.M{"$addToSet": bson.M{
 		"comments": comment,
 	}}
 	db.Update(postID, change)
@@ -153,14 +158,14 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 
 // UncommentPost will remove the given comment object from the
 // list of comments of the post linked to the given id
-func UncommentPost(id bson.ObjectId, comment Comment) Post {
+func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 	postID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
-		"comments": comment,
+		"comments": bson.M{"_id": commentID},
 	}}
 	db.Update(postID, change)
 	var post Post
