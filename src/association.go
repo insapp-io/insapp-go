@@ -119,3 +119,18 @@ func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Associati
 	db.Find(bson.M{"_id": id}).One(&result)
 	return result
 }
+
+func SetImageAssociation(id bson.ObjectId, fileName string) Association {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	assosID := bson.M{"_id": id}
+	change := bson.M{
+		"photoUrl": fileName,
+	}
+	db.Update(assosID, change)
+	var result Association
+	db.Find(bson.M{"_id": id}).One(&result)
+	return result
+}

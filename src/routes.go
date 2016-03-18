@@ -40,6 +40,7 @@ var routes = Routes{
 	Route{"AddAssociation", "POST", "/association", AddAssociationController},
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
 	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
+	Route{"ImageAssociation", "POST", "/association/{id}/image", AddImageAssociationController},
 
 	//EVENTS
 	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
@@ -47,6 +48,7 @@ var routes = Routes{
 	Route{"AddEvent", "POST", "/event", AddEventController},
 	Route{"UpdateEvent", "PUT", "/event/{id}", UpdateEventController},
 	Route{"DeleteEvent", "DELETE", "/event/{id}", DeleteEventController},
+	Route{"ImageEvent", "POST", "/event/{id}/image", AddImageEventController},
 	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
 	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
 
@@ -56,6 +58,7 @@ var routes = Routes{
 	Route{"AddPost", "POST", "/post", AddPostController},
 	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
 	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
+	Route{"ImagePost", "POST", "/post/{id}/image", AddImagePostController},
 	Route{"LikePost", "POST", "/post/{id}/like/{userID}", LikePostController},
 	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
 	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
@@ -66,4 +69,5 @@ var routes = Routes{
 	Route{"AddUser", "POST", "/user", AddUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
+	Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
 }

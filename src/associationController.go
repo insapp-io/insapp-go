@@ -2,7 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"math/rand"
 	"net/http"
+	"os"
+	"time"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -52,4 +57,50 @@ func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	res := DeleteAssociation(bson.ObjectIdHex(vars["id"]))
 	json.NewEncoder(w).Encode(res)
+}
+
+// AddImageAssociationController will set the image of the association and return the association
+func AddImageAssociationController(w http.ResponseWriter, r *http.Request) {
+	fileName := UploadImage(r)
+	if fileName == "error" {
+		w.Header().Set("status", "400")
+		fmt.Fprintln(w, "{}")
+	} else {
+		vars := mux.Vars(r)
+		res := SetImageAssociation(bson.ObjectIdHex(vars["id"]), fileName)
+		json.NewEncoder(w).Encode(res)
+	}
+}
+
+// UploadImage will manage the upload image from a POST request
+func UploadImage(r *http.Request) string {
+
+	r.ParseMultipartForm(32 << 20)
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		return "error"
+	}
+	defer file.Close()
+
+	fileName := RandomString(40)
+	f, err := os.OpenFile("./img/"+fileName+".png", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return "error"
+	}
+
+	defer f.Close()
+	io.Copy(f, file)
+
+	return fileName
+}
+
+// RandomString generates a randomString (y)
+func RandomString(strlen int) string {
+	rand.Seed(time.Now().UTC().UnixNano())
+	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+	result := make([]byte, strlen)
+	for i := 0; i < strlen; i++ {
+		result[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(result)
 }

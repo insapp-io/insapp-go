@@ -172,3 +172,18 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	db.Find(bson.M{"_id": id}).One(&post)
 	return post
 }
+
+func SetImagePost(id bson.ObjectId, fileName string) Post {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	postID := bson.M{"_id": id}
+	change := bson.M{
+		"photoUrl": fileName,
+	}
+	db.Update(postID, change)
+	var result Post
+	db.Find(bson.M{"_id": id}).One(&result)
+	return result
+}

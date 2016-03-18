@@ -131,3 +131,18 @@ func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	user := RemoveEventFromUser(userID, event.ID)
 	return event, user
 }
+
+func SetImageEvent(id bson.ObjectId, fileName string) Event {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("event")
+	eventID := bson.M{"_id": id}
+	change := bson.M{
+		"photoUrl": fileName,
+	}
+	db.Update(eventID, change)
+	var result Event
+	db.Find(bson.M{"_id": id}).One(&result)
+	return result
+}
