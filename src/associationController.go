@@ -29,6 +29,22 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	assocationID := vars["id"]
+	var res = GetAssociation(bson.ObjectIdHex(assocationID))
+
+	decoder := json.NewDecoder(r.Body)
+	var user AssociationUser
+	decoder.Decode(&user)
+
+	user.Association = res.ID
+	user.Username = res.Email
+	user.Password = GetMD5Hash(user.Password)
+	AddAssociationUser(user)
+	json.NewEncoder(w).Encode(res)
+}
+
 // AddAssociationController will answer a JSON of the
 // brand new created association (from the JSON Body)
 func AddAssociationController(w http.ResponseWriter, r *http.Request) {

@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"github.com/freehaha/token-auth"
+	"github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
 )
 
@@ -20,15 +22,48 @@ type Routes []Route
 // NewRouter is the constructeur of the Router
 // It will create every routes from the routes variable just above
 func NewRouter() *mux.Router {
+	tokenAuthUser := tauth.NewTokenAuth(nil, nil, memStoreUser, nil)
+	tokenAuthSuperUser := tauth.NewTokenAuth(nil, nil, memStoreSuperUser, nil)
+
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
+	for _, route := range publicRoutes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
 	}
+
+	for _, route := range routes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(tokenAuthUser.HandleFunc(route.HandlerFunc))
+	}
+
+	for _, route := range superRoutes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(tokenAuthSuperUser.HandleFunc(route.HandlerFunc))
+	}
+
 	return router
+}
+
+var memStoreUser = memstore.New("user")
+var memStoreSuperUser = memstore.New("superUser")
+
+var publicRoutes = Routes{
+	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
+}
+
+var superRoutes = Routes{
+	Route{"AddAssociation", "POST", "/association", AddAssociationController},
+	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
+	Route{"CreateUserForAssociation", "POST", "/association/{id}/user", CreateUserForAssociationController},
 }
 
 var routes = Routes{
@@ -37,9 +72,7 @@ var routes = Routes{
 	//ASSOCIATIONS
 	Route{"GetAssociation", "GET", "/association", GetAllAssociationsController},
 	Route{"GetAssociation", "GET", "/association/{id}", GetAssociationController},
-	Route{"AddAssociation", "POST", "/association", AddAssociationController},
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
-	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
 	Route{"ImageAssociation", "POST", "/association/{id}/image", AddImageAssociationController},
 
 	//EVENTS

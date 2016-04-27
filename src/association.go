@@ -20,6 +20,14 @@ type Association struct {
 // Associations is an array of Association
 type Associations []Association
 
+func AddAssociationUser(user AssociationUser) {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association_user")
+	db.Insert(user)
+}
+
 // AddAssociation will add the given association to the database
 func AddAssociation(association Association) Association {
 	session, _ := mgo.Dial("127.0.0.1")
