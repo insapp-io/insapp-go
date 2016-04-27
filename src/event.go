@@ -138,9 +138,9 @@ func SetImageEvent(id bson.ObjectId, fileName string) Event {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	eventID := bson.M{"_id": id}
-	change := bson.M{
-		"photoUrl": fileName,
-	}
+	change := bson.M{"$set": bson.M{
+		"photourl": fileName + ".png",
+	}}
 	db.Update(eventID, change)
 	var result Event
 	db.Find(bson.M{"_id": id}).One(&result)

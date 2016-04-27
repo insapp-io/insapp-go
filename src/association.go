@@ -126,9 +126,9 @@ func SetImageAssociation(id bson.ObjectId, fileName string) Association {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
-	change := bson.M{
-		"photoUrl": fileName,
-	}
+	change := bson.M{"$set": bson.M{
+		"photourl": fileName + ".png",
+	}}
 	db.Update(assosID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)

@@ -74,10 +74,11 @@ func AddImageAssociationController(w http.ResponseWriter, r *http.Request) {
 
 // UploadImage will manage the upload image from a POST request
 func UploadImage(r *http.Request) string {
-
+	fmt.Println("upload image called")
 	r.ParseMultipartForm(32 << 20)
-	file, _, err := r.FormFile("image")
+	file, _, err := r.FormFile("file")
 	if err != nil {
+		fmt.Println(err)
 		return "error"
 	}
 	defer file.Close()

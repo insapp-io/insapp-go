@@ -179,9 +179,9 @@ func SetImagePost(id bson.ObjectId, fileName string) Post {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	postID := bson.M{"_id": id}
-	change := bson.M{
-		"photoUrl": fileName,
-	}
+	change := bson.M{"$set": bson.M{
+		"photourl": fileName + ".png",
+	}}
 	db.Update(postID, change)
 	var result Post
 	db.Find(bson.M{"_id": id}).One(&result)
