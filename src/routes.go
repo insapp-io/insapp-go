@@ -64,6 +64,7 @@ var superRoutes = Routes{
 	Route{"AddAssociation", "POST", "/association", AddAssociationController},
 	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
 	Route{"CreateUserForAssociation", "POST", "/association/{id}/user", CreateUserForAssociationController},
+	Route{"GetMyAssociations", "GET", "/association/{id}/myassociations", GetMyAssociationController},
 }
 
 var routes = Routes{

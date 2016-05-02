@@ -14,6 +14,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	assocationID := vars["id"]
+	var res = GetMyAssociations(bson.ObjectIdHex(assocationID))
+	json.NewEncoder(w).Encode(res)
+}
+
 // GetAssociationController will answer a JSON of the association
 // linked to the given id in the URL
 func GetAssociationController(w http.ResponseWriter, r *http.Request) {

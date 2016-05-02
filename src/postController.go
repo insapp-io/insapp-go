@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -32,6 +33,7 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var post Post
 	decoder.Decode(&post)
+	post.Date = time.Now()
 	res := AddPost(post)
 	json.NewEncoder(w).Encode(res)
 }
@@ -52,7 +54,7 @@ func UpdatePostController(w http.ResponseWriter, r *http.Request) {
 // empty post if the deletation has succeed
 func DeletePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	res := DeletePost(bson.ObjectIdHex(vars["id"]))
+	res := DeletePost(GetPost(bson.ObjectIdHex(vars["id"])))
 	json.NewEncoder(w).Encode(res)
 }
 

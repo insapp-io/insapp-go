@@ -12,6 +12,7 @@ type Association struct {
 	Email       string          `json:"email"`
 	Description string          `json:"description"`
 	Events      []bson.ObjectId `json:"events"`
+	Posts       []bson.ObjectId `json:"posts"`
 	PhotoURL    string          `json:"photoURL"`
 	BgColor     string          `json:"bgColor"`
 	FgColor     string          `json:"fgColor"`
@@ -96,6 +97,20 @@ func GetAllAssociation() Associations {
 	return result
 }
 
+func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association_user")
+	var result []AssociationUser
+	db.Find(bson.M{"owner": id}).All(&result)
+	res := []bson.ObjectId{}
+	for _, asso := range result {
+		res = append(res, asso.Association)
+	}
+	return res
+}
+
 // AddEventToAssociation will add the given event ID to the given association
 func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session, _ := mgo.Dial("127.0.0.1")
@@ -121,6 +136,36 @@ func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Associati
 	assosID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"events": event,
+	}}
+	db.Update(assosID, change)
+	var result Association
+	db.Find(bson.M{"_id": id}).One(&result)
+	return result
+}
+
+func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	assosID := bson.M{"_id": id}
+	change := bson.M{"$addToSet": bson.M{
+		"posts": post,
+	}}
+	db.Update(assosID, change)
+	var result Association
+	db.Find(bson.M{"_id": id}).One(&result)
+	return result
+}
+
+func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	assosID := bson.M{"_id": id}
+	change := bson.M{"$pull": bson.M{
+		"posts": post,
 	}}
 	db.Update(assosID, change)
 	var result Association

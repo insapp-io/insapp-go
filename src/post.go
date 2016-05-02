@@ -18,6 +18,7 @@ type Post struct {
 	Likes       []bson.ObjectId `json:"likes"`
 	Comments    Comments        `json:"comments"`
 	PhotoURL    string          `json:"photourl"`
+	Status      string          `json:"status"`
 }
 
 // Posts is an array of Post
@@ -28,7 +29,7 @@ type Comment struct {
 	ID      bson.ObjectId `bson:"_id,omitempty"`
 	User    bson.ObjectId `json:"user"`
 	Content string        `json:"content"`
-	Date    time.Time     `josn:"date"`
+	Date    time.Time     `json:"date"`
 }
 
 // Comments is an array of Comment
@@ -43,6 +44,7 @@ func AddPost(post Post) Post {
 	db.Insert(post)
 	var result Post
 	db.Find(bson.M{"title": post.Title, "date": post.Date}).One(&result)
+	AddPostToAssociation(result.Association, result.ID)
 	return result
 }
 
@@ -58,6 +60,7 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 		"title":       post.Title,
 		"description": post.Description,
 		"photourl":    post.PhotoURL,
+		"status":      post.Status,
 	}}
 	db.Update(postID, change)
 	var result Post
@@ -66,14 +69,15 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 }
 
 // DeletePost will delete the given post from the database
-func DeletePost(id bson.ObjectId) Post {
+func DeletePost(post Post) Post {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
-	db.RemoveId(id)
+	db.RemoveId(post.ID)
 	var result Post
-	db.FindId(id).One(result)
+	db.FindId(post.ID).One(result)
+	RemovePostFromAssociation(post.Association, post.ID)
 	return result
 }
 
@@ -177,7 +181,7 @@ func SetImagePost(id bson.ObjectId, fileName string) Post {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
-	db := session.DB("insapp").C("association")
+	db := session.DB("insapp").C("post")
 	postID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"photourl": fileName + ".png",
