@@ -82,15 +82,28 @@ func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-// AddImageAssociationController will set the image of the association and return the association
-func AddImageAssociationController(w http.ResponseWriter, r *http.Request) {
+// AddProfileImageAssociationController will set the profile image of the association and return the association
+func AddProfileImageAssociationController(w http.ResponseWriter, r *http.Request) {
 	fileName := UploadImage(r)
 	if fileName == "error" {
 		w.Header().Set("status", "400")
 		fmt.Fprintln(w, "{}")
 	} else {
 		vars := mux.Vars(r)
-		res := SetImageAssociation(bson.ObjectIdHex(vars["id"]), fileName)
+		res := SetImageAssociation(bson.ObjectIdHex(vars["id"]), fileName, true)
+		json.NewEncoder(w).Encode(res)
+	}
+}
+
+// AddCoverImageAssociationController will set the cover image of the association and return the association
+func AddCoverImageAssociationController(w http.ResponseWriter, r *http.Request) {
+	fileName := UploadImage(r)
+	if fileName == "error" {
+		w.Header().Set("status", "400")
+		fmt.Fprintln(w, "{}")
+	} else {
+		vars := mux.Vars(r)
+		res := SetImageAssociation(bson.ObjectIdHex(vars["id"]), fileName, false)
 		json.NewEncoder(w).Encode(res)
 	}
 }

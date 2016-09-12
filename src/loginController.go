@@ -78,7 +78,7 @@ func checkLoginForUser(login Login) (bson.ObjectId, error) {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	var result []AssociationUser
-	db.Find(bson.M{"username": login.Username).All(&result)
+	db.Find(bson.M{"username": login.Username}).All(&result)
 	if len(result) > 0 {
 		return result[0].ID, nil
 	}

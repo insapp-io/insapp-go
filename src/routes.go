@@ -79,10 +79,11 @@ var superRoutes = Routes{
 	Route{"GetMyAssociations", "GET", "/association/{id}/myassociations", GetMyAssociationController},
 }
 
-var assocationRoutes = Routes{
+var associationRoutes = Routes{
 	//ASSOCIATIONS
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
-	Route{"ImageAssociation", "POST", "/association/{id}/image", AddImageAssociationController},
+	Route{"ProfileImageAssociation", "POST", "/association/{id}/profileimage", AddProfileImageAssociationController},
+	Route{"CoverImageAssociation", "POST", "/association/{id}/coverimage", AddCoverImageAssociationController},
 
 	//EVENTS
 	Route{"AddEvent", "POST", "/event", AddEventController},

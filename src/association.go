@@ -13,7 +13,8 @@ type Association struct {
 	Description string          `json:"description"`
 	Events      []bson.ObjectId `json:"events"`
 	Posts       []bson.ObjectId `json:"posts"`
-	PhotoURL    string          `json:"photoURL"`
+	Cover    		string          `json:"profile"`
+	Profile    	string          `json:"cover"`
 	BgColor     string          `json:"bgColor"`
 	FgColor     string          `json:"fgColor"`
 }
@@ -53,7 +54,8 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 		"name":        association.Name,
 		"email":       association.Email,
 		"description": association.Description,
-		"photourl":    association.PhotoURL,
+		"profile":     association.Profile,
+		"cover":     	 association.Cover,
 		"bgcolor":     association.BgColor,
 		"fgcolor":     association.FgColor,
 	}}
@@ -173,16 +175,19 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	return result
 }
 
-func SetImageAssociation(id bson.ObjectId, fileName string) Association {
+func SetImageAssociation(id bson.ObjectId, fileName string, isProfilePicture bool) Association {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
-	change := bson.M{"$set": bson.M{
-		"photourl": fileName + ".png",
-	}}
-	db.Update(assosID, change)
+	if isProfilePicture {
+		change := bson.M{"$set": bson.M{ "profile": fileName + ".png", }}
+		db.Update(assosID, change)
+	}else{
+		change := bson.M{"$set": bson.M{ "cover": fileName + ".png", }}
+		db.Update(assosID, change)
+	}
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 	return result
