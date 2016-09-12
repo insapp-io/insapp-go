@@ -42,6 +42,19 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func LogUserController(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var login Login
+	decoder.Decode(&login)
+	auth, err := checkLoginForUser(login)
+	if err == nil {
+		sessionToken := logUser(auth)
+		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "userID": auth})
+	} else {
+		json.NewEncoder(w).Encode(bson.M{"error": "Failed to authentificate"})
+	}
+}
+
 func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -55,11 +68,32 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
 }
 
+func checkLoginForUser(login Login) (bson.ObjectId, error) {
+
+	//CHECK USER ACCESS
+	//return bson.ObjectId(""), errors.New("Failed to authentificate")
+
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("user")
+	var result []AssociationUser
+	db.Find(bson.M{"username": login.Username).All(&result)
+	if len(result) > 0 {
+		return result[0].ID, nil
+	}
+	return bson.ObjectId(""), errors.New("No User Found")
+}
+
 func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
 	if master {
 		memStoreUser.NewToken(string(id))
 		return memStoreSuperUser.NewToken(string(id))
 	}
+	return memStoreUser.NewToken(string(id))
+}
+
+func logUser(id bson.ObjectId) *memstore.MemoryToken {
 	return memStoreUser.NewToken(string(id))
 }
 

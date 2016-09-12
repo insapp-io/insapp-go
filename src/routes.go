@@ -22,8 +22,9 @@ type Routes []Route
 // NewRouter is the constructeur of the Router
 // It will create every routes from the routes variable just above
 func NewRouter() *mux.Router {
-	tokenAuthUser := tauth.NewTokenAuth(nil, nil, memStoreUser, nil)
+	tokenAuthAssociationUser := tauth.NewTokenAuth(nil, nil, memStoreAssociationUser, nil)
 	tokenAuthSuperUser := tauth.NewTokenAuth(nil, nil, memStoreSuperUser, nil)
+	tokenAuthUser := tauth.NewTokenAuth(nil, nil, memStoreUser, nil)
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range publicRoutes {
@@ -34,12 +35,12 @@ func NewRouter() *mux.Router {
 			Handler(route.HandlerFunc)
 	}
 
-	for _, route := range routes {
+	for _, route := range associationRoutes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(tokenAuthUser.HandleFunc(route.HandlerFunc))
+			Handler(tokenAuthAssociationUser.HandleFunc(route.HandlerFunc))
 	}
 
 	for _, route := range superRoutes {
@@ -50,14 +51,25 @@ func NewRouter() *mux.Router {
 			Handler(tokenAuthSuperUser.HandleFunc(route.HandlerFunc))
 	}
 
+	for _, route := range userRoutes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(tokenAuthUser.HandleFunc(route.HandlerFunc))
+	}
+
 	return router
 }
 
-var memStoreUser = memstore.New("user")
+var memStoreAssociationUser = memstore.New("associationUser")
 var memStoreSuperUser = memstore.New("superUser")
+var memStoreUser = memstore.New("user")
 
 var publicRoutes = Routes{
+	Route{"Index", "GET", "/", Index},
 	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
+	Route{"LogUser", "POST", "/login/user", LogUserController},
 }
 
 var superRoutes = Routes{
@@ -67,32 +79,44 @@ var superRoutes = Routes{
 	Route{"GetMyAssociations", "GET", "/association/{id}/myassociations", GetMyAssociationController},
 }
 
-var routes = Routes{
-	Route{"Index", "GET", "/", Index},
-
+var assocationRoutes = Routes{
 	//ASSOCIATIONS
-	Route{"GetAssociation", "GET", "/association", GetAllAssociationsController},
-	Route{"GetAssociation", "GET", "/association/{id}", GetAssociationController},
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
 	Route{"ImageAssociation", "POST", "/association/{id}/image", AddImageAssociationController},
 
 	//EVENTS
-	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
-	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
 	Route{"AddEvent", "POST", "/event", AddEventController},
 	Route{"UpdateEvent", "PUT", "/event/{id}", UpdateEventController},
 	Route{"DeleteEvent", "DELETE", "/event/{id}", DeleteEventController},
 	Route{"ImageEvent", "POST", "/event/{id}/image", AddImageEventController},
+
+	//POSTS
+	Route{"AddPost", "POST", "/post", AddPostController},
+	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
+	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
+	Route{"ImagePost", "POST", "/post/{id}/image", AddImagePostController},
+
+	//USER
+	Route{"AddUser", "POST", "/user", AddUserController},
+	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
+	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
+	Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
+}
+
+var userRoutes = Routes{
+	//ASSOCIATIONS
+	Route{"GetAssociation", "GET", "/association", GetAllAssociationsController},
+	Route{"GetAssociation", "GET", "/association/{id}", GetAssociationController},
+
+	//EVENTS
+	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
+	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
 	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
 	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
 
 	//POSTS
 	Route{"GetPost", "GET", "/post/{id}", GetPostController},
 	Route{"GetLastestPost", "GET", "/post", GetLastestPostsController},
-	Route{"AddPost", "POST", "/post", AddPostController},
-	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
-	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
-	Route{"ImagePost", "POST", "/post/{id}/image", AddImagePostController},
 	Route{"LikePost", "POST", "/post/{id}/like/{userID}", LikePostController},
 	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
 	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
@@ -100,8 +124,4 @@ var routes = Routes{
 
 	//USER
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
-	Route{"AddUser", "POST", "/user", AddUserController},
-	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
-	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
-	Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
 }
