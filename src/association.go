@@ -13,8 +13,8 @@ type Association struct {
 	Description string          `json:"description"`
 	Events      []bson.ObjectId `json:"events"`
 	Posts       []bson.ObjectId `json:"posts"`
-	Cover    		string          `json:"profile"`
-	Profile    	string          `json:"cover"`
+	Profile    		string          `json:"profile"`
+	Cover    	string          `json:"cover"`
 	BgColor     string          `json:"bgColor"`
 	FgColor     string          `json:"fgColor"`
 }
