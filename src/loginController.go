@@ -88,9 +88,11 @@ func checkLoginForUser(login Login) (bson.ObjectId, error) {
 func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
 	if master {
 		memStoreUser.NewToken(string(id))
+		memStoreAssociationUser.NewToken(string(id))
 		return memStoreSuperUser.NewToken(string(id))
 	}
-	return memStoreUser.NewToken(string(id))
+	memStoreUser.NewToken(string(id))
+	return memStoreAssociationUser.NewToken(string(id))
 }
 
 func logUser(id bson.ObjectId) *memstore.MemoryToken {
