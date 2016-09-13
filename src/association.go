@@ -13,10 +13,10 @@ type Association struct {
 	Description string          `json:"description"`
 	Events      []bson.ObjectId `json:"events"`
 	Posts       []bson.ObjectId `json:"posts"`
-	Profile    		string          `json:"profile"`
-	Cover    	string          `json:"cover"`
-	BgColor     string          `json:"bgColor"`
-	FgColor     string          `json:"fgColor"`
+	Profile    	string          `json:"profile"`
+	Cover	    	string          `json:"cover"`
+	BgColor     string          `json:"bgcolor"`
+	FgColor     string          `json:"fgcolor"`
 }
 
 // Associations is an array of Association
