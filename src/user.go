@@ -44,6 +44,7 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	change := bson.M{"$set": bson.M{
 		"name":        user.Name,
 		"description": user.Description,
+		"email": 			 user.Email,
 		"emailpublic": user.EmailPublic,
 		"promotion":   user.Promotion,
 	}}
