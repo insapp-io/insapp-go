@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
   "os/exec"
+	"strings"
 
 	"github.com/freehaha/token-auth/memory"
 
@@ -57,7 +58,6 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	cred, err := checkLoginForUser(credentials)
 	if err == nil {
 		sessionToken := logUser(cred.User)
-		cred.Token = sessionToken
 		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken})
 	} else {
 		json.NewEncoder(w).Encode(bson.M{"error": err})
