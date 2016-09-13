@@ -70,7 +70,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&login)
 	isCASValid, err := verifyUserWithCAS(login)
 	if isCASValid {
-		user := AddUser(User{Username:login.Username})
+		user := AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
 		token := generateAuthToken()
 		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username}
 		result := addCredentials(credentials)

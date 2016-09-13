@@ -16,7 +16,6 @@ type User struct {
 	Promotion   string          `json:"promotion"`
 	Events      []bson.ObjectId `json:"events"`
 	PostsLiked  []bson.ObjectId `json:"postsliked"`
-	PhotoURL    string          `json:"photourl"`
 }
 
 // Users is an array of User
@@ -46,7 +45,6 @@ func UpdateUser(id bson.ObjectId, user User) User {
 		"name":        user.Name,
 		"description": user.Description,
 		"emailpublic": user.EmailPublic,
-		"photourl":    user.PhotoURL,
 		"promotion":   user.Promotion,
 	}}
 	db.Update(userID, change)

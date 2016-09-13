@@ -100,8 +100,6 @@ var associationRoutes = Routes{
 
 	//USER
 	Route{"AddUser", "POST", "/user", AddUserController},
-	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
-	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
 	Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
 }
 
@@ -126,4 +124,6 @@ var userRoutes = Routes{
 
 	//USER
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
+	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
+	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
 }
