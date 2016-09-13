@@ -16,8 +16,8 @@ import (
 )
 
 type Login struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Credentials struct {
@@ -25,7 +25,6 @@ type Credentials struct {
 	Username 	string					`json:"username"`
 	AuthToken 		string			`json:"authtoken"`
 	User 			bson.ObjectId		`json:"user" bson:"user"`
-	Token 		*memstore.MemoryToken					`json:"token"`
 }
 
 type AssociationUser struct {
@@ -59,7 +58,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		sessionToken := logUser(cred.User)
 		cred.Token = sessionToken
-		json.NewEncoder(w).Encode(cred)
+		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken})
 	} else {
 		json.NewEncoder(w).Encode(bson.M{"error": err})
 	}
@@ -83,7 +82,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 
 func generateAuthToken() (string){
 	out, _ := exec.Command("uuidgen").Output()
-	return string(out)
+	return strings.TrimSpace(string(out))
 }
 
 func addCredentials(credentials Credentials) (Credentials){
