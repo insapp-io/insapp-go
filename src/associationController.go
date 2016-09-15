@@ -9,6 +9,10 @@ import (
 	"os"
 	"time"
 
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/gorilla/mux"
@@ -129,6 +133,18 @@ func UploadImage(r *http.Request) string {
 	io.Copy(f, file)
 
 	return fileName
+}
+
+func GetImageDimension(fileName string) (int, int) {
+    file, err1 := os.Open("./img/"+fileName+".png")
+    if err1 != nil {
+        fmt.Fprintf(os.Stderr, "%v\n", err1)
+    }
+    image, _, err2 := image.DecodeConfig(file)
+    if err2 != nil {
+        fmt.Fprintf(os.Stderr, "%s: %v\n", fileName, err2)
+    }
+    return image.Width, image.Height
 }
 
 // RandomString generates a randomString (y)

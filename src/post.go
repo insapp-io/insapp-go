@@ -19,6 +19,7 @@ type Post struct {
 	Comments    Comments        `json:"comments"`
 	PhotoURL    string          `json:"photourl"`
 	Status      string          `json:"status"`
+	ImageSize		bson.M					`json:"imageSize"`
 }
 
 // Posts is an array of Post
@@ -178,6 +179,7 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 }
 
 func SetImagePost(id bson.ObjectId, fileName string) Post {
+	width, height := GetImageDimension(fileName)
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -185,6 +187,7 @@ func SetImagePost(id bson.ObjectId, fileName string) Post {
 	postID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"photourl": fileName + ".png",
+		"imagesize": bson.M{"height": height, "width": width},
 	}}
 	db.Update(postID, change)
 	var result Post

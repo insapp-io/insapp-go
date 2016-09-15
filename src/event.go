@@ -45,7 +45,7 @@ func GetFutureEvents() Events {
 	db := session.DB("insapp").C("event")
 	var result Events
 	var now = time.Now()
-	db.Find(bson.M{"datestart": bson.M{"$gt": now}}).All(&result)
+	db.Find(bson.M{"dateend": bson.M{"$gt": now}}).All(&result)
 	return result
 }
 
