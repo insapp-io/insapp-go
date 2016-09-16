@@ -58,7 +58,8 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	cred, err := checkLoginForUser(credentials)
 	if err == nil {
 		sessionToken := logUser(cred.User)
-		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken})
+		user := GetUser(cred.User)
+		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken, "user": user})
 	} else {
 		json.NewEncoder(w).Encode(bson.M{"error": err})
 	}
@@ -123,7 +124,7 @@ func checkLoginForUser(credentials Credentials) (Credentials, error) {
 	if len(result) > 0 {
 		return result[0], nil
 	}
-	return Credentials{}, errors.New("No User Found")
+	return Credentials{}, errors.New("Wrong Credentials")
 }
 
 func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {

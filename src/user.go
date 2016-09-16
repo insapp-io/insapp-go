@@ -14,6 +14,7 @@ type User struct {
 	Email       string          `json:"email"`
 	EmailPublic bool            `json:"emailpublic"`
 	Promotion   string          `json:"promotion"`
+	Gender 			string					`json:"promotion"`
 	Events      []bson.ObjectId `json:"events"`
 	PostsLiked  []bson.ObjectId `json:"postsliked"`
 }
@@ -47,6 +48,7 @@ func UpdateUser(id bson.ObjectId, user User) User {
 		"email": 			 user.Email,
 		"emailpublic": user.EmailPublic,
 		"promotion":   user.Promotion,
+		"gender"	:		 user.Gender,
 	}}
 	db.Update(userID, change)
 	var result User
