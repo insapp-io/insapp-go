@@ -14,7 +14,7 @@ type User struct {
 	Email       string          `json:"email"`
 	EmailPublic bool            `json:"emailpublic"`
 	Promotion   string          `json:"promotion"`
-	Gender 			string					`json:"promotion"`
+	Gender 			string					`json:"gender"`
 	Events      []bson.ObjectId `json:"events"`
 	PostsLiked  []bson.ObjectId `json:"postsliked"`
 }

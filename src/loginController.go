@@ -37,6 +37,10 @@ type AssociationUser struct {
 	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
 }
 
+func VerifyLogUserController(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(bson.M{"status": "ok"})
+}
+
 func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login Login

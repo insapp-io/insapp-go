@@ -126,4 +126,7 @@ var userRoutes = Routes{
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
+
+	//LOGIN
+	Route{"VerifyLogUser", "GET", "/login/user", VerifyLogUserController},
 }
