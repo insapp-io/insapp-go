@@ -33,6 +33,8 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	var event Event
 	decoder.Decode(&event)
 	res := AddEvent(event)
+	asso := GetAssociation(event.Association)
+	TriggerNotification(asso.Name + " vient de poster un nouvel évènement.")
 	json.NewEncoder(w).Encode(res)
 }
 

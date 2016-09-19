@@ -129,5 +129,5 @@ var userRoutes = Routes{
 
 
 	//NOTIFICATION
-	Route{"Notification", "POST", "/notification/", UpdateNotificationUserController},
+	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},
 }
