@@ -69,6 +69,7 @@ func DeleteUser(user User) User {
 	}
 	for _, postId := range user.PostsLiked{
 		DislikePostWithUser(postId, user.ID)
+		DeleteCommentsForUser(postId, user.ID)
 	}
 	db.RemoveId(user.ID)
 	var result User

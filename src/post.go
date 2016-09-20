@@ -181,6 +181,18 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	return post
 }
 
+func DeleteCommentsForUser(id bson.ObjectId, userId bson.ObjectId) {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("post")
+	postID := bson.M{"_id": id}
+	change := bson.M{"$pull": bson.M{
+		"comments": bson.M{"user": userId},
+	}}
+	db.Update(postID, change)
+}
+
 func SetImagePost(id bson.ObjectId, fileName string) Post {
 	width, height := GetImageDimension(fileName)
 	session, _ := mgo.Dial("127.0.0.1")
