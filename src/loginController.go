@@ -69,7 +69,8 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login Login
 	decoder.Decode(&login)
-	isCASValid, err := verifyUserWithCAS(login)
+
+	isCASValid, err := verifyUser(login)
 	if isCASValid {
 		user := AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
 		token := generateAuthToken()
@@ -86,11 +87,22 @@ func generateAuthToken() (string){
 	return strings.TrimSpace(string(out))
 }
 
+func DeleteCredentalsForUser(id bson.ObjectId){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("credentials")
+	db.Remove(bson.M{"user": id})
+}
+
 func addCredentials(credentials Credentials) (Credentials){
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
+	var cred Credentials
+	db.Find(bson.M{"username": credentials.Username}).One(&cred)
+	db.RemoveId(cred.ID)
 	db.Insert(credentials)
 	var result Credentials
 	db.Find(bson.M{"username": credentials.Username}).One(&result)
@@ -110,8 +122,21 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
 }
 
+func verifyUser(login Login) (bool, error){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("user")
+	count, err := db.Find(bson.M{"username": login.Username}).Count()
+	if count > 0 || err != nil {
+		return false, errors.New("User Already Exist")
+	}
+	return verifyUserWithCAS(login)
+}
+
 func verifyUserWithCAS(login Login) (bool, error){
 	return true, nil
+	//return false, errors.New("Wrong CAS Credentials")
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {

@@ -45,7 +45,8 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 // empty user if the deletation has succeed
 func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	res := DeleteUser(bson.ObjectIdHex(vars["id"]))
+	user := GetUser(bson.ObjectIdHex(vars["id"]))
+	res := DeleteUser(user)
 	json.NewEncoder(w).Encode(res)
 }
 

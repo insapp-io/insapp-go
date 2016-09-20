@@ -71,6 +71,13 @@ func DeleteAssociation(id bson.ObjectId) Association {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
+	association := GetAssociation(id)
+	for _, eventId := range association.Events {
+		DeleteEvent(GetEvent(eventId))
+	}
+	for _, postId := range association.Posts {
+		DeletePost(GetPost(postId))
+	}
 	db.RemoveId(id)
 	var result Association
 	db.FindId(id).One(result)

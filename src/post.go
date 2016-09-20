@@ -79,6 +79,9 @@ func DeletePost(post Post) Post {
 	var result Post
 	db.FindId(post.ID).One(result)
 	RemovePostFromAssociation(post.Association, post.ID)
+	for _, userId := range post.Likes{
+		DislikePost(userId, post.ID)
+	}
 	return result
 }
 

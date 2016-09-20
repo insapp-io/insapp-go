@@ -57,14 +57,22 @@ func UpdateUser(id bson.ObjectId, user User) User {
 }
 
 // DeleteUser will delete the given user from the database
-func DeleteUser(id bson.ObjectId) User {
+func DeleteUser(user User) User {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
-	db.RemoveId(id)
+	DeleteCredentalsForUser(user.ID)
+	DeleteNotificationForUser(user.ID)
+	for _, eventId := range user.Events{
+		RemoveParticipant(eventId, user.ID)
+	}
+	for _, postId := range user.PostsLiked{
+		DislikePostWithUser(postId, user.ID)
+	}
+	db.RemoveId(user.ID)
 	var result User
-	db.FindId(id).One(result)
+	db.FindId(user.ID).One(result)
 	return result
 }
 

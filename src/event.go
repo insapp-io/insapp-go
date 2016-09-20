@@ -93,6 +93,9 @@ func DeleteEvent(event Event) Event {
 	db := session.DB("insapp").C("event")
 	db.Remove(event)
 	RemoveEventFromAssociation(event.Association, event.ID)
+	for _, userId := range event.Participants{
+		RemoveEventFromUser(userId, event.ID)
+	}
 	var result Event
 	db.Find(event.ID).One(result)
 	return result

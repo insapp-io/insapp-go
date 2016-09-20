@@ -26,3 +26,12 @@ func CreateOrUpdateNotificationUser(user NotificationUser){
     db.Insert(user)
   }
 }
+
+
+func DeleteNotificationForUser(id bson.ObjectId){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("notification")
+	db.Remove(bson.M{"userid": id})
+}
