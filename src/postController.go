@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -101,15 +100,15 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-// AddImagePostController will set the image of the post and return the post
-func AddImagePostController(w http.ResponseWriter, r *http.Request) {
-	fileName := UploadImage(r)
-	if fileName == "error" {
-		w.Header().Set("status", "400")
-		fmt.Fprintln(w, "{}")
-	} else {
-		vars := mux.Vars(r)
-		res := SetImagePost(bson.ObjectIdHex(vars["id"]), fileName)
-		json.NewEncoder(w).Encode(res)
-	}
-}
+// // AddImagePostController will set the image of the post and return the post
+// func AddImagePostController(w http.ResponseWriter, r *http.Request) {
+// 	fileName := UploadImage(r)
+// 	if fileName == "error" {
+// 		w.Header().Set("status", "400")
+// 		fmt.Fprintln(w, "{}")
+// 	} else {
+// 		vars := mux.Vars(r)
+// 		res := SetImagePost(bson.ObjectIdHex(vars["id"]), fileName)
+// 		json.NewEncoder(w).Encode(res)
+// 	}
+// }

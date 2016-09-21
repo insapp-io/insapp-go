@@ -83,24 +83,29 @@ var superRoutes = Routes{
 var associationRoutes = Routes{
 	//ASSOCIATIONS
 	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
-	Route{"ProfileImageAssociation", "POST", "/association/{id}/profileimage", AddProfileImageAssociationController},
-	Route{"CoverImageAssociation", "POST", "/association/{id}/coverimage", AddCoverImageAssociationController},
+	// Route{"ProfileImageAssociation", "POST", "/association/{id}/profileimage", AddProfileImageAssociationController},
+	// Route{"CoverImageAssociation", "POST", "/association/{id}/coverimage", AddCoverImageAssociationController},
 
 	//EVENTS
 	Route{"AddEvent", "POST", "/event", AddEventController},
 	Route{"UpdateEvent", "PUT", "/event/{id}", UpdateEventController},
 	Route{"DeleteEvent", "DELETE", "/event/{id}", DeleteEventController},
-	Route{"ImageEvent", "POST", "/event/{id}/image", AddImageEventController},
+	// Route{"ImageEvent", "POST", "/event/{id}/image", AddImageEventController},
 
 	//POSTS
 	Route{"AddPost", "POST", "/post", AddPostController},
 	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
 	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
-	Route{"ImagePost", "POST", "/post/{id}/image", AddImagePostController},
+	// Route{"ImagePost", "POST", "/post/{id}/image", AddImagePostController},
 
-	//USER
-	Route{"AddUser", "POST", "/user", AddUserController},
-	Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
+	// //USER
+	// Route{"AddUser", "POST", "/user", AddUserController},
+	// Route{"ImageUser", "POST", "/user/{id}/image", AddImageUserController},
+
+	//Image
+	//DEPENDENCIES : https://github.com/fengsp/color-thief-py
+	Route{"UploadNewImage", "POST", "/image", UploadNewImageController},
+	Route{"UploadImage", "POST", "/image/{name}", UploadImageController},
 }
 
 var userRoutes = Routes{
@@ -126,7 +131,6 @@ var userRoutes = Routes{
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
-
 
 	//NOTIFICATION
 	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},

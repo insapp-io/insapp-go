@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"gopkg.in/mgo.v2/bson"
@@ -79,15 +78,15 @@ func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
-// AddImageEventController will set the image of the event and return the event
-func AddImageEventController(w http.ResponseWriter, r *http.Request) {
-	fileName := UploadImage(r)
-	if fileName == "error" {
-		w.Header().Set("status", "400")
-		fmt.Fprintln(w, "{}")
-	} else {
-		vars := mux.Vars(r)
-		res := SetImageEvent(bson.ObjectIdHex(vars["id"]), fileName)
-		json.NewEncoder(w).Encode(res)
-	}
-}
+// // AddImageEventController will set the image of the event and return the event
+// func AddImageEventController(w http.ResponseWriter, r *http.Request) {
+// 	fileName := UploadImage(r)
+// 	if fileName == "error" {
+// 		w.Header().Set("status", "400")
+// 		fmt.Fprintln(w, "{}")
+// 	} else {
+// 		vars := mux.Vars(r)
+// 		res := SetImageEvent(bson.ObjectIdHex(vars["id"]), fileName)
+// 		json.NewEncoder(w).Encode(res)
+// 	}
+// }

@@ -13,6 +13,8 @@ type Association struct {
 	Description string          `json:"description"`
 	Events      []bson.ObjectId `json:"events"`
 	Posts       []bson.ObjectId `json:"posts"`
+	Palette			[][]int					`json:"palette"`
+	SelectedColor int						`json:"selectedcolor"`
 	Profile    	string          `json:"profile"`
 	Cover	    	string          `json:"cover"`
 	BgColor     string          `json:"bgcolor"`
@@ -51,13 +53,15 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":        association.Name,
-		"email":       association.Email,
-		"description": association.Description,
-		"profile":     association.Profile,
-		"cover":     	 association.Cover,
-		"bgcolor":     association.BgColor,
-		"fgcolor":     association.FgColor,
+		"name":        		association.Name,
+		"email":       		association.Email,
+		"description": 		association.Description,
+		"profile":     		association.Profile,
+		"cover":     	 		association.Cover,
+		"palette":		 		association.Palette,
+		"selectedcolor":	association.SelectedColor,
+		"bgcolor":     		association.BgColor,
+		"fgcolor":     		association.FgColor,
 	}}
 	db.Update(assosID, change)
 	var result Association
@@ -182,20 +186,20 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	return result
 }
 
-func SetImageAssociation(id bson.ObjectId, fileName string, isProfilePicture bool) Association {
-	session, _ := mgo.Dial("127.0.0.1")
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	db := session.DB("insapp").C("association")
-	assosID := bson.M{"_id": id}
-	if isProfilePicture {
-		change := bson.M{"$set": bson.M{ "profile": fileName + ".png", }}
-		db.Update(assosID, change)
-	}else{
-		change := bson.M{"$set": bson.M{ "cover": fileName + ".png", }}
-		db.Update(assosID, change)
-	}
-	var result Association
-	db.Find(bson.M{"_id": id}).One(&result)
-	return result
-}
+// func SetImageAssociation(id bson.ObjectId, fileName string, isProfilePicture bool) Association {
+// 	session, _ := mgo.Dial("127.0.0.1")
+// 	defer session.Close()
+// 	session.SetMode(mgo.Monotonic, true)
+// 	db := session.DB("insapp").C("association")
+// 	assosID := bson.M{"_id": id}
+// 	if isProfilePicture {
+// 		change := bson.M{"$set": bson.M{ "profile": fileName + ".png", }}
+// 		db.Update(assosID, change)
+// 	}else{
+// 		change := bson.M{"$set": bson.M{ "cover": fileName + ".png", }}
+// 		db.Update(assosID, change)
+// 	}
+// 	var result Association
+// 	db.Find(bson.M{"_id": id}).One(&result)
+// 	return result
+// }
