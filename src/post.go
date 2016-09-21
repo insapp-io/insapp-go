@@ -17,7 +17,7 @@ type Post struct {
 	Date        time.Time       `json:"date"`
 	Likes       []bson.ObjectId `json:"likes"`
 	Comments    Comments        `json:"comments"`
-	PhotoURL    string          `json:"photourl"`
+	Image    		string          `json:"image"`
 	Status      string          `json:"status"`
 	ImageSize		bson.M					`json:"imageSize"`
 }
@@ -58,11 +58,11 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 	db := session.DB("insapp").C("post")
 	postID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"title":       post.Title,
-		"description": post.Description,
-		"photourl":    post.PhotoURL,
-		"imagesize": 	 post.ImageSize,
-		"status":      post.Status,
+		"title"				:	post.Title,
+		"description"	:	post.Description,
+		"image"				:	post.Image,
+		"imagesize"		:	post.ImageSize,
+		"status"			:	post.Status,
 	}}
 	db.Update(postID, change)
 	var result Post
@@ -203,20 +203,3 @@ func DeleteCommentsForUser(userId bson.ObjectId) {
 		}
 	}
 }
-
-// func SetImagePost(id bson.ObjectId, fileName string) Post {
-// 	width, height := GetImageDimension(fileName)
-// 	session, _ := mgo.Dial("127.0.0.1")
-// 	defer session.Close()
-// 	session.SetMode(mgo.Monotonic, true)
-// 	db := session.DB("insapp").C("post")
-// 	postID := bson.M{"_id": id}
-// 	change := bson.M{"$set": bson.M{
-// 		"photourl": fileName + ".png",
-// 		"imagesize": bson.M{"height": height, "width": width},
-// 	}}
-// 	db.Update(postID, change)
-// 	var result Post
-// 	db.Find(bson.M{"_id": id}).One(&result)
-// 	return result
-// }

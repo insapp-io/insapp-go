@@ -9,19 +9,19 @@ import (
 
 // Event defines what an Event is
 type Event struct {
-	ID           bson.ObjectId   `bson:"_id,omitempty"`
-	Name         string          `json:"name"`
-	Association  bson.ObjectId   `json:"association" bson:"association"`
-	Description  string          `json:"description"`
-	Participants []bson.ObjectId `json:"participants" bson:"participants,omitempty"`
-	Status       string          `json:"status"`
-	Palette			 [][]int				 `json:"palette"`
-	SelectedColor int						 `json:"selectedcolor"`
-	DateStart    time.Time       `json:"dateStart"`
-	DateEnd      time.Time       `json:"dateEnd"`
-	PhotoURL     string          `json:"photoURL"`
-	BgColor      string          `json:"bgColor"`
-	FgColor      string          `json:"fgColor"`
+	ID           	bson.ObjectId   `bson:"_id,omitempty"`
+	Name         	string          `json:"name"`
+	Association  	bson.ObjectId   `json:"association" bson:"association"`
+	Description  	string          `json:"description"`
+	Participants 	[]bson.ObjectId `json:"participants" bson:"participants,omitempty"`
+	Status       	string          `json:"status"`
+	Palette			 	[][]int				 	`json:"palette"`
+	SelectedColor int						 	`json:"selectedcolor"`
+	DateStart    	time.Time       `json:"dateStart"`
+	DateEnd      	time.Time       `json:"dateEnd"`
+	Image     	 	string          `json:"image"`
+	BgColor      	string          `json:"bgColor"`
+	FgColor      	string          `json:"fgColor"`
 }
 
 // Events is an array of Event
@@ -72,16 +72,16 @@ func UpdateEvent(id bson.ObjectId, event Event) Event {
 	db := session.DB("insapp").C("event")
 	eventID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":        event.Name,
-		"description": event.Description,
-		"status":      event.Status,
-		"photoURL":    event.PhotoURL,
-		"palette":		 		event.Palette,
-		"selectedcolor":	event.SelectedColor,
-		"datestart":   event.DateStart,
-		"dateend":     event.DateEnd,
-		"bgcolor":     event.BgColor,
-		"fgcolor":     event.FgColor,
+		"name"					:	event.Name,
+		"description"		:	event.Description,
+		"status"				:	event.Status,
+		"image"					:	event.Image,
+		"palette"				:	event.Palette,
+		"selectedcolor"	:	event.SelectedColor,
+		"datestart"			:	event.DateStart,
+		"dateend"				:	event.DateEnd,
+		"bgcolor"				:	event.BgColor,
+		"fgcolor"				: event.FgColor,
 	}}
 	db.Update(eventID, change)
 	var result Event
@@ -138,18 +138,3 @@ func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	user := RemoveEventFromUser(userID, event.ID)
 	return event, user
 }
-
-// func SetImageEvent(id bson.ObjectId, fileName string) Event {
-// 	session, _ := mgo.Dial("127.0.0.1")
-// 	defer session.Close()
-// 	session.SetMode(mgo.Monotonic, true)
-// 	db := session.DB("insapp").C("event")
-// 	eventID := bson.M{"_id": id}
-// 	change := bson.M{"$set": bson.M{
-// 		"photourl": fileName + ".png",
-// 	}}
-// 	db.Update(eventID, change)
-// 	var result Event
-// 	db.Find(bson.M{"_id": id}).One(&result)
-// 	return result
-// }
