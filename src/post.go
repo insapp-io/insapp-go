@@ -59,8 +59,7 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 		"title"				:	post.Title,
 		"description"	:	post.Description,
 		"image"				:	post.Image,
-		"imagesize"		:	post.ImageSize,
-		"status"			:	post.Status,
+		"imageSize"		:	post.ImageSize,
 	}}
 	db.Update(postID, change)
 	var result Post
