@@ -13,12 +13,10 @@ type Post struct {
 	Title       string          `json:"title"`
 	Association bson.ObjectId   `json:"association"`
 	Description string          `json:"description"`
-	Event       bson.ObjectId   `json:"event"`
 	Date        time.Time       `json:"date"`
 	Likes       []bson.ObjectId `json:"likes"`
 	Comments    Comments        `json:"comments"`
 	Image    		string          `json:"image"`
-	Status      string          `json:"status"`
 	ImageSize		bson.M					`json:"imageSize"`
 }
 
