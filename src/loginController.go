@@ -47,6 +47,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 		sessionToken := logAssociation(auth, master)
 		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "master": master, "associationID": auth})
 	} else {
+		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(bson.M{"error": "Failed to authentificate"})
 	}
 }
@@ -61,6 +62,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 		user := GetUser(cred.User)
 		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken, "user": user})
 	} else {
+		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(bson.M{"error": err})
 	}
 }
@@ -78,6 +80,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		result := addCredentials(credentials)
 		json.NewEncoder(w).Encode(result)
 	} else {
+		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(bson.M{"error": err})
 	}
 }
