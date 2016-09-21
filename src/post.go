@@ -193,10 +193,13 @@ func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
 	return results
 }
 
-func DeleteCommentsForUser(id bson.ObjectId, userId bson.ObjectId) {
-	comments := getCommentforUser(id, userId)
-	for _, commentId := range comments {
-			UncommentPost(id, commentId)
+func DeleteCommentsForUser(userId bson.ObjectId) {
+	posts := GetLastestPosts(100)
+	for _, post := range posts {
+		comments := getCommentforUser(post.ID, userId)
+		for _, commentId := range comments {
+				UncommentPost(post.ID, commentId)
+		}
 	}
 }
 
