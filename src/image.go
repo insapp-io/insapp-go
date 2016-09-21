@@ -51,7 +51,7 @@ func GetImageDimension(fileName string) (int, int) {
 func GetImageColors(fileName string) [][]int {
   var result [][]int
 
-  bytes, err := exec.Command("python color-thief.py ./img/" + fileName).Output()
+  bytes, err := exec.Command("python", "color-thief.py", "./img/" + fileName).Output()
 
   if err != nil {
     return result
@@ -75,7 +75,7 @@ func GetImageColors(fileName string) [][]int {
     stringColors := strings.Split(colorData, " ")
 
     for _, col := range stringColors {
-      i, err := strconv.Atoi(col)
+      i, err := strconv.Atoi(strings.TrimSpace(col))
       if err == nil {
         colors = append(colors, i)
       }
