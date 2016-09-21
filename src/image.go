@@ -39,11 +39,11 @@ func UploadImageWithName(r *http.Request, name string) string {
 	defer f.Close()
 	io.Copy(f, file)
 
-	return fileName
+	return fileName + ".png"
 }
 
 func GetImageDimension(fileName string) (int, int) {
-    file, _ := os.Open("./img/"+fileName+".png")
+    file, _ := os.Open("./img/"+fileName)
     image, _, _ := image.DecodeConfig(file)
     return image.Width, image.Height
 }
