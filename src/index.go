@@ -11,7 +11,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func Credit(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif;'>")
+	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
 
 	fmt.Fprintln(w, "<h2>Quoi ?</h2>")
