@@ -34,6 +34,8 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&post)
 	post.Date = time.Now()
 	res := AddPost(post)
+	asso := GetAssociation(post.Association)
+	TriggerNotification(asso.Name + " a posté une nouvelle news ")
 	json.NewEncoder(w).Encode(res)
 }
 
