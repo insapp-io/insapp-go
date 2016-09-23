@@ -20,8 +20,8 @@ func main() {
 // See: https://groups.google.com/forum/#!topic/golang-nuts/-Sh616lXNRE
 // See: http://stackoverflow.com/a/24818638/1058612.
 func (s *WithCORS) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	if origin := req.Header.Get("Origin"); origin != "" {
-		res.Header().Set("Access-Control-Allow-Origin", "*")
+	if origin := req.Header.Get("Origin") {
+		res.Header().Set("Access-Control-Allow-Origin", origin)
 		res.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		res.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Origin")
 	}
