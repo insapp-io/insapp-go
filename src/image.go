@@ -7,6 +7,7 @@ import (
     "os"
   	"time"
     "os/exec"
+    "fmt"
 
   	"image"
   	_ "image/jpeg"
@@ -26,6 +27,8 @@ func UploadImageWithName(r *http.Request, name string) string {
 	r.ParseMultipartForm(32 << 20)
 	file, _, err := r.FormFile("file")
 	if err != nil {
+    fmt.Print("ERROR TO GET FILE FROM REQUEST:")
+    fmt.Println(err)
 		return "error"
 	}
 	defer file.Close()
@@ -33,6 +36,8 @@ func UploadImageWithName(r *http.Request, name string) string {
 	fileName := name
 	f, err := os.OpenFile("./img/"+fileName+".png", os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
+    fmt.Print("ERROR TO GET FILE WITH SYSTEM:")
+    fmt.Println(err)
 		return "error"
 	}
 
