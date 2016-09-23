@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"strings"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -35,8 +36,8 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	post.Date = time.Now()
 	res := AddPost(post)
 	asso := GetAssociation(post.Association)
-	TriggerNotification(asso.Name + " a posté une nouvelle news ")
 	json.NewEncoder(w).Encode(res)
+	TriggerNotification("@" + strings.ToLower(asso.Name) + " a posté une nouvelle news 📰", "")
 }
 
 // UpdatePostController will answer the JSON of the

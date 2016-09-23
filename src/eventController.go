@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -33,8 +34,8 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&event)
 	res := AddEvent(event)
 	asso := GetAssociation(event.Association)
-	TriggerNotification(asso.Name + " t'invite à " + event.Name)
 	json.NewEncoder(w).Encode(res)
+	TriggerNotification("@" + strings.ToLower(asso.Name) + " t'invite à " + event.Name + " 📅", event.ID.Hex())
 }
 
 // UpdateEventController will answer the JSON

@@ -26,20 +26,20 @@ func getiOSTokenDevice() []string {
    return result
 }
 
-func TriggerNotification(message string){
-  triggeriOSNotification(message)
+func TriggerNotification(message string, eventId string){
+  triggeriOSNotification(message, eventId)
 }
 
-func triggeriOSNotification(message string){
+func triggeriOSNotification(message string, eventId string){
   done := make(chan bool)
   devices := getiOSTokenDevice()
   for _, device := range devices {
-    go sendiOSNotificationToDevice(device, message, true, done)
+    go sendiOSNotificationToDevice(device, message, eventId, true, done)
   }
   <- done
 }
 
-func sendiOSNotificationToDevice(token string, message string, dev bool, done chan bool) {
+func sendiOSNotificationToDevice(token string, message string, eventId string, dev bool, done chan bool) {
   payload := apns.NewPayload()
   payload.Alert = message
   payload.Badge = 42
@@ -48,6 +48,7 @@ func sendiOSNotificationToDevice(token string, message string, dev bool, done ch
   pn := apns.NewPushNotification()
   pn.DeviceToken = token
   pn.AddPayload(payload)
+  if len(eventId) > 0 { pn.Set("id", eventId) }
 
   if dev {
     client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
