@@ -18,7 +18,6 @@ import (
 
 type Login struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
 }
 
 type Credentials struct {
@@ -72,8 +71,8 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-	isCASValid, err := verifyUser(login)
-	if isCASValid {
+	isValid, err := verifyUser(login)
+	if isValid {
 		user := AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
 		token := generateAuthToken()
 		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username}
@@ -134,12 +133,7 @@ func verifyUser(login Login) (bool, error){
 	if count > 0 || err != nil {
 		return false, errors.New("User Already Exist")
 	}
-	return verifyUserWithCAS(login)
-}
-
-func verifyUserWithCAS(login Login) (bool, error){
 	return true, nil
-	//return false, errors.New("Wrong CAS Credentials")
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {
