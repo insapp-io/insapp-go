@@ -34,7 +34,7 @@ func triggeriOSNotification(message string, eventId string){
   done := make(chan bool)
   devices := getiOSTokenDevice()
   for _, device := range devices {
-    go sendiOSNotificationToDevice(device, message, eventId, true, done)
+    go sendiOSNotificationToDevice(device, message, eventId, false, done)
   }
   <- done
 }
@@ -55,7 +55,7 @@ func sendiOSNotificationToDevice(token string, message string, eventId string, d
     client.Send(pn)
     pn.PayloadString()
   }else{
-    client := apns.NewClient("gateway.push.apple.com:2195", "InsappDevProd.pem", "InsappProd.pem")
+    client := apns.NewClient("gateway.push.apple.com:2195", "InsappProdCert.pem", "InsappProd.pem")
     client.Send(pn)
     pn.PayloadString()
   }
