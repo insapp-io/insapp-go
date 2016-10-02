@@ -25,15 +25,23 @@ type Posts []Post
 
 // Comment defines how to model a Comment of a Post
 type Comment struct {
-	ID      bson.ObjectId `bson:"_id,omitempty"`
-	User    bson.ObjectId `json:"user"`
-	Content string        `json:"content"`
-	Date    time.Time     `json:"date"`
-	Tags    bson.M     		`json:"tags"`
+	ID      bson.ObjectId 		`bson:"_id,omitempty"`
+	User    bson.ObjectId 		`json:"user"`
+	Content string        		`json:"content"`
+	Date    time.Time     		`json:"date"`
+	Tags    Tags							`bson:"tags"`
 }
 
 // Comments is an array of Comment
 type Comments []Comment
+
+type Tag struct {
+	ID      bson.ObjectId 		`bson:"_id,omitempty"`
+	User    bson.ObjectId 		`json:"user"`
+	Name 		string        		`json:"name"`
+}
+
+type Tags []Tag
 
 // AddPost will add the given post to the database
 func AddPost(post Post) Post {
