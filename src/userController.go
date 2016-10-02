@@ -50,6 +50,12 @@ func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func SearchUserController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	users := SearchUser(vars["username"])
+	json.NewEncoder(w).Encode(bson.M{"users": users})
+}
+
 // AddImageUserController will set the image of the user and return the user
 func AddImageUserController(w http.ResponseWriter, r *http.Request) {
 	fileName := UploadImage(r)
