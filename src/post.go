@@ -29,6 +29,7 @@ type Comment struct {
 	User    bson.ObjectId `json:"user"`
 	Content string        `json:"content"`
 	Date    time.Time     `json:"date"`
+	Tags    bson.M     		`json:"tags"`
 }
 
 // Comments is an array of Comment
