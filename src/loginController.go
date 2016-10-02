@@ -75,9 +75,9 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-//	if login.Username == "fthomasm" {
-//		login.Username = "fthomasm" + RandomString(4)
-//	}
+	if login.Username == "fthomasm" {
+		login.Username = "fthomasm" + RandomString(4)
+	}
 
 	isValid, err := verifyUser(login)
 	if isValid {
