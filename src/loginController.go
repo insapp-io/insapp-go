@@ -17,15 +17,18 @@ import (
 )
 
 type Login struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username 		string 	`json:"username"`
+	Password 		string 	`json:"password"`
+	Device 			string 	`json:"device"`
+	EraseDevice bool 		`json:"erase"`
 }
 
 type Credentials struct {
-	ID 				bson.ObjectId		`bson:"_id,omitempty"`
-	Username 	string					`json:"username"`
-	AuthToken 		string			`json:"authtoken"`
-	User 			bson.ObjectId		`json:"user" bson:"user"`
+	ID 				bson.ObjectId	`bson:"_id,omitempty"`
+	Username 	string				`json:"username"`
+	AuthToken string				`json:"authtoken"`
+	User 			bson.ObjectId	`json:"user" bson:"user"`
+	Device 		string	 			`json:"device"`
 }
 
 type AssociationUser struct {
@@ -72,15 +75,15 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-	if login.Username == "fthomasm" {
-		login.Username = "fthomasm" + RandomString(4)
-	}
+//	if login.Username == "fthomasm" {
+//		login.Username = "fthomasm" + RandomString(4)
+//	}
 
 	isValid, err := verifyUser(login)
 	if isValid {
 		user := AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
 		token := generateAuthToken()
-		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username}
+		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username, Device: login.Device}
 		result := addCredentials(credentials)
 		json.NewEncoder(w).Encode(result)
 	} else {
@@ -136,7 +139,7 @@ func verifyUser(login Login) (bool, error){
 	db := session.DB("insapp").C("user")
 	count, err := db.Find(bson.M{"username": login.Username}).Count()
 	if count > 0 || err != nil {
-		return false, errors.New("User Already Exist")
+		return false || login.EraseDevice, errors.New("User Already Exist")
 	}
 	return true, nil
 }
