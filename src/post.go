@@ -37,7 +37,7 @@ type Comments []Comment
 
 type Tag struct {
 	ID      bson.ObjectId 		`bson:"_id,omitempty"`
-	User    bson.ObjectId 		`json:"user"`
+	User    string 						`json:"user"`
 	Name 		string        		`json:"name"`
 }
 

@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"time"
 	"strings"
-
+	"log"
+	"io/ioutil"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/gorilla/mux"
@@ -82,9 +83,14 @@ func DislikePostController(w http.ResponseWriter, r *http.Request) {
 
 // CommentPostController will answer a JSON of the post
 func CommentPostController(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
 	var comment Comment
-	decoder.Decode(&comment)
+	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
+		log.Fatal(err)
+	}
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	res := CommentPost(bson.ObjectIdHex(postID), comment)
