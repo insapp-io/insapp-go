@@ -83,6 +83,30 @@ func DeleteNotificationsForUser(id bson.ObjectId){
 	db.Remove(bson.M{"receiver": id})
 }
 
+func DeleteNotificationsForComment(id bson.ObjectId){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("notification")
+	db.Remove(bson.M{"comment._id": id})
+}
+
+func DeleteNotificationsForPost(id bson.ObjectId){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("notification")
+	db.Remove(bson.M{"content": id})
+}
+
+func DeleteNotificationsForEvent(id bson.ObjectId){
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("notification")
+	db.Remove(bson.M{"content": id})
+}
+
 func DeleteNotificationTokenForUser(id bson.ObjectId){
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()

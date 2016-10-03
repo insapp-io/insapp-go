@@ -85,6 +85,7 @@ func DeletePost(post Post) Post {
 	db.RemoveId(post.ID)
 	var result Post
 	db.FindId(post.ID).One(result)
+	DeleteNotificationsForPost(post.ID)
 	RemovePostFromAssociation(post.Association, post.ID)
 	for _, userId := range post.Likes{
 		DislikePost(userId, post.ID)
@@ -174,6 +175,7 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+	DeleteNotificationsForComment(commentID)
 	postID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"comments": bson.M{"_id": commentID},

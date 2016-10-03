@@ -96,6 +96,7 @@ func DeleteEvent(event Event) Event {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	db.Remove(event)
+	DeleteNotificationsForEvent(event.ID)
 	RemoveEventFromAssociation(event.Association, event.ID)
 	for _, userId := range event.Participants{
 		RemoveEventFromUser(userId, event.ID)
