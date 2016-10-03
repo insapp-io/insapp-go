@@ -21,21 +21,21 @@ func getiOSUsers(user string) []NotificationUser {
   return result
 }
 
-func getOSForUser(user bson.ObjectId) string {
+func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
   session, _ := mgo.Dial("127.0.0.1")
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
   db := session.DB("insapp").C("notification_user")
   var result NotificationUser
   db.Find(bson.M{"userid": user}).One(&result)
-  return result.Os
+  return result
 }
 
 func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment){
   notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: "tag"}
-  if getOSForUser(receiver) == "iOS"{
-    user := getiOSUsers(receiver.Hex())
-    triggeriOSNotification(notification, user)
+  user := getNotificationUserForUser(receiver)
+  if user.Os == "iOS" {
+    triggeriOSNotification(notification, []NotificationUser{user})
   }
   // if getOSForUser(receiver) == "Android"{
   //   triggerAndroidNotification(notification)
