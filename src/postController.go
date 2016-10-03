@@ -97,7 +97,7 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 
 	for _, tag := range(comment.Tags){
-		TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), res.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur " + res.Title, comment)
+		TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), res.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur " + res.Title, res)
 	}
 }
 
