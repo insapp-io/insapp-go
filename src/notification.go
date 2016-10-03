@@ -21,7 +21,7 @@ type Notification struct {
 	Sender      bson.ObjectId   `json:"sender"`
 	Receiver    bson.ObjectId   `json:"receiver"`
 	Content			bson.ObjectId		`json:"content"`
-	Comment			Comment					`json:"comment"`
+	Comment			Comment					`json:"comment,omitempty" bson:",omitempty"`
 	Message			string					`json:"message"`
 	Seen				bool						`json:"seen"`
 	Date				time.Time				`json:"date"`

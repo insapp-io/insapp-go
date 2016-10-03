@@ -14,7 +14,7 @@ func getiOSUsers(user string) []NotificationUser {
   db := session.DB("insapp").C("notification_user")
   var result []NotificationUser
   if user == "" {
-      db.Find(bson.M{"os": "iOS"}).All(&result)
+    db.Find(bson.M{"os": "iOS"}).All(&result)
   }else{
     db.Find(bson.M{"os": "iOS", "userid": user}).All(&result)
   }
