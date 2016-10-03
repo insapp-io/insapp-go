@@ -63,7 +63,8 @@ func DeleteUser(user User) User {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	DeleteCredentalsForUser(user.ID)
-	DeleteNotificationForUser(user.ID)
+	DeleteNotificationsForUser(user.ID)
+	DeleteNotificationTokenForUser(user.ID)
 	for _, eventId := range user.Events{
 		RemoveParticipant(eventId, user.ID)
 	}

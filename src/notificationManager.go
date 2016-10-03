@@ -7,48 +7,76 @@ import (
   "gopkg.in/mgo.v2/bson"
 )
 
-func getiOSUser() []NotificationUser {
+func getiOSUsers(user bson.ObjectId) []NotificationUser {
   session, _ := mgo.Dial("127.0.0.1")
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
-  db := session.DB("insapp").C("notification")
+  db := session.DB("insapp").C("notification_user")
   var result []NotificationUser
-  db.Find(bson.M{"os": "iOS"}).All(&result)
+  if user != "" {
+      db.Find(bson.M{"os": "iOS"}).All(&result)
+  }else{
+    db.Find(bson.M{"os": "iOS", "userId": user}).All(&result)
+  }
   return result
 }
 
-func getiOSTokenDevice() []string {
-  var result []string
-  notificationUsers := getiOSUser()
-    for _, notif := range notificationUsers {
-       result = append(result, notif.Token)
-   }
-   return result
+func getOSForUser(user bson.ObjectId) string {
+  session, _ := mgo.Dial("127.0.0.1")
+  defer session.Close()
+  session.SetMode(mgo.Monotonic, true)
+  db := session.DB("insapp").C("notification_user")
+  var result NotificationUser
+  db.Find(bson.M{"userId": user}).One(&result)
+  return result.Os
 }
 
-func TriggerNotification(message string, eventId string){
-  triggeriOSNotification(message, eventId)
+func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment){
+  notification := Notification{Sender: sender, Receiver: receiver, Content: content, Message: message, Comment: comment, Type: "tag"}
+  if getOSForUser(receiver) == "iOS"{
+    triggeriOSNotification(notification)
+  }
+  // if getOSForUser(receiver) == "Android"{
+  //   triggerAndroidNotification(notification)
+  // }
 }
 
-func triggeriOSNotification(message string, eventId string){
+func TriggerNotificationForEvent(sender bson.ObjectId, content bson.ObjectId, message string){
+  notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
+  triggeriOSNotification(notification)
+  //triggerAndroidNotification(notification)
+}
+
+func TriggerNotificationForPost(sender bson.ObjectId, content bson.ObjectId, message string){
+  notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
+  triggeriOSNotification(notification)
+  //triggerAndroidNotification(notification)
+}
+
+func triggeriOSNotification(notification Notification){
   done := make(chan bool)
-  devices := getiOSTokenDevice()
-  for _, device := range devices {
-    go sendiOSNotificationToDevice(device, message, eventId, false, done)
+  users := getiOSUsers(notification.Receiver)
+  for _, user := range users {
+    notification.Receiver = user.UserId
+    AddNotification(notification)
+    go sendiOSNotificationToDevice(user.Token, notification, false, done)
   }
   <- done
 }
 
-func sendiOSNotificationToDevice(token string, message string, eventId string, dev bool, done chan bool) {
+func sendiOSNotificationToDevice(token string, notification Notification, dev bool, done chan bool) {
   payload := apns.NewPayload()
-  payload.Alert = message
+  payload.Alert = notification.Message
   payload.Badge = 42
   payload.Sound = "bingbong.aiff"
 
   pn := apns.NewPushNotification()
   pn.DeviceToken = token
   pn.AddPayload(payload)
-  if len(eventId) > 0 { pn.Set("id", eventId) }
+  pn.Set("type", notification.Type)
+  pn.Set("sender", notification.Sender)
+  pn.Set("content", notification.Content)
+  pn.Set("message", notification.Message)
 
   if dev {
     client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")

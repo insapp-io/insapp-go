@@ -35,7 +35,7 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	res := AddEvent(event)
 	asso := GetAssociation(event.Association)
 	json.NewEncoder(w).Encode(res)
-	TriggerNotification("@" + strings.ToLower(asso.Name) + " t'invite à " + event.Name + " 📅", res.ID.Hex())
+	TriggerNotificationForEvent(asso.ID, res.ID, "@" + strings.ToLower(asso.Name) + " t'invite à " + res.Name + " 📅")
 }
 
 // UpdateEventController will answer the JSON
