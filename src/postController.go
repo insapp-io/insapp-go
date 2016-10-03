@@ -91,13 +91,17 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
 		log.Fatal(err)
 	}
+
+	comment.ID = bson.NewObjectId()
+	comment.Date = time.Now()
+
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	res := CommentPost(bson.ObjectIdHex(postID), comment)
 	json.NewEncoder(w).Encode(res)
 
 	for _, tag := range(comment.Tags){
-		TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), res.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur " + res.Title, res)
+		TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), res.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur " + res.Title, comment)
 	}
 }
 

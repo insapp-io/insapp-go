@@ -157,10 +157,6 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
-
-	comment.ID = bson.NewObjectId()
-	comment.Date = time.Now()
-
 	postID := bson.M{"_id": id}
 	change := bson.M{"$addToSet": bson.M{
 		"comments": comment,
