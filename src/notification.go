@@ -80,7 +80,7 @@ func DeleteNotificationsForUser(id bson.ObjectId){
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
-	db.Remove(bson.M{"receiver": id})
+	db.RemoveAll(bson.M{"receiver": id})
 }
 
 func DeleteNotificationsForComment(id bson.ObjectId){
@@ -88,7 +88,7 @@ func DeleteNotificationsForComment(id bson.ObjectId){
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
-	db.Remove(bson.M{"comment._id": id})
+	db.RemoveAll(bson.M{"comment._id": id})
 }
 
 func DeleteNotificationsForPost(id bson.ObjectId){
@@ -96,7 +96,7 @@ func DeleteNotificationsForPost(id bson.ObjectId){
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
-	db.Remove(bson.M{"content": id})
+	db.RemoveAll(bson.M{"content": id})
 }
 
 func DeleteNotificationsForEvent(id bson.ObjectId){
@@ -104,7 +104,7 @@ func DeleteNotificationsForEvent(id bson.ObjectId){
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
-	db.Remove(bson.M{"content": id})
+	db.RemoveAll(bson.M{"content": id})
 }
 
 func DeleteNotificationTokenForUser(id bson.ObjectId){
@@ -112,5 +112,5 @@ func DeleteNotificationTokenForUser(id bson.ObjectId){
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
-	db.Remove(bson.M{"userid": id})
+	db.RemoveAll(bson.M{"userid": id})
 }
