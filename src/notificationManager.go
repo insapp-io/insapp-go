@@ -7,7 +7,7 @@ import (
   "gopkg.in/mgo.v2/bson"
 )
 
-func getiOSUsers(user bson.ObjectId) []NotificationUser {
+func getiOSUsers(user string) []NotificationUser {
   session, _ := mgo.Dial("127.0.0.1")
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
@@ -16,7 +16,7 @@ func getiOSUsers(user bson.ObjectId) []NotificationUser {
   if user != "" {
       db.Find(bson.M{"os": "iOS"}).All(&result)
   }else{
-    db.Find(bson.M{"os": "iOS", "userId": user}).All(&result)
+    db.Find(bson.M{"os": "iOS", "userid": user}).All(&result)
   }
   return result
 }
@@ -27,14 +27,15 @@ func getOSForUser(user bson.ObjectId) string {
   session.SetMode(mgo.Monotonic, true)
   db := session.DB("insapp").C("notification_user")
   var result NotificationUser
-  db.Find(bson.M{"userId": user}).One(&result)
+  db.Find(bson.M{"userid": user}).One(&result)
   return result.Os
 }
 
 func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment){
-  notification := Notification{Sender: sender, Receiver: receiver, Content: content, Message: message, Comment: comment, Type: "tag"}
+  notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: "tag"}
   if getOSForUser(receiver) == "iOS"{
-    triggeriOSNotification(notification)
+    user := getiOSUsers(receiver.Hex())
+    triggeriOSNotification(notification, user)
   }
   // if getOSForUser(receiver) == "Android"{
   //   triggerAndroidNotification(notification)
@@ -43,19 +44,20 @@ func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, co
 
 func TriggerNotificationForEvent(sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
-  triggeriOSNotification(notification)
+  users := getiOSUsers("")
+  triggeriOSNotification(notification, users)
   //triggerAndroidNotification(notification)
 }
 
 func TriggerNotificationForPost(sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
-  triggeriOSNotification(notification)
+  users := getiOSUsers("")
+  triggeriOSNotification(notification, users)
   //triggerAndroidNotification(notification)
 }
 
-func triggeriOSNotification(notification Notification){
+func triggeriOSNotification(notification Notification, users []NotificationUser){
   done := make(chan bool)
-  users := getiOSUsers(notification.Receiver)
   for _, user := range users {
     notification.Receiver = user.UserId
     AddNotification(notification)
