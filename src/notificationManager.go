@@ -61,7 +61,7 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
   for _, user := range users {
     notification.Receiver = user.UserId
     AddNotification(notification)
-    go sendiOSNotificationToDevice(user.Token, notification, false, done)
+    go sendiOSNotificationToDevice(user.Token, notification, true, done)
   }
   <- done
 }
@@ -79,6 +79,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, dev bo
   pn.Set("sender", notification.Sender)
   pn.Set("content", notification.Content)
   pn.Set("message", notification.Message)
+  if notification.Type == "tag" {
+    pn.Set("comment", notification.Comment.ID)
+  }
 
   if dev {
     client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
