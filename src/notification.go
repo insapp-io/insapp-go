@@ -66,6 +66,16 @@ func GetNotificationsForUser(userID bson.ObjectId) Notifications {
 	return result
 }
 
+func GetUnreadNotificationsForUser(userID bson.ObjectId) Notifications {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("notification")
+	var result Notifications
+	db.Find(bson.M{"receiver" : userID, "seen": false}).Sort("-date").Limit(30).All(&result)
+	return result
+}
+
 func ReadNotificationForUser(userID bson.ObjectId, notifID bson.ObjectId) Notifications{
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
