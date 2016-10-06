@@ -61,15 +61,16 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
   for _, user := range users {
     notification.Receiver = user.UserId
     AddNotification(notification)
-    go sendiOSNotificationToDevice(user.Token, notification, true, done)
+    number := len(GetNotificationsForUser(user.UserId))
+    go sendiOSNotificationToDevice(user.Token, notification, number, true, done)
   }
   <- done
 }
 
-func sendiOSNotificationToDevice(token string, notification Notification, dev bool, done chan bool) {
+func sendiOSNotificationToDevice(token string, notification Notification, number int, dev bool, done chan bool) {
   payload := apns.NewPayload()
   payload.Alert = notification.Message
-  payload.Badge = 42
+  payload.Badge = number
   payload.Sound = "bingbong.aiff"
 
   pn := apns.NewPushNotification()
