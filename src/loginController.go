@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
   "os/exec"
 	"strings"
@@ -44,7 +43,6 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login Login
 	decoder.Decode(&login)
-	fmt.Println(login)
 	auth, master, err := checkLoginForAssociation(login)
 	if err == nil {
 		sessionToken := logAssociation(auth, master)
