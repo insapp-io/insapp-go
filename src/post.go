@@ -207,3 +207,15 @@ func DeleteCommentsForUser(userId bson.ObjectId) {
 		}
 	}
 }
+
+func DeleteTagsForUser(userId bson.ObjectId) {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("post")
+	postID := bson.M{}
+	change := bson.M{"$pull": bson.M{
+		"comments.tags.user": userId,
+	}}
+	db.Update(postID, change)
+}
