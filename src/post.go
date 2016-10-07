@@ -213,9 +213,22 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
-	postID := bson.M{}
-	change := bson.M{"$pull": bson.M{
-		"comments.tags": bson.M{"user": userId.Hex()},
-	}}
-	db.Update(postID, change)
+	var posts Posts
+	db.Find(bson.M{}).All(&posts)
+	for _, post := range(posts){
+		comments := post.Comments
+		finalComments := Comments{}
+		for _, comment := range(comments){
+			tags := comment.Tags
+			finalTags := Tags{}
+			for _, tag := range(tags){
+				if tag.User != userId.Hex() {
+					finalTags = append(finalTags, tag)
+				}
+			}
+			comment.Tags = finalTags
+			finalComments = append(finalComments, comment)
+		}
+		db.Update(bson.M{"_id": post.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
+	}
 }
