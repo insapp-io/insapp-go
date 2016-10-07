@@ -215,7 +215,7 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 	db := session.DB("insapp").C("post")
 	postID := bson.M{}
 	change := bson.M{"$pull": bson.M{
-		"comments.tags.user": userId,
+		"comments.tags": bson.M{"user": userId.Hex()},
 	}}
 	db.Update(postID, change)
 }
