@@ -73,13 +73,23 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-	if login.Username == "fthomasm" {
-		login.Username = "fthomasm" + RandomString(4)
-	}
+	// if login.Username == "fthomasm" {
+	// 	login.Username = "fthomasm" + RandomString(4)
+	// }
 
 	isValid, err := verifyUser(login)
 	if isValid {
-		user := AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
+		session, _ := mgo.Dial("127.0.0.1")
+		defer session.Close()
+		session.SetMode(mgo.Monotonic, true)
+		db := session.DB("insapp").C("user")
+		count, _ := db.Find(bson.M{"username": login.Username}).Count()
+		var user User
+		if count == 0 {
+			user = AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
+		}else{
+			db.Find(bson.M{"username": login.Username}).One(&user)
+		}
 		token := generateAuthToken()
 		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username, Device: login.Device}
 		result := addCredentials(credentials)

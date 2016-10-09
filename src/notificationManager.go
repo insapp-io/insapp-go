@@ -62,7 +62,7 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
     notification.Receiver = user.UserId
     AddNotification(notification)
     number := len(GetUnreadNotificationsForUser(user.UserId))
-    go sendiOSNotificationToDevice(user.Token, notification, number, true, done)
+    go sendiOSNotificationToDevice(user.Token, notification, number, false, done)
   }
   <- done
 }
