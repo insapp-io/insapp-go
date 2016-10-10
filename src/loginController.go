@@ -63,7 +63,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 		user := GetUser(cred.User)
 		json.NewEncoder(w).Encode(bson.M{"credentials": credentials, "sessionToken": sessionToken, "user": user})
 	} else {
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(bson.M{"error": err})
 	}
 }
