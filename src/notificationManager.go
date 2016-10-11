@@ -5,6 +5,9 @@ import (
 
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
+  "fmt"
+  "net/http"
+  "bytes"
 )
 
 func getiOSUsers(user string) []NotificationUser {
@@ -17,6 +20,20 @@ func getiOSUsers(user string) []NotificationUser {
     db.Find(bson.M{"os": "iOS"}).All(&result)
   }else{
     db.Find(bson.M{"os": "iOS", "userid": user}).All(&result)
+  }
+  return result
+}
+
+func getAndroidUsers(user string) []NotificationUser {
+  session, _ := mgo.Dial("127.0.0.1")
+  defer session.Close()
+  session.SetMode(mgo.Monotonic, true)
+  db := session.DB("insapp").C("notification_user")
+  var result []NotificationUser
+  if user == "" {
+    db.Find(bson.M{"os": "android"}).All(&result)
+  }else{
+    db.Find(bson.M{"os": "android", "userid": user}).All(&result)
   }
   return result
 }
@@ -37,23 +54,36 @@ func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, co
   if user.Os == "iOS" {
     triggeriOSNotification(notification, []NotificationUser{user})
   }
-  // if getOSForUser(receiver) == "Android"{
-  //   triggerAndroidNotification(notification)
-  // }
+  if user.Os == "android" {
+    triggerAndroidNotification(notification, []NotificationUser{user})
+  }
 }
 
 func TriggerNotificationForEvent(sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
-  users := getiOSUsers("")
-  triggeriOSNotification(notification, users)
-  //triggerAndroidNotification(notification)
+  iOSUsers := getiOSUsers("")
+  androidUsers := getAndroidUsers("")
+  triggeriOSNotification(notification, iOSUsers)
+  triggerAndroidNotification(notification, androidUsers)
 }
 
 func TriggerNotificationForPost(sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
-  users := getiOSUsers("")
-  triggeriOSNotification(notification, users)
-  //triggerAndroidNotification(notification)
+  iOSUsers := getiOSUsers("")
+  androidUsers := getAndroidUsers("")
+  triggeriOSNotification(notification, iOSUsers)
+  triggerAndroidNotification(notification, androidUsers)
+}
+
+func triggerAndroidNotification(notification Notification, users []NotificationUser){
+  done := make(chan bool)
+  for _, user := range users {
+    notification.Receiver = user.UserId
+    AddNotification(notification)
+    number := len(GetUnreadNotificationsForUser(user.UserId))
+    go sendAndroidNotificationToDevice(user.Token, notification, number, done)
+  }
+  <- done
 }
 
 func triggeriOSNotification(notification Notification, users []NotificationUser){
@@ -93,6 +123,37 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
     client.Send(pn)
     pn.PayloadString()
   }
+
+  done <- true
+}
+
+func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+  url := "https://android.googleapis.com/gcm/send"
+  var commentString = ""
+  if notification.Type == "tag" {
+    commentString = `"comment" : " ` + notification.Comment.ID.Hex() + `, `
+  }
+  var jsonStr = []byte(`
+    {"registration_ids":["` + token + `"],
+      "data":{
+        "name" : "` + notification.Message + `",
+        "type" : "` + notification.Type + `",
+        "sender" : "` + notification.Sender.Hex() + `",
+        "content" : "` + notification.Content.Hex() + `",` + commentString + `
+        "message" : "` + notification.Message + `"
+      }
+    }`)
+  req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+  req.Header.Set("Authorization", "key=PUT_YOUR_API_KEY_HERE")
+  req.Header.Set("Content-Type", "application/json")
+
+  client := &http.Client{}
+  resp, err := client.Do(req)
+  if err != nil {
+      panic(err)
+  }
+  defer resp.Body.Close()
+  fmt.Println("response Status:", resp.Status)
 
   done <- true
 }
