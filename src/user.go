@@ -3,7 +3,15 @@ package main
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
+	"strings"
 )
+
+var promotions = []string{"", "1STPI", "2STPI",
+    "3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
+    "4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
+    "5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
+    "Personnel/Enseignant"}
 
 // User defines how to model a User
 type User struct {
@@ -28,9 +36,10 @@ func AddUser(user User) User {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
+	user.Username = strings.ToLower(user.Username)
 	db.Insert(user)
 	var result User
-	db.Find(bson.M{"username": user.Username}).One(&result)
+	db.Find(bson.M{"username": strings.ToLower(user.Username) }).One(&result)
 	return result
 }
 
@@ -41,13 +50,20 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
+	promotion := ""
+	for _, promo := range promotions {
+		if user.Promotion == promo {
+			promotion = user.Promotion
+			break
+		}
+	}
 	userID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"name":        user.Name,
 		"description": user.Description,
 		"email": 			 user.Email,
 		"emailpublic": user.EmailPublic,
-		"promotion":   user.Promotion,
+		"promotion":   promotion,
 		"gender"	:		 user.Gender,
 	}}
 	db.Update(userID, change)
@@ -76,6 +92,17 @@ func DeleteUser(user User) User {
 	db.RemoveId(user.ID)
 	var result User
 	db.FindId(user.ID).One(result)
+	return result
+}
+
+// GetUser will return an User object from the given ID
+func GetAllUser() Users {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("user")
+	var result Users
+	db.Find(bson.M{}).All(&result)
 	return result
 }
 
@@ -169,17 +196,14 @@ func SearchUser(username string) Users {
 	return result
 }
 
-func SetImageUser(id bson.ObjectId, fileName string) User {
+func ReportUser(id bson.ObjectId) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
-	userID := bson.M{"_id": id}
-	change := bson.M{
-		"photoUrl": fileName,
-	}
-	db.Update(userID, change)
-	var result User
-	db.Find(bson.M{"_id": id}).One(&result)
-	return result
+	var user User
+	db.Find(bson.M{"_id": id}).One(&user)
+	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
+		"Cet utilisateur a été reporté le " + time.Now().String() +
+		"\n\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
 }

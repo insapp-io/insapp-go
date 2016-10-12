@@ -69,6 +69,7 @@ var memStoreUser = memstore.New("user")
 var publicRoutes = Routes{
 	Route{"Index", "GET", "/", Index},
 	Route{"Credit", "GET", "/credit", Credit},
+	Route{"Legal", "GET", "/legal", Legal},
 	Route{"Credit", "POST", "/", Index},
 	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
 	Route{"LogUser", "POST", "/login/user", LogUserController},
@@ -76,6 +77,7 @@ var publicRoutes = Routes{
 }
 
 var superRoutes = Routes{
+	Route{"GetUsers", "GET", "/user", GetAllUserController},
 	Route{"AddAssociation", "POST", "/association", AddAssociationController},
 	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
 	Route{"CreateUserForAssociation", "POST", "/association/{id}/user", CreateUserForAssociationController},
@@ -128,12 +130,14 @@ var userRoutes = Routes{
 	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
 	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
 	Route{"UncommentPost", "DELETE", "/post/{id}/comment/{commentID}", UncommentPostController},
+	Route{"ReportComment", "PUT", "/report/{id}/comment/{commentID}", ReportCommentController},
 
 	//USER
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
 	Route{"SearchUser", "GET", "/search/users/{username}", SearchUserController},
+	Route{"ReportUser", "PUT", "/report/user/{id}", ReportUserController},
 
 	//NOTIFICATION
 	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},

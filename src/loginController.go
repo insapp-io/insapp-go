@@ -73,9 +73,13 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-	// if login.Username == "fthomasm" {
-	// 	login.Username = "fthomasm" + RandomString(4)
-	// }
+	if login.Username == "fthomasm" {
+		login.Username = "fthomasm" + RandomString(4)
+	}
+
+	w.WriteHeader(http.StatusForbidden)
+	json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, on est pas encore Mercredi  " })
+	return
 
 	isValid, err := verifyUser(login)
 	if isValid {

@@ -2,7 +2,7 @@ package main
 
 import (
   apns "github.com/anachronistic/apns"
-
+  "encoding/json"
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
   "fmt"
@@ -92,12 +92,13 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
     notification.Receiver = user.UserId
     AddNotification(notification)
     number := len(GetUnreadNotificationsForUser(user.UserId))
-    go sendiOSNotificationToDevice(user.Token, notification, number, false, done)
+    go sendiOSNotificationToDevice(user.Token, notification, number, done)
   }
   <- done
 }
 
-func sendiOSNotificationToDevice(token string, notification Notification, number int, dev bool, done chan bool) {
+func sendiOSNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+
   payload := apns.NewPayload()
   payload.Alert = notification.Message
   payload.Badge = number
@@ -114,7 +115,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
     pn.Set("comment", notification.Comment.ID)
   }
 
-  if dev {
+  config, _ := Configuration()
+
+  if config.Environment == "staging" {
     client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
     client.Send(pn)
     pn.PayloadString()
@@ -129,22 +132,13 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 
 func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
   url := "https://android.googleapis.com/gcm/send"
-  var commentString = ""
-  if notification.Type == "tag" {
-    commentString = `"comment" : " ` + notification.Comment.ID.Hex() + `, `
-  }
-  var jsonStr = []byte(`
-    {"registration_ids":["` + token + `"],
-      "data":{
-        "name" : "` + notification.Message + `",
-        "type" : "` + notification.Type + `",
-        "sender" : "` + notification.Sender.Hex() + `",
-        "content" : "` + notification.Content.Hex() + `",` + commentString + `
-        "message" : "` + notification.Message + `"
-      }
-    }`)
-  req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-  req.Header.Set("Authorization", "key=PUT_YOUR_API_KEY_HERE")
+  notifJson, _ := json.Marshal(notification)
+  var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
+  req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
+
+  config, _ := Configuration()
+
+  req.Header.Set("Authorization", "key=" + config.GoogleKey)
   req.Header.Set("Content-Type", "application/json")
 
   client := &http.Client{}
