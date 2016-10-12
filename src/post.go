@@ -186,6 +186,30 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	return post
 }
 
+func ReportComment(id bson.ObjectId, commentID bson.ObjectId) {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("post")
+	var post Post
+	db.Find(bson.M{"_id": id}).One(&post)
+	for _, comment := range post.Comments {
+		if comment.ID == commentID {
+			var sender User
+			db = session.DB("insapp").C("user")
+			db.Find(bson.M{"_id": id}).One(&sender)
+			SendEmail("aeir@insa-rennes.fr", "Un commentaire a été reporté sur Insapp",
+				"Ce commentaire a été reporté le " + time.Now().String() +
+				"\n\nCommentaire:\n" + comment.ID.Hex() + "\n" + comment.Content +
+				"\n\nPost:\n" + post.Title +
+				"\n\nUser:\n" + sender.ID.Hex() + "\n" + sender.Username + "\n" + sender.Name)
+		}
+	}
+
+
+
+}
+
 func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
 	post := GetPost(id)
 	comments := post.Comments

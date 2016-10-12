@@ -3,6 +3,8 @@ package main
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"net/smtp"
+	"time"
 )
 
 // User defines how to model a User
@@ -169,17 +171,31 @@ func SearchUser(username string) Users {
 	return result
 }
 
-func SetImageUser(id bson.ObjectId, fileName string) User {
+
+func ReportUser(id bson.ObjectId) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
-	userID := bson.M{"_id": id}
-	change := bson.M{
-		"photoUrl": fileName,
-	}
-	db.Update(userID, change)
-	var result User
-	db.Find(bson.M{"_id": id}).One(&result)
-	return result
+	var user User
+	db.Find(bson.M{"_id": id}).One(&user)
+	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
+		"Cet utilisateur a été reporté le " + time.Now().String() +
+		"\n\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
+}
+
+
+func SendEmail(to string, subject string, body string) {
+  from := "insapp.contact@gmail.com"
+	pass := "PASSWORD"
+	cc := "insapp.contact@gmail.com"
+	msg := "From: " + from + "\n" +
+		"To: " + to + "\n" +
+    "Cc: " + cc + "\n" +
+		"Subject: " + subject + "\n\n" +
+		body
+
+	smtp.SendMail("smtp.gmail.com:587",
+		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+		from, []string{to}, []byte(msg))
 }

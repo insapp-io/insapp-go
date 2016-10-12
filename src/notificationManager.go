@@ -2,7 +2,7 @@ package main
 
 import (
   apns "github.com/anachronistic/apns"
-
+  "encoding/json"
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
   "fmt"
@@ -129,21 +129,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 
 func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
   url := "https://android.googleapis.com/gcm/send"
-  var commentString = ""
-  if notification.Type == "tag" {
-    commentString = `"comment" : " ` + notification.Comment.ID.Hex() + `, `
-  }
-  var jsonStr = []byte(`
-    {"registration_ids":["` + token + `"],
-      "data":{
-        "name" : "` + notification.Message + `",
-        "type" : "` + notification.Type + `",
-        "sender" : "` + notification.Sender.Hex() + `",
-        "content" : "` + notification.Content.Hex() + `",` + commentString + `
-        "message" : "` + notification.Message + `"
-      }
-    }`)
-  req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+  notifJson, _ := json.Marshal(notification)
+  var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
+  req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
   req.Header.Set("Authorization", "key=PUT_YOUR_API_KEY_HERE")
   req.Header.Set("Content-Type", "application/json")
 

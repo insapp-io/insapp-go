@@ -117,6 +117,14 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func ReportCommentController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postID := vars["id"]
+	commentID := vars["commentID"]
+	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
+	json.NewEncoder(w).Encode(bson.M{})
+}
+
 // // AddImagePostController will set the image of the post and return the post
 // func AddImagePostController(w http.ResponseWriter, r *http.Request) {
 // 	fileName := UploadImage(r)
