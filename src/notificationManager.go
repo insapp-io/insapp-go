@@ -132,7 +132,7 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
   notifJson, _ := json.Marshal(notification)
   var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
   req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
-  req.Header.Set("Authorization", "key=PUT_YOUR_API_KEY_HERE")
+  req.Header.Set("Authorization", "key=AIzaSyCWKY919k8ufpERLGJcdmhCrIEjNpvyND4")
   req.Header.Set("Content-Type", "application/json")
 
   client := &http.Client{}

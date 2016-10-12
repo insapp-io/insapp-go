@@ -187,7 +187,7 @@ func ReportUser(id bson.ObjectId) {
 
 func SendEmail(to string, subject string, body string) {
   from := "insapp.contact@gmail.com"
-	pass := "PASSWORD"
+	pass := "7g2-24K-u8m-mwX"
 	cc := "insapp.contact@gmail.com"
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
