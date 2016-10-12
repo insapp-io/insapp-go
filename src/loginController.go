@@ -73,9 +73,13 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 
-	// if login.Username == "fthomasm" {
-	// 	login.Username = "fthomasm" + RandomString(4)
-	// }
+	if login.Username == "fthomasm" {
+		login.Username = "fthomasm" + RandomString(4)
+	}
+
+	w.WriteHeader(http.StatusForbidden)
+	json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, il est pas encore 18h00  " })
+	return
 
 	isValid, err := verifyUser(login)
 	if isValid {
@@ -176,7 +180,7 @@ func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
 }
 
 func logUser(id bson.ObjectId) *memstore.MemoryToken {
-	return memStoreUser.NewToken(string(id))
+	return memStoreUser.NewToken(id.Hex())
 }
 
 func GetMD5Hash(text string) string {

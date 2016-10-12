@@ -185,21 +185,3 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	db.Find(bson.M{"_id": id}).One(&result)
 	return result
 }
-
-// func SetImageAssociation(id bson.ObjectId, fileName string, isProfilePicture bool) Association {
-// 	session, _ := mgo.Dial("127.0.0.1")
-// 	defer session.Close()
-// 	session.SetMode(mgo.Monotonic, true)
-// 	db := session.DB("insapp").C("association")
-// 	assosID := bson.M{"_id": id}
-// 	if isProfilePicture {
-// 		change := bson.M{"$set": bson.M{ "profile": fileName + ".png", }}
-// 		db.Update(assosID, change)
-// 	}else{
-// 		change := bson.M{"$set": bson.M{ "cover": fileName + ".png", }}
-// 		db.Update(assosID, change)
-// 	}
-// 	var result Association
-// 	db.Find(bson.M{"_id": id}).One(&result)
-// 	return result
-// }

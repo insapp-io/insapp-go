@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"gopkg.in/mgo.v2/bson"
-
+	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 )
 
@@ -16,6 +15,11 @@ func GetUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
 	var res = GetUser(bson.ObjectIdHex(userID))
+	json.NewEncoder(w).Encode(res)
+}
+
+func GetAllUserController(w http.ResponseWriter, r *http.Request) {
+	var res = GetAllUser()
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -56,15 +60,11 @@ func SearchUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bson.M{"users": users})
 }
 
-// AddImageUserController will set the image of the user and return the user
-func AddImageUserController(w http.ResponseWriter, r *http.Request) {
-	fileName := UploadImage(r)
-	if fileName == "error" {
-		w.Header().Set("status", "400")
-		fmt.Fprintln(w, "{}")
-	} else {
-		vars := mux.Vars(r)
-		res := SetImageUser(bson.ObjectIdHex(vars["id"]), fileName)
-		json.NewEncoder(w).Encode(res)
-	}
+func ReportUserController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID := vars["id"]
+	token := tauth.Get(r)
+	reporterID := token.Claims("id").(string)
+	ReportUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(reporterID))
+	json.NewEncoder(w).Encode(bson.M{})
 }

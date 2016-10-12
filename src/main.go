@@ -12,6 +12,15 @@ type WithCORS struct {
 }
 
 func main() {
+
+	_, err := Configuration()
+
+	if err != nil{
+		log.Println(err)
+		log.Fatal("[error] Error when parsing config file. Make sure the config file is valid : ")
+		return
+	}
+
 	log.Println("Starting server on 0.0.0.0:9000")
 	log.Fatal(http.ListenAndServe(":9000", &WithCORS{NewRouter()}))
 }

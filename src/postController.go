@@ -8,8 +8,8 @@ import (
 	"log"
 	"io/ioutil"
 	"gopkg.in/mgo.v2/bson"
-
 	"github.com/gorilla/mux"
+	"github.com/freehaha/token-auth"
 )
 
 // GetPostController will answer a JSON of the post
@@ -115,6 +115,16 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	commentID := vars["commentID"]
 	res := UncommentPost(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
 	json.NewEncoder(w).Encode(res)
+}
+
+func ReportCommentController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postID := vars["id"]
+	commentID := vars["commentID"]
+	token := tauth.Get(r)
+	userID := token.Claims("id").(string)
+	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), bson.ObjectIdHex(userID))
+	json.NewEncoder(w).Encode(bson.M{})
 }
 
 // // AddImagePostController will set the image of the post and return the post
