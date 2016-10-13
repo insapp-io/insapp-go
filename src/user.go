@@ -190,7 +190,7 @@ func SendEmail(to string, subject string, body string) {
 	pass := "7g2-24K-u8m-mwX"
 	cc := "insapp.contact@gmail.com"
 	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
+		"To: " + "insapp.contact@gmail.com" + "\n" +
     "Cc: " + cc + "\n" +
 		"Subject: " + subject + "\n\n" +
 		body

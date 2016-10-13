@@ -43,3 +43,29 @@ Les notifications peuvent être activées ou désactivées dans les réglages du
 
 	fmt.Fprintln(w, "</body>")
 }
+
+
+
+
+func Legal(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
+	fmt.Fprintln(w, "<h1>Insapp</h1>")
+
+	fmt.Fprintln(w, `<p>
+Les sources des informations diffusées sur INSAPP sont réputées fiables. Toutefois, INSAPP se réserve la faculté d'une non-garantie de la fiabilité des sources. Les informations données sur le site le sont à titre purement informatif. Ainsi, l'Utilisateur assume seul l'entière responsabilité de l'utilisation des informations et contenus du présent site.
+L'Utilisateur s'assure de garder son mot de passe secret. Toute divulgation du mot de passe, quelle que soit sa forme, est interdite.
+		</p>`)
+
+	fmt.Fprintln(w, `<p>
+L'Utilisateur assume les risques liés à l'utilisation de son identifiant et mot de passe. Le site décline toute responsabilité.
+Une garantie optimale de la sécurité et de la confidentialité des données transmises n'est pas assurée par INSAPP. Toutefois, le site s'engage à mettre en œuvre tous les moyens nécessaires afin de garantir au mieux la sécurité et la confidentialité des données.
+		</p>`)
+
+	fmt.Fprintln(w, `<p>
+Le site permet aux membres de publier des commentaires.
+Dans ses publications, l'Utilisateur s’engage à respecter la charte informatique de l’INSA Rennes et les règles de droit en vigueur.
+Le site exerce une modération a posteriori sur les publications et se réserve le droit de refuser leur mise en ligne, sans avoir à s’en justifier auprès du membre.
+		</p>`)
+
+	fmt.Fprintln(w, "</body>")
+}
