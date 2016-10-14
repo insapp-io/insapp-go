@@ -41,6 +41,21 @@ Ces commentaires restent anonymes et les associations se réservent le droit de 
 Les notifications peuvent être activées ou désactivées dans les réglages du téléphone.
 		</p>`)
 
+
+	fmt.Fprintln(w, "<h2>Testeurs</h2>")
+
+	fmt.Fprintln(w, `<p>
+Insapp a été testé pendant 3 semaines par des beta-testeurs volontaires issuent de differents départements de l'INSA. Nous tenons à remercier :
+</br>
+</br>
+Nans Préjean</br>
+Hugo David</br>
+Valentin Marc</br>
+Alex Gravier</br>
+Mathieu Cassard</br>
+Célestin Bodet</br>
+		</p>`)
+
 	fmt.Fprintln(w, "</body>")
 }
 
