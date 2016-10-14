@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+var promotions = []string{"", "1STPI", "2STPI",
+    "3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
+    "4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
+    "5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
+    "Personnel/Enseignant"}
+
 // User defines how to model a User
 type User struct {
 	ID          bson.ObjectId   `bson:"_id,omitempty"`
@@ -43,13 +49,20 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
+	promotion := ""
+	for _, promo := range promotions {
+		if user.Promotion == promo {
+			promotion = user.Promotion
+			break
+		}
+	}
 	userID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"name":        user.Name,
 		"description": user.Description,
 		"email": 			 user.Email,
 		"emailpublic": user.EmailPublic,
-		"promotion":   user.Promotion,
+		"promotion":   promotion,
 		"gender"	:		 user.Gender,
 	}}
 	db.Update(userID, change)
