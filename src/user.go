@@ -3,7 +3,6 @@ package main
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"net/smtp"
 	"time"
 	"strings"
 )
@@ -197,7 +196,6 @@ func SearchUser(username string) Users {
 	return result
 }
 
-
 func ReportUser(id bson.ObjectId) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
@@ -208,20 +206,4 @@ func ReportUser(id bson.ObjectId) {
 	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
 		"Cet utilisateur a été reporté le " + time.Now().String() +
 		"\n\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
-}
-
-
-func SendEmail(to string, subject string, body string) {
-  from := "insapp.contact@gmail.com"
-	pass := "7g2-24K-u8m-mwX"
-	cc := "insapp.contact@gmail.com"
-	msg := "From: " + from + "\n" +
-		"To: " + "insapp.contact@gmail.com" + "\n" +
-    "Cc: " + cc + "\n" +
-		"Subject: " + subject + "\n\n" +
-		body
-
-	smtp.SendMail("smtp.gmail.com:587",
-		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
-		from, []string{to}, []byte(msg))
 }

@@ -77,9 +77,9 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		login.Username = "fthomasm" + RandomString(4)
 	}
 
-	//w.WriteHeader(http.StatusForbidden)
-	//json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, on est pas encore Mercredi  " })
-	//return
+	w.WriteHeader(http.StatusForbidden)
+	json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, on est pas encore Mercredi  " })
+	return
 
 	isValid, err := verifyUser(login)
 	if isValid {

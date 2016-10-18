@@ -92,12 +92,13 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
     notification.Receiver = user.UserId
     AddNotification(notification)
     number := len(GetUnreadNotificationsForUser(user.UserId))
-    go sendiOSNotificationToDevice(user.Token, notification, number, false, done)
+    go sendiOSNotificationToDevice(user.Token, notification, number, done)
   }
   <- done
 }
 
-func sendiOSNotificationToDevice(token string, notification Notification, number int, dev bool, done chan bool) {
+func sendiOSNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+
   payload := apns.NewPayload()
   payload.Alert = notification.Message
   payload.Badge = number
@@ -114,7 +115,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
     pn.Set("comment", notification.Comment.ID)
   }
 
-  if dev {
+  config, _ := Configuration()
+
+  if config.Environment == "staging" {
     client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
     client.Send(pn)
     pn.PayloadString()
@@ -132,7 +135,10 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
   notifJson, _ := json.Marshal(notification)
   var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
   req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
-  req.Header.Set("Authorization", "key=AIzaSyCWKY919k8ufpERLGJcdmhCrIEjNpvyND4")
+
+  config, _ := Configuration()
+
+  req.Header.Set("Authorization", "key=" + config.GoogleKey)
   req.Header.Set("Content-Type", "application/json")
 
   client := &http.Client{}
