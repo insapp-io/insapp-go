@@ -97,6 +97,17 @@ func DeleteUser(user User) User {
 }
 
 // GetUser will return an User object from the given ID
+func GetAllUser() Users {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("user")
+	var result Users
+	db.Find(bson.M{}).All(&result)
+	return result
+}
+
+// GetUser will return an User object from the given ID
 func GetUser(id bson.ObjectId) User {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()

@@ -18,6 +18,11 @@ func GetUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func GetAllUserController(w http.ResponseWriter, r *http.Request) {
+	var res = GetAllUser()
+	json.NewEncoder(w).Encode(res)
+}
+
 // AddUserController will answer a JSON of the
 // brand new created user (from the JSON Body)
 func AddUserController(w http.ResponseWriter, r *http.Request) {
