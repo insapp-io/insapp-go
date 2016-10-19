@@ -9,9 +9,9 @@ func SendEmail(to string, subject string, body string) {
 	config, _ := Configuration()
   from := config.Email
 	pass := config.Password
-	cc := "insapp.contact@gmail.com"
+	cc := config.Email
 	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
+		"To: " + from + "\n" +
     "Cc: " + cc + "\n" +
 		"Subject: " + subject + "\n\n" +
 		body

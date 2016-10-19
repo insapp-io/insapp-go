@@ -78,7 +78,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusForbidden)
-	json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, on est pas encore Mercredi  " })
+	json.NewEncoder(w).Encode(bson.M{"error": "Soit patient, il est psa encore 18h00  " })
 	return
 
 	isValid, err := verifyUser(login)
