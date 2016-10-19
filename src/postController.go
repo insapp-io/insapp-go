@@ -8,7 +8,6 @@ import (
 	"log"
 	"io/ioutil"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/freehaha/token-auth"
 )
@@ -124,7 +123,6 @@ func ReportCommentController(w http.ResponseWriter, r *http.Request) {
 	commentID := vars["commentID"]
 	token := tauth.Get(r)
 	userID := token.Claims("id").(string)
-	fmt.Println("userID => " + userID)
 	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), bson.ObjectIdHex(userID))
 	json.NewEncoder(w).Encode(bson.M{})
 }

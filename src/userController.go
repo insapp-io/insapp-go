@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"gopkg.in/mgo.v2/bson"
-
+	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 )
 
@@ -63,6 +63,8 @@ func SearchUserController(w http.ResponseWriter, r *http.Request) {
 func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
-	ReportUser(bson.ObjectIdHex(userID))
+	token := tauth.Get(r)
+	reporterID := token.Claims("id").(string)
+	ReportUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(reporterID))
 	json.NewEncoder(w).Encode(bson.M{})
 }

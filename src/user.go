@@ -196,14 +196,17 @@ func SearchUser(username string) Users {
 	return result
 }
 
-func ReportUser(id bson.ObjectId) {
+func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	var user User
 	db.Find(bson.M{"_id": id}).One(&user)
+	var reporter User
+	db.Find(bson.M{"_id": reporterID}).One(&reporter)
 	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
 		"Cet utilisateur a été reporté le " + time.Now().String() +
+		"\n\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name + 
 		"\n\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
 }
