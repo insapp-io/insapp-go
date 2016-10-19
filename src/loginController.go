@@ -180,7 +180,7 @@ func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
 }
 
 func logUser(id bson.ObjectId) *memstore.MemoryToken {
-	return memStoreUser.NewToken(string(id))
+	return memStoreUser.NewToken(id.Hex())
 }
 
 func GetMD5Hash(text string) string {
