@@ -22,10 +22,6 @@ type Routes []Route
 // NewRouter is the constructeur of the Router
 // It will create every routes from the routes variable just above
 func NewRouter() *mux.Router {
-	tokenAuthAssociationUser := tauth.NewTokenAuth(nil, nil, memStoreAssociationUser, nil)
-	tokenAuthSuperUser := tauth.NewTokenAuth(nil, nil, memStoreSuperUser, nil)
-	tokenAuthUser := tauth.NewTokenAuth(nil, nil, memStoreUser, nil)
-
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range publicRoutes {
 		router.
@@ -61,6 +57,10 @@ func NewRouter() *mux.Router {
 
 	return router
 }
+
+var tokenAuthAssociationUser = tauth.NewTokenAuth(nil, nil, memStoreAssociationUser, nil)
+var tokenAuthSuperUser = tauth.NewTokenAuth(nil, nil, memStoreSuperUser, nil)
+var tokenAuthUser = tauth.NewTokenAuth(nil, nil, memStoreUser, nil)
 
 var memStoreAssociationUser = memstore.New("associationUser")
 var memStoreSuperUser = memstore.New("superUser")
