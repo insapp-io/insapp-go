@@ -207,6 +207,6 @@ func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
 	db.Find(bson.M{"_id": reporterID}).One(&reporter)
 	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
 		"Cet utilisateur a été reporté le " + time.Now().String() +
-		"\n\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name + 
-		"\n\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
+		"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name +
+		"\n\nSignaler:\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
 }
