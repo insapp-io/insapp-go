@@ -64,6 +64,7 @@ Florian Arnoud</br>
 Anthony Sharpe</br>
 Sebastien Turpin</br>
 Luc Geffrault</br>
+Agathe Duboue</br>
 </br>
 		</p>`)
 

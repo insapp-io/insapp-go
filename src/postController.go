@@ -8,8 +8,9 @@ import (
 	"log"
 	"io/ioutil"
 	"gopkg.in/mgo.v2/bson"
-
+	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/freehaha/token-auth"
 )
 
 // GetPostController will answer a JSON of the post
@@ -121,7 +122,10 @@ func ReportCommentController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	commentID := vars["commentID"]
-	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
+	token := tauth.Get(r)
+	userID := token.Claims("id").(string)
+	fmt.Println("userID => " + userID)
+	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), bson.ObjectIdHex(userID))
 	json.NewEncoder(w).Encode(bson.M{})
 }
 
