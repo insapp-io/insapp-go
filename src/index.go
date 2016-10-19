@@ -62,6 +62,9 @@ Tanguy Le Quéré</br>
 Laurent Quénach de Quivillic</br>
 Florian Arnoud</br>
 Anthony Sharpe</br>
+Sebastien Turpin</br>
+Luc Geffrault</br>
+</br>
 		</p>`)
 
 	fmt.Fprintln(w, "</body>")
