@@ -54,6 +54,14 @@ Valentin Marc</br>
 Alex Gravier</br>
 Mathieu Cassard</br>
 Célestin Bodet</br>
+Etienne Rebout</br>
+Rémy Garcia</br>
+Jean-Baptiste Nou</br>
+Thomas Bouvier</br>
+Tanguy Le Quéré</br>
+Laurent Quénach de Quivillic</br>
+Florian Arnoud</br>
+Anthony Sharpe</br>
 		</p>`)
 
 	fmt.Fprintln(w, "</body>")
