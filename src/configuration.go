@@ -11,6 +11,7 @@ type Config struct {
 	Password    string      `json:"password"`
 	GoogleKey   string      `json:"googlekey"`
   Environment string      `json:"env"`
+  Port        string      `json:"port"`
 }
 
 
