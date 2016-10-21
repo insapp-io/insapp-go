@@ -62,7 +62,7 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	gender := ""
 	for _, gen := range genders {
 		if user.Gender == gen {
-			promotion = gen
+			gender = gen
 			break
 		}
 	}
