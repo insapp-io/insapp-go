@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"gopkg.in/mgo.v2/bson"
-
+	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 )
 
@@ -40,6 +40,13 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 	var user AssociationUser
 	decoder.Decode(&user)
 
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assocationID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+
 	user.Association = res.ID
 	user.Username = res.Email
 	user.Password = GetMD5Hash(user.Password)
@@ -53,6 +60,12 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
 	decoder.Decode(&association)
+	isValid := VerifyAssociationRequest(r, association.ID)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	res := AddAssociation(association)
 	json.NewEncoder(w).Encode(res)
 }
@@ -65,6 +78,12 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&association)
 	vars := mux.Vars(r)
 	assocationID := vars["id"]
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assocationID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	res := UpdateAssociation(bson.ObjectIdHex(assocationID), association)
 	json.NewEncoder(w).Encode(res)
 }
@@ -73,6 +92,23 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 // empty association if the deletation has succeed
 func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	res := DeleteAssociation(bson.ObjectIdHex(vars["id"]))
+	assoID := vars["id"]
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assoID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+	res := DeleteAssociation(bson.ObjectIdHex(assoID))
 	json.NewEncoder(w).Encode(res)
+}
+
+func VerifyAssociationRequest(r *http.Request, associationId bson.ObjectId) bool {
+	token := tauth.Get(r)
+	id := token.Claims("id").(string)
+	if bson.ObjectIdHex(id) != associationId {
+		result := GetAssociationUser(bson.ObjectIdHex(id))
+		return result.Master
+	}
+	return true
 }

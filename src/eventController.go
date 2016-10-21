@@ -32,6 +32,14 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var event Event
 	decoder.Decode(&event)
+
+	isValid := VerifyAssociationRequest(r, event.Association)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+
 	res := AddEvent(event)
 	asso := GetAssociation(event.Association)
 	json.NewEncoder(w).Encode(res)
@@ -46,6 +54,14 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&event)
 	vars := mux.Vars(r)
 	eventID := vars["id"]
+
+	isValid := VerifyAssociationRequest(r, event.Association)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+
 	res := UpdateEvent(bson.ObjectIdHex(eventID), event)
 	json.NewEncoder(w).Encode(res)
 }
@@ -55,6 +71,14 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := GetEvent(bson.ObjectIdHex(vars["id"]))
+
+	isValid := VerifyAssociationRequest(r, event.Association)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+
 	res := DeleteEvent(event)
 	json.NewEncoder(w).Encode(res)
 }
@@ -65,6 +89,12 @@ func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
+	isValid := VerifyUserRequest(r, userID)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	event, user := AddParticipant(eventID, userID)
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
@@ -75,6 +105,12 @@ func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
+	isValid := VerifyUserRequest(r, userID)
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	event, user := RemoveParticipant(eventID, userID)
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }

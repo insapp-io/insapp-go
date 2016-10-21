@@ -2,7 +2,7 @@ package main
 
 import (
 	"time"
-
+	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -86,9 +86,16 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 				"\n\nUser:\n" + sender.ID.Hex() + "\n" + sender.Username + "\n" + sender.Name)
 		}
 	}
+}
 
-
-
+func GetComment(postId bson.ObjectId, id bson.ObjectId) (Comment, error) {
+	post := GetPost(postId)
+	for _, comment := range post.Comments {
+		if comment.ID == id {
+			return comment, nil
+		}
+	}
+	return Comment{}, errors.New("No Comment Found")
 }
 
 func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {

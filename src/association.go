@@ -185,3 +185,13 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	db.Find(bson.M{"_id": id}).One(&result)
 	return result
 }
+
+func GetAssociationUser(id bson.ObjectId) AssociationUser {
+	session, _ := mgo.Dial("127.0.0.1")
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association_user")
+	var result AssociationUser
+	db.Find(bson.M{"association": id}).One(&result)
+	return result
+}
