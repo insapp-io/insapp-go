@@ -79,7 +79,7 @@ func triggerAndroidNotification(notification Notification, users []NotificationU
   done := make(chan bool)
   for _, user := range users {
     notification.Receiver = user.UserId
-    AddNotification(notification)
+    notification = AddNotification(notification)
     number := len(GetUnreadNotificationsForUser(user.UserId))
     go sendAndroidNotificationToDevice(user.Token, notification, number, done)
   }
@@ -90,7 +90,7 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
   done := make(chan bool)
   for _, user := range users {
     notification.Receiver = user.UserId
-    AddNotification(notification)
+    notification = AddNotification(notification)
     number := len(GetUnreadNotificationsForUser(user.UserId))
     go sendiOSNotificationToDevice(user.Token, notification, number, done)
   }
@@ -107,6 +107,7 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
   pn := apns.NewPushNotification()
   pn.DeviceToken = token
   pn.AddPayload(payload)
+  pn.Set("id", notification.ID)
   pn.Set("type", notification.Type)
   pn.Set("sender", notification.Sender)
   pn.Set("content", notification.Content)

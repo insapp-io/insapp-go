@@ -14,6 +14,12 @@ import (
 func GetUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
+	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	var res = GetUser(bson.ObjectIdHex(userID))
 	json.NewEncoder(w).Encode(res)
 }
@@ -41,6 +47,12 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&user)
 	vars := mux.Vars(r)
 	userID := vars["id"]
+	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
 	res := UpdateUser(bson.ObjectIdHex(userID), user)
 	json.NewEncoder(w).Encode(res)
 }
@@ -49,7 +61,14 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 // empty user if the deletation has succeed
 func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	user := GetUser(bson.ObjectIdHex(vars["id"]))
+	userID := vars["id"]
+	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
+	if !isValid {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		return
+	}
+	user := GetUser(bson.ObjectIdHex(userID))
 	res := DeleteUser(user)
 	json.NewEncoder(w).Encode(res)
 }
@@ -67,4 +86,10 @@ func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	reporterID := token.Claims("id").(string)
 	ReportUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(reporterID))
 	json.NewEncoder(w).Encode(bson.M{})
+}
+
+func VerifyUserRequest(r *http.Request, userId bson.ObjectId) bool {
+	token := tauth.Get(r)
+	id := token.Claims("id").(string)
+	return bson.ObjectIdHex(id) == userId
 }

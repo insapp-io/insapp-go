@@ -109,7 +109,7 @@ func generateAuthToken() (string){
 	return strings.TrimSpace(string(out))
 }
 
-func DeleteCredentalsForUser(id bson.ObjectId){
+func DeleteCredentialsForUser(id bson.ObjectId){
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
@@ -171,12 +171,12 @@ func checkLoginForUser(credentials Credentials) (Credentials, error) {
 
 func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
 	if master {
-		memStoreUser.NewToken(string(id))
-		memStoreAssociationUser.NewToken(string(id))
-		return memStoreSuperUser.NewToken(string(id))
+		memStoreUser.NewToken(id.Hex())
+		memStoreAssociationUser.NewToken(id.Hex())
+		return memStoreSuperUser.NewToken(id.Hex())
 	}
-	memStoreUser.NewToken(string(id))
-	return memStoreAssociationUser.NewToken(string(id))
+	memStoreUser.NewToken(id.Hex())
+	return memStoreAssociationUser.NewToken(id.Hex())
 }
 
 func logUser(id bson.ObjectId) *memstore.MemoryToken {

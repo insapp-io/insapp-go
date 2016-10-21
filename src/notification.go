@@ -2,7 +2,6 @@ package main
 
 import (
 	"time"
-	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -32,6 +31,7 @@ type Notifications []Notification
 
 
 func CreateOrUpdateNotificationUser(user NotificationUser){
+	if len(user.Token) == 0 { return }
   session, _ := mgo.Dial("127.0.0.1")
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
@@ -44,7 +44,7 @@ func CreateOrUpdateNotificationUser(user NotificationUser){
   }
 }
 
-func AddNotification(notification Notification) {
+func AddNotification(notification Notification) Notification {
 	session, _ := mgo.Dial("127.0.0.1")
 	defer session.Close()
 	notification.ID = bson.NewObjectId()
@@ -52,8 +52,8 @@ func AddNotification(notification Notification) {
 	notification.Seen = false
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
-	res := db.Insert(notification)
-	fmt.Println(res)
+	db.Insert(notification)
+	return notification
 }
 
 func GetNotificationsForUser(userID bson.ObjectId) Notifications {
