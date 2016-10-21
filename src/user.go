@@ -13,6 +13,8 @@ var promotions = []string{"", "1STPI", "2STPI",
     "5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
     "Personnel/Enseignant"}
 
+var genders = []string{"", "female", "male"}
+
 // User defines how to model a User
 type User struct {
 	ID          bson.ObjectId   `bson:"_id,omitempty"`
@@ -53,7 +55,14 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	promotion := ""
 	for _, promo := range promotions {
 		if user.Promotion == promo {
-			promotion = user.Promotion
+			promotion = promo
+			break
+		}
+	}
+	gender := ""
+	for _, gen := range genders {
+		if user.Gender == gen {
+			promotion = gen
 			break
 		}
 	}
@@ -64,7 +73,7 @@ func UpdateUser(id bson.ObjectId, user User) User {
 		"email": 			 user.Email,
 		"emailpublic": user.EmailPublic,
 		"promotion":   promotion,
-		"gender"	:		 user.Gender,
+		"gender"	:		 gender,
 	}}
 	db.Update(userID, change)
 	var result User
@@ -78,7 +87,7 @@ func DeleteUser(user User) User {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
-	DeleteCredentalsForUser(user.ID)
+	DeleteCredentialsForUser(user.ID)
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
 	for _, eventId := range user.Events{

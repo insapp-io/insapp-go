@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"fmt"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -15,7 +14,6 @@ func UploadNewImageController(w http.ResponseWriter, r *http.Request) {
 	fileName := UploadImage(r)
 	if fileName == "error" {
 		w.WriteHeader(http.StatusNotAcceptable)
-		fmt.Println("ERROR IN IMAGECONTROLLER.GO LINE 17")
 		json.NewEncoder(w).Encode(bson.M{"error": "Failed to upload image"})
 	} else {
     width, height := GetImageDimension(fileName)
