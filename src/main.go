@@ -13,7 +13,7 @@ type WithCORS struct {
 
 func main() {
 
-	_, err := Configuration()
+	conf, err := Configuration()
 
 	if err != nil{
 		log.Println(err)
@@ -21,8 +21,8 @@ func main() {
 		return
 	}
 
-	log.Println("Starting server on 0.0.0.0:9000")
-	log.Fatal(http.ListenAndServe(":9000", &WithCORS{NewRouter()}))
+	log.Println("Starting server on 0.0.0.0:" + conf.Port)
+	log.Fatal(http.ListenAndServe(":" + conf.Port, &WithCORS{NewRouter()}))
 }
 
 // Simple wrapper to Allow CORS.
