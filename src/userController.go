@@ -41,8 +41,9 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&user)
 	vars := mux.Vars(r)
 	userID := vars["id"]
-	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
-	if !isValid {
+	isValidUser := VerifyUserRequest(r, bson.ObjectIdHex(userID))
+	isValidAssociation := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
+	if !isValidUser && !isValidAssociation {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
 		return

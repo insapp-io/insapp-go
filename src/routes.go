@@ -72,7 +72,7 @@ var publicRoutes = Routes{
 	Route{"Legal", "GET", "/legal", Legal},
 	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
 	Route{"LogUser", "POST", "/login/user", LogUserController},
-	Route{"SignUser", "POST", "/signin/user", SignInUserController},
+	Route{"SignUser", "POST", "/signin/user/{ticket}", SignInUserController},
 }
 
 var superRoutes = Routes{
