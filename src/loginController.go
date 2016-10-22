@@ -23,7 +23,6 @@ type Login struct {
 	Username 		string 	`json:"username"`
 	Password 		string 	`json:"password"`
 	Device 			string 	`json:"device"`
-	EraseDevice bool 		`json:"erase"`
 }
 
 type Credentials struct {
@@ -79,18 +78,23 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	ticket := vars["ticket"]
-	fmt.Println("ticket = " + ticket)
-	fmt.Println("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2Fapi%2Fv1%2F&ticket=" + ticket)
+
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2Fapi%2Fv1%2F&ticket=" + ticket)
   if err != nil {
-    log.Fatal(err)
-  } else {
-    defer response.Body.Close()
-    _, err := io.Copy(os.Stdout, response.Body)
-    if err != nil {
-			log.Fatal(err)
-    }
+		fmt.Println("Impossible de verfifier l'identité1")
   }
+  defer response.Body.Close()
+  xml := response.Body
+
+	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
+		fmt.Println("Impossible de verfifier l'identité2")
+	}
+
+	username := strings.Split(xml, "<cas:user>")[1]
+	username := strings.Split(username, "</cas:user>")[0]
+	login.Username = username
+
+	fmt.Println("username => " + username)
 
 	if login.Username == "fthomasm" {
 		login.Username = "fthomasm" + RandomString(4)
