@@ -78,7 +78,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ticket := vars["ticket"]
 
-	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2Fapi%2Fv1%2F&ticket=" + ticket)
+	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
   if err != nil {
 		fmt.Println("Impossible de verfifier l'identité1")
   }
