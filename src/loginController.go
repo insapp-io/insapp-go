@@ -9,10 +9,7 @@ import (
   "os/exec"
 	"strings"
 	"fmt"
-	"io"
-	"log"
-	"os"
-
+	"io/ioutil"
 	"github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
@@ -23,6 +20,7 @@ type Login struct {
 	Username 		string 	`json:"username"`
 	Password 		string 	`json:"password"`
 	Device 			string 	`json:"device"`
+	EraseDevice	bool		`json:"erase"`
 }
 
 type Credentials struct {
@@ -84,14 +82,20 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Impossible de verfifier l'identité1")
   }
   defer response.Body.Close()
-  xml := response.Body
+
+	htmlData, err := ioutil.ReadAll(response.Body) //<--- here!
+	if err != nil {
+		fmt.Println("Impossible de verfifier l'identité2")
+  }
+
+  xml := string(htmlData)
 
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
-		fmt.Println("Impossible de verfifier l'identité2")
+		fmt.Println("Impossible de verfifier l'identité3")
 	}
 
 	username := strings.Split(xml, "<cas:user>")[1]
-	username := strings.Split(username, "</cas:user>")[0]
+	username = strings.Split(username, "</cas:user>")[0]
 	login.Username = username
 
 	fmt.Println("username => " + username)
