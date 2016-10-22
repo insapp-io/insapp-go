@@ -8,7 +8,6 @@ import (
 	"net/http"
   "os/exec"
 	"strings"
-	"fmt"
 	"io/ioutil"
 	"github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
@@ -69,7 +68,6 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignInUserController(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("SignInUserController called")
 	decoder := json.NewDecoder(r.Body)
 	var login Login
 	decoder.Decode(&login)
@@ -161,10 +159,7 @@ func verifyUser(ticket string) (string, error){
 	if err != nil {
 		return "", errors.New("Impossible de verfifier l'identité")
   }
-
   xml := string(htmlData)
-	fmt.Println(xml)
-
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
 		return "", errors.New("Impossible de verfifier l'identité")
 	}
