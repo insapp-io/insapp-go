@@ -8,9 +8,13 @@ import (
 	"net/http"
   "os/exec"
 	"strings"
+	"fmt"
+	"io"
+	"log"
+	"os"
 
 	"github.com/freehaha/token-auth/memory"
-
+	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -72,6 +76,21 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login Login
 	decoder.Decode(&login)
+
+	vars := mux.Vars(r)
+	ticket := vars["ticket"]
+	fmt.Println("ticket = " + ticket)
+	fmt.Println("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2Fapi%2Fv1%2F&ticket=" + ticket)
+	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2Fapi%2Fv1%2F&ticket=" + ticket)
+  if err != nil {
+    log.Fatal(err)
+  } else {
+    defer response.Body.Close()
+    _, err := io.Copy(os.Stdout, response.Body)
+    if err != nil {
+			log.Fatal(err)
+    }
+  }
 
 	if login.Username == "fthomasm" {
 		login.Username = "fthomasm" + RandomString(4)
