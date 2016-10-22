@@ -70,6 +70,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignInUserController(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("SignInUserController called")
 	decoder := json.NewDecoder(r.Body)
 	var login Login
 	decoder.Decode(&login)
@@ -89,6 +90,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
   }
 
   xml := string(htmlData)
+	fmt.Println(xml)
 
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
 		fmt.Println("Impossible de verfifier l'identité3")
