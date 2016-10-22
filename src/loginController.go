@@ -20,7 +20,6 @@ type Login struct {
 	Username 		string 	`json:"username"`
 	Password 		string 	`json:"password"`
 	Device 			string 	`json:"device"`
-	EraseDevice	bool		`json:"erase"`
 }
 
 type Credentials struct {
@@ -78,40 +77,18 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ticket := vars["ticket"]
 
-	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
-  if err != nil {
-		fmt.Println("Impossible de verfifier l'identité1")
-  }
-  defer response.Body.Close()
+	// w.WriteHeader(http.StatusForbidden)
+	// json.NewEncoder(w).Encode(bson.M{"error": "De manière temporaire, les inscriptions sont désactivées. Réessaye Lundi 😊" })
+	// return
 
-	htmlData, err := ioutil.ReadAll(response.Body) //<--- here!
-	if err != nil {
-		fmt.Println("Impossible de verfifier l'identité2")
-  }
-
-  xml := string(htmlData)
-	fmt.Println(xml)
-
-	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
-		fmt.Println("Impossible de verfifier l'identité3")
-	}
-
-	username := strings.Split(xml, "<cas:user>")[1]
-	username = strings.Split(username, "</cas:user>")[0]
+	username, err := verifyUser(ticket)
 	login.Username = username
-
-	fmt.Println("username => " + username)
 
 	if login.Username == "fthomasm" {
 		login.Username = "fthomasm" + RandomString(4)
 	}
 
-	w.WriteHeader(http.StatusForbidden)
-	json.NewEncoder(w).Encode(bson.M{"error": "De manière temporaire, les inscriptions sont désactivées. Réessaye Lundi 😊" })
-	return
-
-	isValid, err := verifyUser(login)
-	if isValid {
+	if len(login.Username) > 0 {
 		session, _ := mgo.Dial("127.0.0.1")
 		defer session.Close()
 		session.SetMode(mgo.Monotonic, true)
@@ -173,16 +150,32 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
 }
 
-func verifyUser(login Login) (bool, error){
-	session, _ := mgo.Dial("127.0.0.1")
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	db := session.DB("insapp").C("user")
-	count, err := db.Find(bson.M{"username": login.Username}).Count()
-	if count > 0 || err != nil {
-		return false || login.EraseDevice, errors.New("User Already Exist")
+func verifyUser(ticket string) (string, error){
+	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
+  if err != nil {
+		return "", errors.New("Impossible de verfifier l'identité")
+  }
+  defer response.Body.Close()
+
+	htmlData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", errors.New("Impossible de verfifier l'identité")
+  }
+
+  xml := string(htmlData)
+	fmt.Println(xml)
+
+	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
+		return "", errors.New("Impossible de verfifier l'identité")
 	}
-	return true, nil
+
+	username := strings.Split(xml, "<cas:user>")[1]
+	username = strings.Split(username, "</cas:user>")[0]
+
+	if !(len(username) > 5) {
+		return "", errors.New("Impossible de verfifier l'identité")
+	}
+	return username, nil
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {
