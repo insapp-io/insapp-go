@@ -79,7 +79,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(bson.M{"error": "De manière temporaire, les inscriptions sont désactivées. Réessaye Lundi 😊" })
 	// return
 
-	username, err := verifyUser(ticket)
+	username, err := verifyTicket(ticket)
 	login.Username = username
 
 	if login.Username == "fthomasm" {
@@ -148,7 +148,7 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
 }
 
-func verifyUser(ticket string) (string, error){
+func verifyTicket(ticket string) (string, error){
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
   if err != nil {
 		return "", errors.New("Impossible de verfifier l'identité")
