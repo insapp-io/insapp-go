@@ -86,7 +86,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		login.Username = "fthomasm" + RandomString(4)
 	}
 
-	if len(login.Username) > 0 {
+	if err == nil && len(login.Username) > 0 && len(login.Device) > 0 {
 		session, _ := mgo.Dial("127.0.0.1")
 		defer session.Close()
 		session.SetMode(mgo.Monotonic, true)
