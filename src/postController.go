@@ -162,8 +162,10 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Inexistant"})
 		return
 	}
-	isValid := VerifyUserRequest(r, comment.User)
-	if !isValid {
+	post := GetPost(bson.ObjectIdHex(postID))
+	isUserValid := VerifyUserRequest(r, comment.User)
+	isAssociationValid := VerifyAssociationRequest(r, post.Association)
+	if !isUserValid && !isAssociationValid {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
 		return
