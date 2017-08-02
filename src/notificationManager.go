@@ -177,15 +177,18 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 }
 
 func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+	url := "https://fcm.googleapis.com/fcm/send"
+	notifJson, _ := json.Marshal(notification)
 
+	var jsonStr string
 	config, _ := Configuration()
+
 	if config.Environment != "prod" {
-		return
+		jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+	} else {
+		jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
 	}
 
-	url := "https://android.googleapis.com/gcm/send"
-	notifJson, _ := json.Marshal(notification)
-	var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
 	req.Header.Set("Authorization", "key="+config.GoogleKey)
