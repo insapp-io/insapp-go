@@ -24,7 +24,20 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 // GetLastestPostsController will answer a JSON of the
 // N lastest post. Here N = 50.
 func GetLastestPostsController(w http.ResponseWriter, r *http.Request) {
-	var res = GetLastestPosts(50)
+	userId := GetUserFromRequest(r)
+	user := GetUser(bson.ObjectIdHex(userId))
+	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
+	posts := GetLastestPosts(50)
+	res := Posts{}
+	if user.ID != "" {
+		for _, post := range(posts){
+			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
+				res = append(res, post)
+			}
+		}
+	}else{
+		res = posts
+	}
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -46,7 +59,7 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	res := AddPost(post)
 	asso := GetAssociation(post.Association)
 	json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForPost(asso.ID, res.ID, "@" + strings.ToLower(asso.Name) + " a posté une nouvelle news 📰")
+	go TriggerNotificationForPost(post, asso.ID, res.ID, "@" + strings.ToLower(asso.Name) + " a posté une nouvelle news 📰")
 }
 
 // UpdatePostController will answer the JSON of the
@@ -143,11 +156,18 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	postID := vars["id"]
-	res := CommentPost(bson.ObjectIdHex(postID), comment)
-	json.NewEncoder(w).Encode(res)
+	post := CommentPost(bson.ObjectIdHex(postID), comment)
+	association := GetAssociation(post.Association)
+	user := GetUser(comment.User)
+
+	json.NewEncoder(w).Encode(post)
+
+	if !post.NoNotification {
+		SendAssociationEmailForCommentOnPost(association.Email, post, comment, user)
+	}
 
 	for _, tag := range(comment.Tags){
-		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), res.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur \"" + res.Title + "\"", comment)
+		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), post.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur \"" + post.Title + "\"", comment, "tag")
 	}
 }
 

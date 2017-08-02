@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-  "os/exec"
+	"os/exec"
 	"strings"
 	"io/ioutil"
 	"github.com/freehaha/token-auth/memory"
@@ -86,8 +86,11 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		login.Username = "fthomasm" + RandomString(4)
 	}
 
+	login.Username = strings.ToLower(login.Username)
+
 	if err == nil && len(login.Username) > 0 && len(login.Device) > 0 {
-		session, _ := mgo.Dial("127.0.0.1")
+		conf, _ := Configuration()
+		session, _ := mgo.Dial(conf.Database)
 		defer session.Close()
 		session.SetMode(mgo.Monotonic, true)
 		db := session.DB("insapp").C("user")
@@ -114,7 +117,8 @@ func generateAuthToken() (string){
 }
 
 func DeleteCredentialsForUser(id bson.ObjectId){
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
@@ -122,7 +126,8 @@ func DeleteCredentialsForUser(id bson.ObjectId){
 }
 
 func addCredentials(credentials Credentials) (Credentials){
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
@@ -136,7 +141,8 @@ func addCredentials(credentials Credentials) (Credentials){
 }
 
 func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
@@ -150,16 +156,16 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 
 func verifyTicket(ticket string) (string, error){
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
-  if err != nil {
+	if err != nil {
 		return "", errors.New("Impossible de verfifier l'identité")
-  }
-  defer response.Body.Close()
+	}
+	defer response.Body.Close()
 
 	htmlData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return "", errors.New("Impossible de verfifier l'identité")
-  }
-  xml := string(htmlData)
+	}
+	xml := string(htmlData)
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
 		return "", errors.New("Impossible de verfifier l'identité")
 	}
@@ -167,14 +173,15 @@ func verifyTicket(ticket string) (string, error){
 	username := strings.Split(xml, "<cas:user>")[1]
 	username = strings.Split(username, "</cas:user>")[0]
 
-	if !(len(username) > 5) {
+	if !(len(username) > 2) {
 		return "", errors.New("Impossible de verfifier l'identité")
 	}
 	return username, nil
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")

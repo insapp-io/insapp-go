@@ -25,7 +25,7 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range publicRoutes {
 		router.
-			Methods(route.Method).
+		Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
@@ -33,7 +33,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range associationRoutes {
 		router.
-			Methods(route.Method).
+		Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthAssociationUser.HandleFunc(route.HandlerFunc))
@@ -41,7 +41,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range superRoutes {
 		router.
-			Methods(route.Method).
+		Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthSuperUser.HandleFunc(route.HandlerFunc))
@@ -49,7 +49,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range userRoutes {
 		router.
-			Methods(route.Method).
+		Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthUser.HandleFunc(route.HandlerFunc))
@@ -79,7 +79,6 @@ var superRoutes = Routes{
 	Route{"GetUsers", "GET", "/user", GetAllUserController},
 	Route{"AddAssociation", "POST", "/association", AddAssociationController},
 	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
-	Route{"CreateUserForAssociation", "POST", "/association/{id}/user", CreateUserForAssociationController},
 	Route{"GetMyAssociations", "GET", "/association/{id}/myassociations", GetMyAssociationController},
 }
 
@@ -111,8 +110,11 @@ var userRoutes = Routes{
 	//EVENTS
 	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
 	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
-	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
+	Route{"AddParticipantOldVersion", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
+	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}/status/{status}", ChangeAttendeeStatusController},
 	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
+	Route{"CommentEvent", "POST", "/event/{id}/comment", CommentEventController},
+	Route{"UncommentEvent", "DELETE", "/event/{id}/comment/{commentID}", UncommentEventController},
 
 	//POSTS
 	Route{"GetPost", "GET", "/post/{id}", GetPostController},
@@ -127,11 +129,17 @@ var userRoutes = Routes{
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
-	Route{"SearchUser", "GET", "/search/users/{username}", SearchUserController},
 	Route{"ReportUser", "PUT", "/report/user/{id}", ReportUserController},
 
 	//NOTIFICATION
 	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},
 	Route{"Notification", "GET", "/notification/{userID}", GetNotificationController},
 	Route{"Notification", "DELETE", "/notification/{userID}/{id}", DeleteNotificationController},
+
+	//SEARCH
+	Route{"SearchUser", "POST", "/search/users", SearchUserController},
+	Route{"SearchAssociation", "POST", "/search/associations", SearchAssociationController},
+	Route{"SearchEvent", "POST", "/search/events", SearchEventController},
+	Route{"SearchPost", "POST", "/search/posts", SearchPostController},
+	Route{"SearchUniversal", "POST", "/search", SearchUniversalController},
 }

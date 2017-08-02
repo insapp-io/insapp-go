@@ -6,12 +6,14 @@ import (
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
   "fmt"
+  "strings"
   "net/http"
   "bytes"
 )
 
 func getiOSUsers(user string) []NotificationUser {
-  session, _ := mgo.Dial("127.0.0.1")
+  conf, _ := Configuration()
+  session, _ := mgo.Dial(conf.Database)
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
   db := session.DB("insapp").C("notification_user")
@@ -25,7 +27,8 @@ func getiOSUsers(user string) []NotificationUser {
 }
 
 func getAndroidUsers(user string) []NotificationUser {
-  session, _ := mgo.Dial("127.0.0.1")
+  conf, _ := Configuration()
+  session, _ := mgo.Dial(conf.Database)
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
   db := session.DB("insapp").C("notification_user")
@@ -39,7 +42,8 @@ func getAndroidUsers(user string) []NotificationUser {
 }
 
 func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
-  session, _ := mgo.Dial("127.0.0.1")
+  conf, _ := Configuration()
+  session, _ := mgo.Dial(conf.Database)
   defer session.Close()
   session.SetMode(mgo.Monotonic, true)
   db := session.DB("insapp").C("notification_user")
@@ -48,8 +52,8 @@ func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
   return result
 }
 
-func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment){
-  notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: "tag"}
+func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string){
+  notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
   user := getNotificationUserForUser(receiver)
   if user.Os == "iOS" {
     triggeriOSNotification(notification, []NotificationUser{user})
@@ -59,20 +63,56 @@ func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, co
   }
 }
 
-func TriggerNotificationForEvent(sender bson.ObjectId, content bson.ObjectId, message string){
+func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
   iOSUsers := getiOSUsers("")
+  users := []NotificationUser{}
+  for _, notificationUser := range iOSUsers {
+    var user = GetUser(notificationUser.UserId)
+    if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+      users = append(users, notificationUser)
+    }
+  }
+  if Contains("iOS", event.Plateforms) {
+    triggeriOSNotification(notification, users)
+  }
   androidUsers := getAndroidUsers("")
-  triggeriOSNotification(notification, iOSUsers)
-  triggerAndroidNotification(notification, androidUsers)
+  users = []NotificationUser{}
+  for _, notificationUser := range androidUsers {
+    var user = GetUser(notificationUser.UserId)
+    if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+      users = append(users, notificationUser)
+    }
+  }
+  if Contains("android", event.Plateforms) {
+    triggerAndroidNotification(notification, users)
+  }
 }
 
-func TriggerNotificationForPost(sender bson.ObjectId, content bson.ObjectId, message string){
+func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.ObjectId, message string){
   notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
   iOSUsers := getiOSUsers("")
+  users := []NotificationUser{}
+  for _, notificationUser := range iOSUsers {
+    var user = GetUser(notificationUser.UserId)
+    if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+      users = append(users, notificationUser)
+    }
+  }
+  if Contains("iOS", post.Plateforms) {
+    triggeriOSNotification(notification, users)
+  }
   androidUsers := getAndroidUsers("")
-  triggeriOSNotification(notification, iOSUsers)
-  triggerAndroidNotification(notification, androidUsers)
+  users = []NotificationUser{}
+  for _, notificationUser := range androidUsers {
+    var user = GetUser(notificationUser.UserId)
+    if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+      users = append(users, notificationUser)
+    }
+  }
+  if Contains("android", post.Plateforms) {
+    triggerAndroidNotification(notification, users)
+  }
 }
 
 func triggerAndroidNotification(notification Notification, users []NotificationUser){
@@ -98,6 +138,9 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
 }
 
 func sendiOSNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+
+  conf, _ := Configuration()
+  if conf.Environment != "prod" { return }
 
   payload := apns.NewPayload()
   payload.Alert = notification.Message
@@ -132,21 +175,23 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 }
 
 func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+
+  config, _ := Configuration()
+  if config.Environment != "prod" { return }
+
   url := "https://android.googleapis.com/gcm/send"
   notifJson, _ := json.Marshal(notification)
   var jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + "}"
-  req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
+  req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
-  config, _ := Configuration()
+
 
   req.Header.Set("Authorization", "key=" + config.GoogleKey)
   req.Header.Set("Content-Type", "application/json")
 
   client := &http.Client{}
-  resp, err := client.Do(req)
-  if err != nil {
-      panic(err)
-  }
+  resp, _ := client.Do(req)
+
   defer resp.Body.Close()
   fmt.Println("response Status:", resp.Status)
 

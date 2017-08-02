@@ -21,7 +21,7 @@ func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, `<p>
 Insapp est une application qui a pour but de promouvoir l'associatif au sein de l'INSA Rennes.
 L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel en 2016.
-Nous avons travaillé de pair avec l'AEIR et notamment Théau Jubin et Antoine Tulasne ainsi qu'avec le CRI de l'INSA Rennes.
+Nous avons travaillé de pair avec l'AEIR et notamment Théau Jubin et Antoine Tulasne ainsi qu'avec le CRI de l'INSA Rennes. Aujourd'hui, la team Insapp c'est Antoine Crochet, Thomas Bouvier, Louis-Sinan Cappoen, Guillaume Courtet et Florent Thomas-Morel.
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Données</h2>")
@@ -79,20 +79,25 @@ func Legal(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
 
 	fmt.Fprintln(w, `<p>
-Les sources des informations diffusées sur INSAPP sont réputées fiables. Toutefois, INSAPP se réserve la faculté d'une non-garantie de la fiabilité des sources. Les informations données sur le site le sont à titre purement informatif. Ainsi, l'Utilisateur assume seul l'entière responsabilité de l'utilisation des informations et contenus du présent site.
-L'Utilisateur s'assure de garder son mot de passe secret. Toute divulgation du mot de passe, quelle que soit sa forme, est interdite.
+Les données transmises à l’application sont matériellement stockées sur les serveurs loués par l'Amicale des élèves. À aucun moment INSAPP ne stocke, diffuse ou a accès aux identifiants INSA des utilisateurs, pour des raisons évidentes de sécurité et de confidentialité.
 		</p>`)
 
 	fmt.Fprintln(w, `<p>
-L'Utilisateur assume les risques liés à l'utilisation de son identifiant et mot de passe. Le site décline toute responsabilité.
-Une garantie optimale de la sécurité et de la confidentialité des données transmises n'est pas assurée par INSAPP. Toutefois, le site s'engage à mettre en œuvre tous les moyens nécessaires afin de garantir au mieux la sécurité et la confidentialité des données.
+L'Utilisateur s'assure de garder son mot de passe secret. Toute divulgation du mot de passe, quelle que soit sa forme, est interdite. L'Utilisateur assume les risques liés à l'utilisation de son identifiant et mot de passe. INSAPP décline toute responsabilité. Une garantie optimale de la sécurité et de la confidentialité des données transmises n'est pas assurée par INSAPP. Toutefois, INSAPP s'engage à mettre en œuvre tous les moyens nécessaires afin de garantir au mieux l’intégrité des données.
 		</p>`)
 
 	fmt.Fprintln(w, `<p>
-Le site permet aux membres de publier des commentaires.
-Dans ses publications, l'Utilisateur s’engage à respecter la charte informatique de l’INSA Rennes et les règles de droit en vigueur.
-Le site exerce une modération a posteriori sur les publications et se réserve le droit de refuser leur mise en ligne, sans avoir à s’en justifier auprès du membre.
+Les sources des informations diffusées sur INSAPP sont réputées fiables. Toutefois, INSAPP se réserve la faculté d'une non-garantie de la fiabilité des sources. Les informations données sur INSAPP le sont à titre purement informatif. Ainsi, l'Utilisateur assume seul l'entière responsabilité de l'utilisation des informations et contenus.
 		</p>`)
+
+	fmt.Fprintln(w, `<p>
+L’application permet aux membres de publier des commentaires. Dans ses publications, l'Utilisateur s’engage à respecter la charte informatique de l’INSA de Rennes et les règles de droit en vigueur. INSAPP exerce une modération a posteriori sur les publications et se réserve le droit de refuser leur mise en ligne, sans avoir à s’en justifier auprès du membre. L’application permet également à l’utilisateur, s’il le souhaite, de compléter son profil.
+		</p>`)
+
+	fmt.Fprintln(w, `<p>
+INSAPP requiert l’accès à la caméra lors du scan du code barre amicaliste. Cette donnée est stockée localement, et n’est en aucun cas transmise à un tiers.
+		</p>`)
+
 
 	fmt.Fprintln(w, "</body>")
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-
 	"gopkg.in/mgo.v2/bson"
 	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
@@ -47,10 +46,12 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	password := GeneratePassword()
 	user.Association = res.ID
 	user.Username = res.Email
-	user.Password = GetMD5Hash(user.Password)
+	user.Password = GetMD5Hash(password)
 	AddAssociationUser(user)
+	SendAssociationEmailSubscription(user.Username, password)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -67,6 +68,18 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res := AddAssociation(association)
+	password := GeneratePassword()
+	token := tauth.Get(r)
+	id := bson.ObjectIdHex(token.Claims("id").(string))
+
+	var user AssociationUser
+	user.Association = res.ID
+	user.Username = res.Email
+	user.Master = false
+	user.Owner = id
+	user.Password = GetMD5Hash(password)
+	AddAssociationUser(user)
+	SendAssociationEmailSubscription(user.Username, password)
 	json.NewEncoder(w).Encode(res)
 }
 

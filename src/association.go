@@ -25,7 +25,8 @@ type Association struct {
 type Associations []Association
 
 func AddAssociationUser(user AssociationUser) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
@@ -34,7 +35,8 @@ func AddAssociationUser(user AssociationUser) {
 
 // AddAssociation will add the given association to the database
 func AddAssociation(association Association) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -47,21 +49,22 @@ func AddAssociation(association Association) Association {
 // UpdateAssociation will update the given association link to the given ID,
 // with the field of the given association, in the database
 func UpdateAssociation(id bson.ObjectId, association Association) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":        		association.Name,
-		"email":       		association.Email,
-		"description": 		association.Description,
-		"profile":     		association.Profile,
-		"cover":     	 		association.Cover,
-		"palette":		 		association.Palette,
-		"selectedcolor":	association.SelectedColor,
-		"bgcolor":     		association.BgColor,
-		"fgcolor":     		association.FgColor,
+		"name":        		     association.Name,
+		"email":       		     association.Email,
+		"description": 		     association.Description,
+		"profile":     		     association.Profile,
+		"cover":     	 		 association.Cover,
+		"palette":		 		 association.Palette,
+		"selectedcolor":	     association.SelectedColor,
+		"bgcolor":     		     association.BgColor,
+		"fgcolor":     		     association.FgColor,
 	}}
 	db.Update(assosID, change)
 	var result Association
@@ -71,7 +74,8 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 
 // DeleteAssociation will delete the given association from the database
 func DeleteAssociation(id bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -90,7 +94,8 @@ func DeleteAssociation(id bson.ObjectId) Association {
 
 // GetAssociation will return an Association object from the given ID
 func GetAssociation(id bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -101,7 +106,8 @@ func GetAssociation(id bson.ObjectId) Association {
 
 // GetAllAssociation will return an array of all the existing Association
 func GetAllAssociation() Associations {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -111,7 +117,8 @@ func GetAllAssociation() Associations {
 }
 
 func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
@@ -124,9 +131,23 @@ func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 	return res
 }
 
+
+func SearchAssociation(name string) Associations {
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("association")
+	var result Associations
+	db.Find(bson.M{"$or" : []interface{}{
+		bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	return result
+}
+
 // AddEventToAssociation will add the given event ID to the given association
 func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -142,7 +163,8 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 
 // RemoveEventFromAssociation will remove the given event ID from the given association
 func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -157,7 +179,8 @@ func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Associati
 }
 
 func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -172,7 +195,8 @@ func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
 }
 
 func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
@@ -187,7 +211,8 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 }
 
 func GetAssociationUser(id bson.ObjectId) AssociationUser {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")

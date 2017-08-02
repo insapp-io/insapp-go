@@ -69,12 +69,6 @@ func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func SearchUserController(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	users := SearchUser(vars["username"])
-	json.NewEncoder(w).Encode(bson.M{"users": users})
-}
-
 func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
@@ -88,4 +82,19 @@ func VerifyUserRequest(r *http.Request, userId bson.ObjectId) bool {
 	token := tauth.Get(r)
 	id := token.Claims("id").(string)
 	return bson.ObjectIdHex(id) == userId
+}
+
+func GetUserFromRequest(r *http.Request) string {
+	token := tauth.Get(r)
+	id := token.Claims("id").(string)
+	return id
+}
+
+func Contains(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

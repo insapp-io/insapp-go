@@ -4,14 +4,13 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
-	"strings"
 )
 
 var promotions = []string{"", "1STPI", "2STPI",
-    "3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
-    "4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
-    "5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
-    "Personnel/Enseignant"}
+	"3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
+	"4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
+	"5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
+	"Alternant", "Personnel/Enseignant"}
 
 var genders = []string{"", "female", "male"}
 
@@ -34,21 +33,23 @@ type Users []User
 
 // AddUser will add the given user from JSON body to the database
 func AddUser(user User) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
-	user.Username = strings.ToLower(user.Username)
+	user.Username = user.Username
 	db.Insert(user)
 	var result User
-	db.Find(bson.M{"username": strings.ToLower(user.Username) }).One(&result)
+	db.Find(bson.M{"username": user.Username}).One(&result)
 	return result
 }
 
 // UpdateUser will update the user link to the given ID,
 // with the field of the given user, in the database
 func UpdateUser(id bson.ObjectId, user User) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -83,7 +84,8 @@ func UpdateUser(id bson.ObjectId, user User) User {
 
 // DeleteUser will delete the given user from the database
 func DeleteUser(user User) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -91,13 +93,17 @@ func DeleteUser(user User) User {
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
 	for _, eventId := range user.Events{
-		RemoveParticipant(eventId, user.ID)
+		RemoveParticipant(eventId, user.ID, "going")
+		RemoveParticipant(eventId, user.ID, "notgoing")
+		RemoveParticipant(eventId, user.ID, "maybe")
 	}
 	for _, postId := range user.PostsLiked{
 		DislikePostWithUser(postId, user.ID)
 	}
 	DeleteTagsForUser(user.ID)
+	DeleteTagsForUserOnEvents(user.ID)
 	DeleteCommentsForUser(user.ID)
+	DeleteCommentsForUserOnEvents(user.ID)
 	db.RemoveId(user.ID)
 	var result User
 	db.FindId(user.ID).One(result)
@@ -106,7 +112,8 @@ func DeleteUser(user User) User {
 
 // GetUser will return an User object from the given ID
 func GetAllUser() Users {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -117,7 +124,8 @@ func GetAllUser() Users {
 
 // GetUser will return an User object from the given ID
 func GetUser(id bson.ObjectId) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -129,7 +137,8 @@ func GetUser(id bson.ObjectId) User {
 // LikePost will add the postID to the list of liked post
 // of the user linked to the given id
 func LikePost(id bson.ObjectId, postID bson.ObjectId) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -146,7 +155,8 @@ func LikePost(id bson.ObjectId, postID bson.ObjectId) User {
 // DislikePost will remove the postID from the list of liked
 // post of the user linked to the given id
 func DislikePost(id bson.ObjectId, postID bson.ObjectId) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -163,7 +173,8 @@ func DislikePost(id bson.ObjectId, postID bson.ObjectId) User {
 // AddEventToUser will add the eventID to the list
 // of the user's event linked to the given id
 func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -180,7 +191,8 @@ func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
 // RemoveEventFromUser will remove the eventID from the list
 // of the user's event linked to the given id
 func RemoveEventFromUser(id bson.ObjectId, eventID bson.ObjectId) User {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -194,19 +206,21 @@ func RemoveEventFromUser(id bson.ObjectId, eventID bson.ObjectId) User {
 	return result
 }
 
-func SearchUser(username string) Users {
-	session, _ := mgo.Dial("127.0.0.1")
+func SearchUser(name string) Users {
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	var result Users
 	db.Find(bson.M{"$or" : []interface{}{
-		bson.M{"username" : bson.M{ "$regex" : bson.RegEx{`^.*` + username + `.*`, "i"}}}, bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + username + `.*`, "i"}}}}}).All(&result)
+		bson.M{"username" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 	return result
 }
 
 func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
@@ -216,6 +230,6 @@ func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
 	db.Find(bson.M{"_id": reporterID}).One(&reporter)
 	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
 		"Cet utilisateur a été reporté le " + time.Now().String() +
-		"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name +
-		"\n\nSignaler:\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
+			"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name +
+			"\n\nSignaler:\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
 }

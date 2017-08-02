@@ -31,7 +31,8 @@ type Tags []Tag
 // CommentPost will add the given comment object to the
 // list of comments of the post linked to the given id
 func CommentPost(id bson.ObjectId, comment Comment) Post {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
@@ -48,7 +49,8 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 // UncommentPost will remove the given comment object from the
 // list of comments of the post linked to the given id
 func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
@@ -63,8 +65,42 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 	return post
 }
 
+func CommentEvent(id bson.ObjectId, comment Comment) Event {
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("event")
+	eventID := bson.M{"_id": id}
+	change := bson.M{"$addToSet": bson.M{
+		"comments": comment,
+	}}
+	db.Update(eventID, change)
+	var event Event
+	db.Find(bson.M{"_id": id}).One(&event)
+	return event
+}
+
+func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("event")
+	DeleteNotificationsForComment(commentID)
+	eventID := bson.M{"_id": id}
+	change := bson.M{"$pull": bson.M{
+		"comments": bson.M{"_id": commentID},
+	}}
+	db.Update(eventID, change)
+	var event Event
+	db.Find(bson.M{"_id": id}).One(&event)
+	return event
+}
+
 func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.ObjectId) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
@@ -80,10 +116,10 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 			db.Find(bson.M{"_id": comment.User}).One(&sender)
 			SendEmail("aeir@insa-rennes.fr", "Un commentaire a été reporté sur Insapp",
 				"Ce commentaire a été reporté le " + time.Now().String() +
-				"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username +
-				"\n\nCommentaire:\n" + comment.ID.Hex() + "\n" + comment.Content +
-				"\n\nPost:\n" + post.Title +
-				"\n\nUser:\n" + sender.ID.Hex() + "\n" + sender.Username + "\n" + sender.Name)
+					"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username +
+					"\n\nCommentaire:\n" + comment.ID.Hex() + "\n" + comment.Content +
+					"\n\nPost:\n" + post.Title +
+					"\n\nUser:\n" + sender.ID.Hex() + "\n" + sender.Username + "\n" + sender.Name)
 		}
 	}
 }
@@ -91,6 +127,16 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 func GetComment(postId bson.ObjectId, id bson.ObjectId) (Comment, error) {
 	post := GetPost(postId)
 	for _, comment := range post.Comments {
+		if comment.ID == id {
+			return comment, nil
+		}
+	}
+	return Comment{}, errors.New("No Comment Found")
+}
+
+func GetCommentForEvent(eventId bson.ObjectId, id bson.ObjectId) (Comment, error) {
+	event := GetEvent(eventId)
+	for _, comment := range event.Comments {
 		if comment.ID == id {
 			return comment, nil
 		}
@@ -110,18 +156,66 @@ func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
 	return results
 }
 
+func getCommentForUserOnEvent(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
+	event := GetEvent(id)
+	comments := event.Comments
+	var results []bson.ObjectId
+	for _, comment := range comments{
+		if comment.User == userId {
+			results = append(results, comment.ID)
+		}
+	}
+	return results
+}
+
 func DeleteCommentsForUser(userId bson.ObjectId) {
 	posts := GetLastestPosts(100)
 	for _, post := range posts {
 		comments := getCommentforUser(post.ID, userId)
 		for _, commentId := range comments {
-				UncommentPost(post.ID, commentId)
+			UncommentPost(post.ID, commentId)
 		}
 	}
 }
 
+func DeleteCommentsForUserOnEvents(userId bson.ObjectId) {
+	events := GetEvents()
+	for _, event := range events {
+		comments := getCommentForUserOnEvent(event.ID, userId)
+		for _, commentId := range comments {
+			UncommentEvent(event.ID, commentId)
+		}
+	}
+}
+
+func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("event")
+	events := GetEvents()
+	for _, event := range(events){
+		comments := event.Comments
+		finalComments := Comments{}
+		for _, comment := range(comments){
+			tags := comment.Tags
+			finalTags := Tags{}
+			for _, tag := range(tags){
+				if tag.User != userId.Hex() {
+					finalTags = append(finalTags, tag)
+				}
+			}
+			comment.Tags = finalTags
+			finalComments = append(finalComments, comment)
+		}
+		db.Update(bson.M{"_id": event.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
+	}
+}
+
 func DeleteTagsForUser(userId bson.ObjectId) {
-	session, _ := mgo.Dial("127.0.0.1")
+	conf, _ := Configuration()
+	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
