@@ -1,18 +1,17 @@
 package main
 
 import (
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"image"
-	_ "image/jpeg"
-	_ "image/png"
-	_ "image/gif"
 
-	"strings"
 	"strconv"
-
+	"strings"
 )
 
 var magicTable = map[string]string{
@@ -32,7 +31,7 @@ func mimeFromIncipit(incipit []byte) string {
 	return ""
 }
 
-func UploadImage(r *http.Request) string{
+func UploadImage(r *http.Request) string {
 	return UploadImageWithName(r, RandomString(40))
 }
 
@@ -55,7 +54,7 @@ func UploadImageWithName(r *http.Request, name string) string {
 	defer file.Close()
 
 	fileName := name
-	err = ioutil.WriteFile("./img/" + fileName + "." + imgType, data, 0666)
+	err = ioutil.WriteFile("./img/"+fileName+"."+imgType, data, 0666)
 	if err != nil {
 		return "error"
 	}
@@ -63,7 +62,7 @@ func UploadImageWithName(r *http.Request, name string) string {
 }
 
 func GetImageDimension(fileName string) (int, int) {
-	file, err := os.Open("./img/"+fileName)
+	file, err := os.Open("./img/" + fileName)
 	if err != nil {
 		return 0, 0
 	}
@@ -74,7 +73,7 @@ func GetImageDimension(fileName string) (int, int) {
 func GetImageColors(fileName string) [][]int {
 	var result [][]int
 
-	bytes, err := exec.Command("python", "color-thief.py", "./img/" + fileName).Output()
+	bytes, err := exec.Command("python", "color-thief.py", "./img/"+fileName).Output()
 
 	if err != nil {
 		return result

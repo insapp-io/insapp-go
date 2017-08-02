@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-	"io/ioutil"
-	"gopkg.in/mgo.v2/bson"
-	"github.com/gorilla/mux"
 )
 
 // GetEventController will answer a JSON of the event
@@ -28,12 +28,12 @@ func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
 	events := GetFutureEvents()
 	res := Events{}
 	if user.ID != "" {
-		for _, event := range(events){
+		for _, event := range events {
 			if Contains(strings.ToUpper(user.Promotion), event.Promotions) && (Contains(os, event.Plateforms) || os == "") || len(event.Promotions) == 0 || len(event.Plateforms) == 0 {
 				res = append(res, event)
 			}
 		}
-	}else{
+	} else {
 		res = events
 	}
 	json.NewEncoder(w).Encode(res)
@@ -56,7 +56,7 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	res := AddEvent(event)
 	asso := GetAssociation(event.Association)
 	json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForEvent(event, asso.ID, res.ID, "@" + strings.ToLower(asso.Name) + " t'invite à " + res.Name + " 📅")
+	go TriggerNotificationForEvent(event, asso.ID, res.ID, "@"+strings.ToLower(asso.Name)+" t'invite à "+res.Name+" 📅")
 }
 
 // UpdateEventController will answer the JSON
@@ -126,13 +126,13 @@ func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 	if status == "going" {
 		event, user := AddParticipantToGoingList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
-	}else if status == "maybe" {
+	} else if status == "maybe" {
 		event, user := AddParticipantToMaybeList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
-	}else if status == "notgoing" {
+	} else if status == "notgoing" {
 		event, user := AddParticipantToNotGoingList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
-	}else{
+	} else {
 		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(bson.M{"error": "bad status"})
 	}
@@ -155,7 +155,6 @@ func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	event, user := RemoveParticipant(eventID, userID, "maybe")
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
-
 
 // CommentPostController will answer a JSON of the post
 func CommentEventController(w http.ResponseWriter, r *http.Request) {
@@ -194,8 +193,8 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 		SendAssociationEmailForCommentOnEvent(association.Email, event, comment, user)
 	}
 
-	for _, tag := range(comment.Tags){
-		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), event.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur \"" + event.Name + "\"", comment, "eventTag")
+	for _, tag := range comment.Tags {
+		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), event.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur \""+event.Name+"\"", comment, "eventTag")
 	}
 }
 

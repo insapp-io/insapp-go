@@ -7,18 +7,18 @@ import (
 
 // Association defines the model of a Association
 type Association struct {
-	ID          bson.ObjectId   `bson:"_id,omitempty"`
-	Name        string          `json:"name"`
-	Email       string          `json:"email"`
-	Description string          `json:"description"`
-	Events      []bson.ObjectId `json:"events"`
-	Posts       []bson.ObjectId `json:"posts"`
-	Palette			[][]int					`json:"palette"`
-	SelectedColor int						`json:"selectedcolor"`
-	Profile    	string          `json:"profile"`
-	Cover	    	string          `json:"cover"`
-	BgColor     string          `json:"bgcolor"`
-	FgColor     string          `json:"fgcolor"`
+	ID            bson.ObjectId   `bson:"_id,omitempty"`
+	Name          string          `json:"name"`
+	Email         string          `json:"email"`
+	Description   string          `json:"description"`
+	Events        []bson.ObjectId `json:"events"`
+	Posts         []bson.ObjectId `json:"posts"`
+	Palette       [][]int         `json:"palette"`
+	SelectedColor int             `json:"selectedcolor"`
+	Profile       string          `json:"profile"`
+	Cover         string          `json:"cover"`
+	BgColor       string          `json:"bgcolor"`
+	FgColor       string          `json:"fgcolor"`
 }
 
 // Associations is an array of Association
@@ -56,15 +56,15 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	db := session.DB("insapp").C("association")
 	assosID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":        		     association.Name,
-		"email":       		     association.Email,
-		"description": 		     association.Description,
-		"profile":     		     association.Profile,
-		"cover":     	 		 association.Cover,
-		"palette":		 		 association.Palette,
-		"selectedcolor":	     association.SelectedColor,
-		"bgcolor":     		     association.BgColor,
-		"fgcolor":     		     association.FgColor,
+		"name":          association.Name,
+		"email":         association.Email,
+		"description":   association.Description,
+		"profile":       association.Profile,
+		"cover":         association.Cover,
+		"palette":       association.Palette,
+		"selectedcolor": association.SelectedColor,
+		"bgcolor":       association.BgColor,
+		"fgcolor":       association.FgColor,
 	}}
 	db.Update(assosID, change)
 	var result Association
@@ -131,7 +131,6 @@ func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 	return res
 }
 
-
 func SearchAssociation(name string) Associations {
 	conf, _ := Configuration()
 	session, _ := mgo.Dial(conf.Database)
@@ -139,8 +138,8 @@ func SearchAssociation(name string) Associations {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 	var result Associations
-	db.Find(bson.M{"$or" : []interface{}{
-		bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	db.Find(bson.M{"$or": []interface{}{
+		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 	return result
 }
 

@@ -7,14 +7,13 @@ import (
 
 // Post defines how to model a Post
 type Config struct {
-	Email       string      `json:"email"`
-	Password    string      `json:"password"`
-	GoogleKey   string      `json:"googlekey"`
-	Database    string      `json:"database"`
-	Environment string      `json:"env"`
-	Port        string      `json:"port"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	GoogleKey   string `json:"googlekey"`
+	Database    string `json:"database"`
+	Environment string `json:"env"`
+	Port        string `json:"port"`
 }
-
 
 func Configuration() (Config, error) {
 	file, _ := os.Open("config.json")

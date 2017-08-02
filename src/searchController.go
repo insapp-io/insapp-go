@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 type Search struct {
-	Terms       string          `json:"terms"`
+	Terms string `json:"terms"`
 }
 
 func SearchUserController(w http.ResponseWriter, r *http.Request) {

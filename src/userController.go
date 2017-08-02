@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gopkg.in/mgo.v2/bson"
 	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // GetUserController will answer a JSON of the user

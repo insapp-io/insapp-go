@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-	"gopkg.in/mgo.v2/bson"
 	"github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {

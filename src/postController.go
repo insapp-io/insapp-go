@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-	"time"
-	"strings"
-	"log"
-	"io/ioutil"
-	"gopkg.in/mgo.v2/bson"
-	"github.com/gorilla/mux"
 	"github.com/freehaha/token-auth"
+	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
+	"time"
 )
 
 // GetPostController will answer a JSON of the post
@@ -30,12 +30,12 @@ func GetLastestPostsController(w http.ResponseWriter, r *http.Request) {
 	posts := GetLastestPosts(50)
 	res := Posts{}
 	if user.ID != "" {
-		for _, post := range(posts){
+		for _, post := range posts {
 			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
 				res = append(res, post)
 			}
 		}
-	}else{
+	} else {
 		res = posts
 	}
 	json.NewEncoder(w).Encode(res)
@@ -59,7 +59,7 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	res := AddPost(post)
 	asso := GetAssociation(post.Association)
 	json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForPost(post, asso.ID, res.ID, "@" + strings.ToLower(asso.Name) + " a posté une nouvelle news 📰")
+	go TriggerNotificationForPost(post, asso.ID, res.ID, "@"+strings.ToLower(asso.Name)+" a posté une nouvelle news 📰")
 }
 
 // UpdatePostController will answer the JSON of the
@@ -166,8 +166,8 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 		SendAssociationEmailForCommentOnPost(association.Email, post, comment, user)
 	}
 
-	for _, tag := range(comment.Tags){
-		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), post.ID , "@" + GetUser(comment.User).Username + " t'a taggé sur \"" + post.Title + "\"", comment, "tag")
+	for _, tag := range comment.Tags {
+		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), post.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur \""+post.Title+"\"", comment, "tag")
 	}
 }
 

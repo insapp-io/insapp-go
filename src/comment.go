@@ -1,32 +1,31 @@
 package main
 
 import (
-	"time"
 	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 // Comment defines how to model a Comment of a Post
 type Comment struct {
-	ID      bson.ObjectId 		`bson:"_id,omitempty"`
-	User    bson.ObjectId 		`json:"user"`
-	Content string        		`json:"content"`
-	Date    time.Time     		`json:"date"`
-	Tags    Tags							`json:"tags"`
+	ID      bson.ObjectId `bson:"_id,omitempty"`
+	User    bson.ObjectId `json:"user"`
+	Content string        `json:"content"`
+	Date    time.Time     `json:"date"`
+	Tags    Tags          `json:"tags"`
 }
 
 // Comments is an array of Comment
 type Comments []Comment
 
 type Tag struct {
-	ID      bson.ObjectId 		`bson:"_id,omitempty"`
-	User    string 						`json:"user"`
-	Name 		string        		`json:"name"`
+	ID   bson.ObjectId `bson:"_id,omitempty"`
+	User string        `json:"user"`
+	Name string        `json:"name"`
 }
 
 type Tags []Tag
-
 
 // CommentPost will add the given comment object to the
 // list of comments of the post linked to the given id
@@ -115,11 +114,11 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 			db = session.DB("insapp").C("user")
 			db.Find(bson.M{"_id": comment.User}).One(&sender)
 			SendEmail("aeir@insa-rennes.fr", "Un commentaire a été reporté sur Insapp",
-				"Ce commentaire a été reporté le " + time.Now().String() +
-					"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username +
-					"\n\nCommentaire:\n" + comment.ID.Hex() + "\n" + comment.Content +
-					"\n\nPost:\n" + post.Title +
-					"\n\nUser:\n" + sender.ID.Hex() + "\n" + sender.Username + "\n" + sender.Name)
+				"Ce commentaire a été reporté le "+time.Now().String()+
+					"\n\nReporteur:\n"+reporter.ID.Hex()+"\n"+reporter.Username+
+					"\n\nCommentaire:\n"+comment.ID.Hex()+"\n"+comment.Content+
+					"\n\nPost:\n"+post.Title+
+					"\n\nUser:\n"+sender.ID.Hex()+"\n"+sender.Username+"\n"+sender.Name)
 		}
 	}
 }
@@ -148,7 +147,7 @@ func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
 	post := GetPost(id)
 	comments := post.Comments
 	var results []bson.ObjectId
-	for _, comment := range comments{
+	for _, comment := range comments {
 		if comment.User == userId {
 			results = append(results, comment.ID)
 		}
@@ -160,7 +159,7 @@ func getCommentForUserOnEvent(id bson.ObjectId, userId bson.ObjectId) []bson.Obj
 	event := GetEvent(id)
 	comments := event.Comments
 	var results []bson.ObjectId
-	for _, comment := range comments{
+	for _, comment := range comments {
 		if comment.User == userId {
 			results = append(results, comment.ID)
 		}
@@ -195,13 +194,13 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	events := GetEvents()
-	for _, event := range(events){
+	for _, event := range events {
 		comments := event.Comments
 		finalComments := Comments{}
-		for _, comment := range(comments){
+		for _, comment := range comments {
 			tags := comment.Tags
 			finalTags := Tags{}
-			for _, tag := range(tags){
+			for _, tag := range tags {
 				if tag.User != userId.Hex() {
 					finalTags = append(finalTags, tag)
 				}
@@ -221,13 +220,13 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 	db := session.DB("insapp").C("post")
 	var posts Posts
 	db.Find(bson.M{}).All(&posts)
-	for _, post := range(posts){
+	for _, post := range posts {
 		comments := post.Comments
 		finalComments := Comments{}
-		for _, comment := range(comments){
+		for _, comment := range comments {
 			tags := comment.Tags
 			finalTags := Tags{}
-			for _, tag := range(tags){
+			for _, tag := range tags {
 				if tag.User != userId.Hex() {
 					finalTags = append(finalTags, tag)
 				}

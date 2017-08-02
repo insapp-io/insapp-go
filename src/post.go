@@ -9,23 +9,22 @@ import (
 
 // Post defines how to model a Post
 type Post struct {
-	ID          bson.ObjectId   `bson:"_id,omitempty"`
-	Title       string          `json:"title"`
-	Association bson.ObjectId   `json:"association"`
-	Description string          `json:"description"`
-	Date        time.Time       `json:"date"`
-	Likes       []bson.ObjectId `json:"likes"`
-	Comments    Comments        `json:"comments"`
-	Promotions       []string        `json:"promotions"`
-	Plateforms       []string        `json:"plateforms"`
-	Image    		string          `json:"image"`
-	ImageSize		bson.M					`json:"imageSize"`
-	NoNotification     bool `json:"nonotification"`
+	ID             bson.ObjectId   `bson:"_id,omitempty"`
+	Title          string          `json:"title"`
+	Association    bson.ObjectId   `json:"association"`
+	Description    string          `json:"description"`
+	Date           time.Time       `json:"date"`
+	Likes          []bson.ObjectId `json:"likes"`
+	Comments       Comments        `json:"comments"`
+	Promotions     []string        `json:"promotions"`
+	Plateforms     []string        `json:"plateforms"`
+	Image          string          `json:"image"`
+	ImageSize      bson.M          `json:"imageSize"`
+	NoNotification bool            `json:"nonotification"`
 }
 
 // Posts is an array of Post
 type Posts []Post
-
 
 // AddPost will add the given post to the database
 func AddPost(post Post) Post {
@@ -51,13 +50,13 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 	db := session.DB("insapp").C("post")
 	postID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"title"				:	post.Title,
-		"description"	:	post.Description,
-		"image"				:	post.Image,
-		"plateforms"		:	post.Plateforms,
-		"promotions"		:	post.Promotions,
-		"imageSize"		:	post.ImageSize,
-		"nonotification":    post.NoNotification,
+		"title":          post.Title,
+		"description":    post.Description,
+		"image":          post.Image,
+		"plateforms":     post.Plateforms,
+		"promotions":     post.Promotions,
+		"imageSize":      post.ImageSize,
+		"nonotification": post.NoNotification,
 	}}
 	db.Update(postID, change)
 	var result Post
@@ -77,7 +76,7 @@ func DeletePost(post Post) Post {
 	db.FindId(post.ID).One(result)
 	DeleteNotificationsForPost(post.ID)
 	RemovePostFromAssociation(post.Association, post.ID)
-	for _, userId := range post.Likes{
+	for _, userId := range post.Likes {
 		DislikePost(userId, post.ID)
 	}
 	return result
@@ -114,8 +113,8 @@ func SearchPost(name string) Posts {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 	var result Posts
-	db.Find(bson.M{"$or" : []interface{}{
-		bson.M{"title" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	db.Find(bson.M{"$or": []interface{}{
+		bson.M{"title": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 	return result
 }
 

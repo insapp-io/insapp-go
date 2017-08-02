@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 func UploadNewImageController(w http.ResponseWriter, r *http.Request) {
 	fileName := UploadImage(r)
 	if fileName == "error" {
@@ -25,7 +24,6 @@ func UploadNewImageController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{"file": fileName, "size": bson.M{"width": width, "height": height}, "colors": colors})
 	}
 }
-
 
 func UploadImageController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

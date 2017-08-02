@@ -25,7 +25,7 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range publicRoutes {
 		router.
-		Methods(route.Method).
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
@@ -33,7 +33,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range associationRoutes {
 		router.
-		Methods(route.Method).
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthAssociationUser.HandleFunc(route.HandlerFunc))
@@ -41,7 +41,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range superRoutes {
 		router.
-		Methods(route.Method).
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthSuperUser.HandleFunc(route.HandlerFunc))
@@ -49,7 +49,7 @@ func NewRouter() *mux.Router {
 
 	for _, route := range userRoutes {
 		router.
-		Methods(route.Method).
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(tokenAuthUser.HandleFunc(route.HandlerFunc))

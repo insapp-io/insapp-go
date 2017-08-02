@@ -10,8 +10,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Insapp REST API - v.0.1")
 }
 
-
-
 func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
@@ -40,7 +38,6 @@ Les associations ont accès au nombre de "like", le nombre de participants pour 
 Ces commentaires restent anonymes et les associations se réservent le droit de supprimer des commentaires.
 Les notifications peuvent être activées ou désactivées dans les réglages du téléphone.
 		</p>`)
-
 
 	fmt.Fprintln(w, "<h2>Testeurs</h2>")
 
@@ -71,9 +68,6 @@ Agathe Duboue</br>
 	fmt.Fprintln(w, "</body>")
 }
 
-
-
-
 func Legal(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
@@ -97,7 +91,6 @@ L’application permet aux membres de publier des commentaires. Dans ses publica
 	fmt.Fprintln(w, `<p>
 INSAPP requiert l’accès à la caméra lors du scan du code barre amicaliste. Cette donnée est stockée localement, et n’est en aucun cas transmise à un tiers.
 		</p>`)
-
 
 	fmt.Fprintln(w, "</body>")
 }

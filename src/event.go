@@ -9,25 +9,25 @@ import (
 
 // Event defines what an Event is
 type Event struct {
-	ID           	bson.ObjectId   `bson:"_id,omitempty"`
-	Name         	string          `json:"name"`
-	Association  	bson.ObjectId   `json:"association" bson:"association"`
-	Description  	string          `json:"description"`
-	Participants 	[]bson.ObjectId `json:"participants" bson:"participants,omitempty"`
-	Maybe 	        []bson.ObjectId `json:"maybe" bson:"maybe,omitempty"`
-	NotGoing 	    []bson.ObjectId `json:"notgoing" bson:"notgoing,omitempty"`
-	Comments        Comments        `json:"comments"`
-	Status       	string          `json:"status"`
-	Palette			 	[][]int				 	`json:"palette"`
-	SelectedColor int						 	`json:"selectedcolor"`
-	DateStart    	time.Time       `json:"dateStart"`
-	DateEnd      	time.Time       `json:"dateEnd"`
-	Image     	 	string          `json:"image"`
-	Promotions       []string        `json:"promotions"`
-	Plateforms       []string        `json:"plateforms"`
-	BgColor      	string          `json:"bgColor"`
-	FgColor      	string          `json:"fgColor"`
-	NoNotification  bool          `json:"nonotification"`
+	ID             bson.ObjectId   `bson:"_id,omitempty"`
+	Name           string          `json:"name"`
+	Association    bson.ObjectId   `json:"association" bson:"association"`
+	Description    string          `json:"description"`
+	Participants   []bson.ObjectId `json:"participants" bson:"participants,omitempty"`
+	Maybe          []bson.ObjectId `json:"maybe" bson:"maybe,omitempty"`
+	NotGoing       []bson.ObjectId `json:"notgoing" bson:"notgoing,omitempty"`
+	Comments       Comments        `json:"comments"`
+	Status         string          `json:"status"`
+	Palette        [][]int         `json:"palette"`
+	SelectedColor  int             `json:"selectedcolor"`
+	DateStart      time.Time       `json:"dateStart"`
+	DateEnd        time.Time       `json:"dateEnd"`
+	Image          string          `json:"image"`
+	Promotions     []string        `json:"promotions"`
+	Plateforms     []string        `json:"plateforms"`
+	BgColor        string          `json:"bgColor"`
+	FgColor        string          `json:"fgColor"`
+	NoNotification bool            `json:"nonotification"`
 }
 
 // Events is an array of Event
@@ -93,19 +93,19 @@ func UpdateEvent(id bson.ObjectId, event Event) Event {
 	db := session.DB("insapp").C("event")
 	eventID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name"					:	event.Name,
-		"description"		:	event.Description,
-		"status"				:	event.Status,
-		"image"					:	event.Image,
-		"palette"				:	event.Palette,
-		"selectedcolor"	:	event.SelectedColor,
-		"datestart"			:	event.DateStart,
-		"dateend"				:	event.DateEnd,
-		"plateforms"			:	event.Plateforms,
-		"promotions"			:	event.Promotions,
-		"bgcolor"				:	event.BgColor,
-		"fgcolor"				: event.FgColor,
-		"nonotification"	   : event.NoNotification,
+		"name":           event.Name,
+		"description":    event.Description,
+		"status":         event.Status,
+		"image":          event.Image,
+		"palette":        event.Palette,
+		"selectedcolor":  event.SelectedColor,
+		"datestart":      event.DateStart,
+		"dateend":        event.DateEnd,
+		"plateforms":     event.Plateforms,
+		"promotions":     event.Promotions,
+		"bgcolor":        event.BgColor,
+		"fgcolor":        event.FgColor,
+		"nonotification": event.NoNotification,
 	}}
 	db.Update(eventID, change)
 	var result Event
@@ -123,7 +123,7 @@ func DeleteEvent(event Event) Event {
 	db.Remove(event)
 	DeleteNotificationsForEvent(event.ID)
 	RemoveEventFromAssociation(event.Association, event.ID)
-	for _, userId := range event.Participants{
+	for _, userId := range event.Participants {
 		RemoveEventFromUser(userId, event.ID)
 	}
 	var result Event
@@ -170,7 +170,6 @@ func AddParticipantToMaybeList(id bson.ObjectId, userID bson.ObjectId) (Event, U
 	return event, user
 }
 
-
 func AddParticipantToNotGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	RemoveParticipant(id, userID, "maybe")
 	RemoveParticipant(id, userID, "participants")
@@ -215,11 +214,10 @@ func SearchEvent(name string) Events {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 	var result Events
-	db.Find(bson.M{"$or" : []interface{}{
-		bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	db.Find(bson.M{"$or": []interface{}{
+		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 	return result
 }
-
 
 //CommentEvent(eventId, comment)
 //UncommentEvent(eventId, comment)

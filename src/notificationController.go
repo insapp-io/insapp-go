@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-	"gopkg.in/mgo.v2/bson"
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
-
 
 // AddUserController will answer a JSON of the
 // brand new created user (from the JSON Body)

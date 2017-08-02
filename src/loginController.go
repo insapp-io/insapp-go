@@ -5,28 +5,28 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"net/http"
-	"os/exec"
-	"strings"
-	"io/ioutil"
 	"github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"net/http"
+	"os/exec"
+	"strings"
 )
 
 type Login struct {
-	Username 		string 	`json:"username"`
-	Password 		string 	`json:"password"`
-	Device 			string 	`json:"device"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Device   string `json:"device"`
 }
 
 type Credentials struct {
-	ID 				bson.ObjectId	`bson:"_id,omitempty"`
-	Username 	string				`json:"username"`
-	AuthToken string				`json:"authtoken"`
-	User 			bson.ObjectId	`json:"user" bson:"user"`
-	Device 		string	 			`json:"device"`
+	ID        bson.ObjectId `bson:"_id,omitempty"`
+	Username  string        `json:"username"`
+	AuthToken string        `json:"authtoken"`
+	User      bson.ObjectId `json:"user" bson:"user"`
+	Device    string        `json:"device"`
 }
 
 type AssociationUser struct {
@@ -98,7 +98,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		var user User
 		if count == 0 {
 			user = AddUser(User{Name: "", Username: login.Username, Description: "", Email: "", EmailPublic: false, Promotion: "", Events: []bson.ObjectId{}, PostsLiked: []bson.ObjectId{}})
-		}else{
+		} else {
 			db.Find(bson.M{"username": login.Username}).One(&user)
 		}
 		token := generateAuthToken()
@@ -111,12 +111,12 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generateAuthToken() (string){
+func generateAuthToken() string {
 	out, _ := exec.Command("uuidgen").Output()
 	return strings.TrimSpace(string(out))
 }
 
-func DeleteCredentialsForUser(id bson.ObjectId){
+func DeleteCredentialsForUser(id bson.ObjectId) {
 	conf, _ := Configuration()
 	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
@@ -125,7 +125,7 @@ func DeleteCredentialsForUser(id bson.ObjectId){
 	db.Remove(bson.M{"user": id})
 }
 
-func addCredentials(credentials Credentials) (Credentials){
+func addCredentials(credentials Credentials) Credentials {
 	conf, _ := Configuration()
 	session, _ := mgo.Dial(conf.Database)
 	defer session.Close()
@@ -154,7 +154,7 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
 }
 
-func verifyTicket(ticket string) (string, error){
+func verifyTicket(ticket string) (string, error) {
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
 	if err != nil {
 		return "", errors.New("Impossible de verfifier l'identité")
@@ -166,7 +166,7 @@ func verifyTicket(ticket string) (string, error){
 		return "", errors.New("Impossible de verfifier l'identité")
 	}
 	xml := string(htmlData)
-	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>"){
+	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>") {
 		return "", errors.New("Impossible de verfifier l'identité")
 	}
 

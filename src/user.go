@@ -23,7 +23,7 @@ type User struct {
 	Email       string          `json:"email"`
 	EmailPublic bool            `json:"emailpublic"`
 	Promotion   string          `json:"promotion"`
-	Gender 			string					`json:"gender"`
+	Gender      string          `json:"gender"`
 	Events      []bson.ObjectId `json:"events"`
 	PostsLiked  []bson.ObjectId `json:"postsliked"`
 }
@@ -71,10 +71,10 @@ func UpdateUser(id bson.ObjectId, user User) User {
 	change := bson.M{"$set": bson.M{
 		"name":        user.Name,
 		"description": user.Description,
-		"email": 			 user.Email,
+		"email":       user.Email,
 		"emailpublic": user.EmailPublic,
 		"promotion":   promotion,
-		"gender"	:		 gender,
+		"gender":      gender,
 	}}
 	db.Update(userID, change)
 	var result User
@@ -92,12 +92,12 @@ func DeleteUser(user User) User {
 	DeleteCredentialsForUser(user.ID)
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
-	for _, eventId := range user.Events{
+	for _, eventId := range user.Events {
 		RemoveParticipant(eventId, user.ID, "going")
 		RemoveParticipant(eventId, user.ID, "notgoing")
 		RemoveParticipant(eventId, user.ID, "maybe")
 	}
-	for _, postId := range user.PostsLiked{
+	for _, postId := range user.PostsLiked {
 		DislikePostWithUser(postId, user.ID)
 	}
 	DeleteTagsForUser(user.ID)
@@ -213,8 +213,8 @@ func SearchUser(name string) Users {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 	var result Users
-	db.Find(bson.M{"$or" : []interface{}{
-		bson.M{"username" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"name" : bson.M{ "$regex" : bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	db.Find(bson.M{"$or": []interface{}{
+		bson.M{"username": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 	return result
 }
 
@@ -229,7 +229,7 @@ func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
 	var reporter User
 	db.Find(bson.M{"_id": reporterID}).One(&reporter)
 	SendEmail("aeir@insa-rennes.fr", "Un utilisateur a été reporté sur Insapp",
-		"Cet utilisateur a été reporté le " + time.Now().String() +
-			"\n\nReporteur:\n" + reporter.ID.Hex() + "\n" + reporter.Username + "\n" + reporter.Name +
-			"\n\nSignaler:\n" + user.ID.Hex() + "\n" + user.Username + "\n" + user.Name + "\n" + user.Description)
+		"Cet utilisateur a été reporté le "+time.Now().String()+
+			"\n\nReporteur:\n"+reporter.ID.Hex()+"\n"+reporter.Username+"\n"+reporter.Name+
+			"\n\nSignaler:\n"+user.ID.Hex()+"\n"+user.Username+"\n"+user.Name+"\n"+user.Description)
 }

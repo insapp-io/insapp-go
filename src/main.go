@@ -15,14 +15,14 @@ func main() {
 
 	conf, err := Configuration()
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 		log.Fatal("[error] Error when parsing config file. Make sure the config file is valid : ")
 		return
 	}
 
 	log.Println("Starting server on 0.0.0.0:" + conf.Port)
-	log.Fatal(http.ListenAndServe(":" + conf.Port, &WithCORS{NewRouter()}))
+	log.Fatal(http.ListenAndServe(":"+conf.Port, &WithCORS{NewRouter()}))
 }
 
 // Simple wrapper to Allow CORS.
