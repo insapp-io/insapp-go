@@ -163,7 +163,7 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 
 	config, _ := Configuration()
 
-	if config.Environment == "staging" {
+	if config.Environment != "prod" {
 		client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
 		client.Send(pn)
 		pn.PayloadString()

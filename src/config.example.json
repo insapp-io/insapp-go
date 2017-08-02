@@ -1,0 +1,8 @@
+{
+  "email":"example@example.com",
+  "password":"pass",
+  "googlekey":"example",
+  "database":"example",
+  "env":"example",
+  "port":"1234"
+}

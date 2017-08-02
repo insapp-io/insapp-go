@@ -8,6 +8,13 @@ cd src && go get
 
 ## Build & Launch
 
+Edit config file
+
+```
+vi config.example.json
+mv config.example.json config.json
+```
+
 Check that you have mongodb running
 
 ```
