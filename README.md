@@ -3,8 +3,7 @@ Backend part of the Insapp project written in Go-lang
 
 ## Dependencies
 ```
-go get github.com/gorilla/mux
-go get gopkg.in/mgo.v2
+cd src && go get
 ```
 
 ## Build & Launch
