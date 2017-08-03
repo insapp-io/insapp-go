@@ -3,6 +3,6 @@
   "password":"pass",
   "googlekey":"example",
   "database":"example",
-  "env":"example",
-  "port":"1234"
+  "env":"dev",
+  "port":"9000"
 }

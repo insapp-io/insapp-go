@@ -11,8 +11,8 @@ cd src && go get
 Edit config file
 
 ```
-vi config.example.json
-mv config.example.json config.json
+cp config.example.json config.json
+vi config.json
 ```
 
 Check that you have mongodb running
@@ -24,7 +24,7 @@ cd src && go build && ./src
 Now your process is listening on 0.0.0.0:9000
 
 
-## API Endrpoint
+## API Endpoints
 
 ### Association
 

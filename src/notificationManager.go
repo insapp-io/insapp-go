@@ -138,12 +138,6 @@ func triggeriOSNotification(notification Notification, users []NotificationUser)
 }
 
 func sendiOSNotificationToDevice(token string, notification Notification, number int, done chan bool) {
-
-	conf, _ := Configuration()
-	if conf.Environment != "prod" {
-		return
-	}
-
 	payload := apns.NewPayload()
 	payload.Alert = notification.Message
 	payload.Badge = number
