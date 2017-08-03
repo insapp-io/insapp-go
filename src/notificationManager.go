@@ -209,7 +209,9 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 
 	defer resp.Body.Close()
 
-	fmt.Println("Android notification response status:", resp.StatusCode)
+	fmt.Println("Android notification response :")
+	fmt.Println("Token:", token)
+	fmt.Println("Status:", resp.StatusCode)
 
 	var res fcmResponseStatus
 
