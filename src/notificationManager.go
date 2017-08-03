@@ -5,11 +5,27 @@ import (
 	"encoding/json"
 	"fmt"
 	apns "github.com/anachronistic/apns"
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
+
+// fcmResponseStatus represents fcm response message
+type fcmResponseStatus struct {
+	Ok            bool
+	StatusCode    int
+	MulticastId   int64               `json:"multicast_id"`
+	Success       int                 `json:"success"`
+	Fail          int                 `json:"failure"`
+	Canonical_ids int                 `json:"canonical_ids"`
+	Results       []map[string]string `json:"results,omitempty"`
+	MsgId         int64               `json:"message_id,omitempty"`
+	Err           string              `json:"error,omitempty"`
+	RetryAfter    string
+}
 
 func getiOSUsers(user string) []NotificationUser {
 	conf, _ := Configuration()
@@ -178,9 +194,9 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 	config, _ := Configuration()
 
 	if config.Environment != "prod" {
-		jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
 	} else {
-		jsonStr = "{\"registration_ids\":[\"" + token + "\"], \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
 	}
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
@@ -192,7 +208,15 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 	resp, _ := client.Do(req)
 
 	defer resp.Body.Close()
-	fmt.Println("response Status:", resp.Status)
+
+	fmt.Println("Android notification response status:", resp.StatusCode)
+
+	var res fcmResponseStatus
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal([]byte(body), &res)
+
+	spew.Dump(res)
 
 	done <- true
 }
