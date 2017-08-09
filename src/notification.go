@@ -10,7 +10,7 @@ import (
 type NotificationUser struct {
 	ID     bson.ObjectId `bson:"_id,omitempty"`
 	UserId bson.ObjectId `json:"userid"`
-	Token  string        `json:"token"`
+	Token  string        `json:"token,omitempty" bson:",omitempty"`
 	Os     string        `json:"os"`
 }
 
@@ -78,6 +78,9 @@ func GetNotificationsForUser(userID bson.ObjectId) Notifications {
 	db := session.DB("insapp").C("notification")
 	var result Notifications
 	db.Find(bson.M{"receiver": userID}).Sort("-date").Limit(30).All(&result)
+	for _, notification := range result {
+
+	}
 	return result
 }
 
