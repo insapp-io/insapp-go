@@ -10,7 +10,7 @@ import (
 type NotificationUser struct {
 	ID     bson.ObjectId `bson:"_id,omitempty"`
 	UserId bson.ObjectId `json:"userid"`
-	Token  string        `json:"token,omitempty" bson:",omitempty"`
+	Token  string        `json:"token" bson:",omitempty"`
 	Os     string        `json:"os"`
 }
 
@@ -49,7 +49,11 @@ func CreateOrUpdateNotificationUser(user NotificationUser) {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
-	res, _ := db.Find(bson.M{"userid": user.UserId}).Count()
+	res, _ := db.Find(bson.M{"token": user.Token}).Count()
+	if res > 0 {
+		db.Update(bson.M{"token": user.Token}, bson.M{"$set": bson.M{"token": nil}})
+	}
+	res, _ = db.Find(bson.M{"userid": user.UserId}).Count()
 	if res > 0 {
 		db.Update(bson.M{"userid": user.UserId}, bson.M{"$set": bson.M{"token": user.Token, "os": user.Os}})
 	} else {
