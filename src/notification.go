@@ -78,9 +78,6 @@ func GetNotificationsForUser(userID bson.ObjectId) Notifications {
 	db := session.DB("insapp").C("notification")
 	var result Notifications
 	db.Find(bson.M{"receiver": userID}).Sort("-date").Limit(30).All(&result)
-	for _, notification := range result {
-
-	}
 	return result
 }
 
