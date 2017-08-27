@@ -135,7 +135,8 @@ func DislikePostController(w http.ResponseWriter, r *http.Request) {
 func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(bson.M{"error": "Unable to read the request body"})
 	}
 	var comment Comment
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
@@ -156,6 +157,7 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	postID := vars["id"]
+
 	post := CommentPost(bson.ObjectIdHex(postID), comment)
 	association := GetAssociation(post.Association)
 	user := GetUser(comment.User)

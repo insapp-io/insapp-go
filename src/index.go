@@ -42,7 +42,7 @@ Les notifications peuvent être activées ou désactivées dans les réglages du
 	fmt.Fprintln(w, "<h2>Testeurs</h2>")
 
 	fmt.Fprintln(w, `<p>
-Insapp a été testé pendant 3 semaines par des beta-testeurs volontaires issus de différents départements de l'INSA. Nous tenons à remercier :
+Insapp a été testé pendant 3 semaines par des beta-testeurs volontaires issus de différents départements de l'INSA. Nous tenons à remercier pour leurs retours :
 </br>
 </br>
 Nans Préjean</br>
@@ -62,6 +62,7 @@ Sebastien Turpin</br>
 Luc Geffrault</br>
 Agathe Duboue</br>
 Alexis Brard</br>
+Timothé Frignac</br>
 </br>
 		</p>`)
 
@@ -71,7 +72,7 @@ Alexis Brard</br>
 Le code source d'Insapp est ouvert et libre de droits  :
 </br>
 </br>
-https://github.com/fthomasmorel/insapp-web</br>
+https://github.com/tomatrocho/insapp-web (forké de https://github.com/fthomasmorel/insapp-web)</br>
 https://github.com/tomatrocho/insapp-go (forké de https://github.com/fthomasmorel/insapp-go)</br>
 https://github.com/fthomasmorel/insapp-iOS</br>
 https://github.com/tomatrocho/insapp-android</br>
