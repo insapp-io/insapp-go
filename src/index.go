@@ -19,7 +19,7 @@ func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, `<p>
 Insapp est une application promouvant l'associatif au sein de l'INSA de Rennes.
 L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel en 2016, en collaboration avec l'AEIR (notamment avec Théau Jubin et Antoine Tulasne) et le CRI de l'INSA de Rennes.
-Thomas Bouvier, Louis-Sinan Cappoen, et Guillaume Courtet ont ensuite rejoint l'équipe de développement.
+Thomas Bouvier et Guillaume Courtet ont ensuite rejoint l'équipe de développement.
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Données</h2>")
