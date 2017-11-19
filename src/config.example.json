@@ -1,8 +1,8 @@
 {
-  "email":"example@example.com",
+  "email":"example@gmail.com",
   "password":"pass",
   "googlekey":"example",
-  "database":"example",
+  "database":"mongo",
   "env":"dev",
   "port":"9000"
 }
