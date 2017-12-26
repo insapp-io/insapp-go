@@ -92,16 +92,21 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 	if Contains("iOS", event.Plateforms) {
 		triggeriOSNotification(notification, users)
 	}
-	androidUsers := getAndroidUsers("")
-	users = []NotificationUser{}
-	for _, notificationUser := range androidUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
-			users = append(users, notificationUser)
+	/*
+		androidUsers := getAndroidUsers("")
+		users = []NotificationUser{}
+		for _, notificationUser := range androidUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+				users = append(users, notificationUser)
+			}
 		}
-	}
+		if Contains("android", event.Plateforms) {
+			triggerAndroidNotification(notification, users)
+		}
+	*/
 	if Contains("android", event.Plateforms) {
-		triggerAndroidNotification(notification, users)
+		triggerAndroidTopicNotification(notification, []string{"events"})
 	}
 }
 
@@ -118,16 +123,21 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 	if Contains("iOS", post.Plateforms) {
 		triggeriOSNotification(notification, users)
 	}
-	androidUsers := getAndroidUsers("")
-	users = []NotificationUser{}
-	for _, notificationUser := range androidUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
-			users = append(users, notificationUser)
+	/*
+		androidUsers := getAndroidUsers("")
+		users = []NotificationUser{}
+		for _, notificationUser := range androidUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+				users = append(users, notificationUser)
+			}
 		}
-	}
+		if Contains("android", post.Plateforms) {
+			triggerAndroidNotification(notification, users)
+		}
+	*/
 	if Contains("android", post.Plateforms) {
-		triggerAndroidNotification(notification, users)
+		triggerAndroidTopicNotification(notification, []string{"news"})
 	}
 }
 
@@ -139,6 +149,12 @@ func triggerAndroidNotification(notification Notification, users []NotificationU
 		number := len(GetUnreadNotificationsForUser(user.UserId))
 		go sendAndroidNotificationToDevice(user.Token, notification, number, done)
 	}
+	<-done
+}
+
+func triggerAndroidTopicNotification(notification Notification, topics []string) {
+	done := make(chan bool)
+	sendAndroidNotificationToTopics(topics, notification, 0, done)
 	<-done
 }
 
@@ -188,21 +204,21 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 
 func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
 	url := "https://fcm.googleapis.com/fcm/send"
-	notifJson, _ := json.Marshal(notification)
+	notificationJson, _ := json.Marshal(notification)
 
 	var jsonStr string
 	config, _ := Configuration()
 
 	if config.Environment != "prod" {
-		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
 	} else {
-		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notifJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
 	}
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
-	req.Header.Set("Authorization", "key="+config.GoogleKey)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "key="+config.GoogleKey)
 
 	client := &http.Client{}
 	resp, _ := client.Do(req)
@@ -211,6 +227,64 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 
 	fmt.Println("Android notification response :")
 	fmt.Println("Token:", token)
+	fmt.Println("Status:", resp.StatusCode)
+
+	var res fcmResponseStatus
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal([]byte(body), &res)
+
+	spew.Dump(res)
+
+	done <- true
+}
+
+func sendAndroidNotificationToTopics(topics []string, notification Notification, number int, done chan bool) {
+	url := "https://fcm.googleapis.com/fcm/send"
+	notificationJson, _ := json.Marshal(notification)
+
+	var jsonStr string
+	config, _ := Configuration()
+
+	var topicsStr string
+
+	if topics == nil || len(topics) == 0 {
+		done <- true
+	} else if len(topics) == 1 {
+		topicsStr = "/topics/" + topics[0]
+
+		if config.Environment != "prod" {
+			jsonStr = "{\"to\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+		} else {
+			jsonStr = "{\"to\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+		}
+	} else {
+		for i := 0; i < len(topics); i++ {
+			if i > 0 {
+				topicsStr += " || "
+			}
+			topicsStr += "'" + topics[i] + "' in topics"
+		}
+
+		if config.Environment != "prod" {
+			jsonStr = "{\"condition\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+		} else {
+			jsonStr = "{\"condition\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+		}
+	}
+
+	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "key="+config.GoogleKey)
+
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+
+	defer resp.Body.Close()
+
+	fmt.Println("Android notification response :")
+	fmt.Println("Condition:", topicsStr)
 	fmt.Println("Status:", resp.StatusCode)
 
 	var res fcmResponseStatus
