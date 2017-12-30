@@ -38,8 +38,6 @@ Ces commentaires restent anonymes et les associations se réservent le droit de 
 Les notifications peuvent être activées ou désactivées dans les réglages du téléphone.
 		</p>`)
 
-	fmt.Fprintln(w, "<h2>Testeurs</h2>")
-
 	fmt.Fprintln(w, "<h2>Sources</h2>")
 
 	fmt.Fprintln(w, `<p>
@@ -51,6 +49,8 @@ https://github.com/tomatrocho/insapp-android</br>
 https://github.com/fthomasmorel/insapp-iOS</br>
 </br>
 		</p>`)
+
+	fmt.Fprintln(w, "<h2>Testeurs</h2>")
 
 	fmt.Fprintln(w, `<p>
 Insapp a été testé pendant 3 semaines par des beta-testeurs volontaires issus de différents départements de l'INSA. Nous tenons à remercier pour leurs retours :
