@@ -19,13 +19,12 @@ func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, `<p>
 Insapp est une application promouvant l'associatif au sein de l'INSA de Rennes.
 L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel en 2016, en collaboration avec l'AEIR (notamment avec Théau Jubin et Antoine Tulasne) et le CRI de l'INSA de Rennes.
-Thomas Bouvier et Guillaume Courtet ont ensuite rejoint l'équipe de développement.
+Thomas Bouvier et Guillaume Courtet ont ensuite rejoint l'équipe de développement, et maintiennent actuellement le projet.
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Données</h2>")
 
 	fmt.Fprintln(w, `<p>
-Les données transmises à l'application sont matériellement stockées sur les serveurs du CRI.
 Vos identifiants INSA, utilisés lors de l'inscription ne sont pas stockés pour Insapp pour des raisons de sécurité et de vie privée.
 À aucun moment nous ne stockons, diffusons ou avons accès à vos identifiants INSA.
 Vous n'êtes en aucun cas obligé de renseigner votre identité dans la page profil de l'application, qui n'est là qu'à titre facultatif.
@@ -37,6 +36,18 @@ Vous n'êtes en aucun cas obligé de renseigner votre identité dans la page pro
 Les associations ont accès au nombre de "like", le nombre de participants pour leurs évènements, ainsi qu'au contenu des commentaires postés sur leurs posts.
 Ces commentaires restent anonymes et les associations se réservent le droit de supprimer des commentaires.
 Les notifications peuvent être activées ou désactivées dans les réglages du téléphone.
+		</p>`)
+
+	fmt.Fprintln(w, "<h2>Sources</h2>")
+
+	fmt.Fprintln(w, `<p>
+Le code source d'Insapp est ouvert et libre de droits  :
+</br>
+</br>
+https://github.com/tomatrocho/insapp-server</br>
+https://github.com/tomatrocho/insapp-android</br>
+https://github.com/fthomasmorel/insapp-iOS</br>
+</br>
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Testeurs</h2>")
@@ -63,19 +74,6 @@ Luc Geffrault</br>
 Agathe Duboue</br>
 Alexis Brard</br>
 Timothé Frignac</br>
-</br>
-		</p>`)
-
-	fmt.Fprintln(w, "<h2>Sources</h2>")
-
-	fmt.Fprintln(w, `<p>
-Le code source d'Insapp est ouvert et libre de droits  :
-</br>
-</br>
-https://github.com/tomatrocho/insapp-web (forké de https://github.com/fthomasmorel/insapp-web)</br>
-https://github.com/tomatrocho/insapp-go (forké de https://github.com/fthomasmorel/insapp-go)</br>
-https://github.com/fthomasmorel/insapp-iOS</br>
-https://github.com/tomatrocho/insapp-android</br>
 </br>
 		</p>`)
 
