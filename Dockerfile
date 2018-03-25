@@ -21,6 +21,6 @@ LABEL maintainer "Thomas Bouvier <tomatrocho@gmail.com>"
 WORKDIR /root/
 COPY --from=0 /go/src/github.com/tomatrocho/insapp-go .
 
-EXPOSE 9010
+EXPOSE 9000
 
 CMD ["./app"]
