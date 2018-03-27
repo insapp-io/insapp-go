@@ -18,9 +18,9 @@ RUN set -x && \
 FROM alpine
 LABEL maintainer "Thomas Bouvier <tomatrocho@gmail.com>"
 
-WORKDIR /root/
-RUN mkdir img
+RUN apk add --no-cache bash
 
+WORKDIR /root/
 COPY --from=builder /go/src/app .
 
 EXPOSE 9000
