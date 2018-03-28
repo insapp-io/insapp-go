@@ -2,10 +2,6 @@
 FROM golang AS builder
 LABEL maintainer "Thomas Bouvier <tomatrocho@gmail.com>"
 
-RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN python2.7 get-pip.py
-RUN pip install colorthief
-
 RUN apt-get update ; apt-get install -y uuid-runtime
 
 WORKDIR /go/src/app
@@ -18,7 +14,20 @@ RUN set -x && \
 FROM alpine
 LABEL maintainer "Thomas Bouvier <tomatrocho@gmail.com>"
 
-RUN apk update && apk add --no-cache bash && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && \
+    apk add --no-cache bash && \
+    apk add ca-certificates && \
+    apk add build-base python-dev jpeg-dev zlib-dev
+
+ENV LIBRARY_PATH=/lib:/usr/lib
+
+RUN python -m ensurepip && \
+    rm -r /usr/lib/python*/ensurepip && \
+    pip install --upgrade pip setuptools && \
+    pip install colorthief
+
+RUN rm -rf /var/cache/apk/* && \
+    rm -r /root/.cache
 
 WORKDIR /root/
 COPY --from=builder /go/src/app .
