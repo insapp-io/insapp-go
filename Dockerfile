@@ -18,7 +18,7 @@ RUN set -x && \
 FROM alpine
 LABEL maintainer "Thomas Bouvier <tomatrocho@gmail.com>"
 
-RUN apk add --no-cache bash
+RUN apk update && apk add --no-cache bash && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 WORKDIR /root/
 COPY --from=builder /go/src/app .
