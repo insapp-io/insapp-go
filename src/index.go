@@ -17,9 +17,10 @@ func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<h2>C'est quoi ?</h2>")
 
 	fmt.Fprintln(w, `<p>
-Insapp est une application promouvant l'associatif au sein de l'INSA de Rennes.
-L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel en 2016, en collaboration avec l'AEIR (notamment avec Théau Jubin et Antoine Tulasne) et le CRI de l'INSA de Rennes.
-Thomas Bouvier et Guillaume Courtet ont ensuite rejoint l'équipe de développement, et maintiennent actuellement le projet.
+Insapp est une application promouvant l'associatif au sein de l'INSA Rennes.
+L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel début 2016. Dès octobre 2016, Thomas Bouvier et Guillaume Courtet ont rejoint l'équipe de développement.
+Thomas Bouvier maintient actuellement le projet.
+Insapp est un projet lancé en collaboration avec l'AEIR et le CRI de l'INSA Rennes. Merci à Théau Jubin et Antoine Tulasne (2016), Laura Frouin (2017) et Titouan Le Hir (2018) pour leurs contributions !
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Données</h2>")
@@ -41,12 +42,12 @@ Les notifications peuvent être activées ou désactivées dans les réglages du
 	fmt.Fprintln(w, "<h2>Sources</h2>")
 
 	fmt.Fprintln(w, `<p>
-Le code source d'Insapp est ouvert et libre de droits  :
+Le code source d'Insapp est ouvert et libre de droits. Le code des applications Android (Java & Kotlin) et iOS (Swift), de l'interface web (AngularJS) et de l'API (Golang) est accessible sur Github, aux adresses suivantes :
 </br>
 </br>
-https://github.com/tomatrocho/insapp-server</br>
-https://github.com/tomatrocho/insapp-android</br>
-https://github.com/fthomasmorel/insapp-iOS</br>
+https://github.com/tomatrocho/insapp-server.git</br>
+https://github.com/tomatrocho/insapp-android.git</br>
+https://github.com/fthomasmorel/insapp-iOS.git</br>
 </br>
 		</p>`)
 
@@ -85,7 +86,7 @@ func Legal(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
 
 	fmt.Fprintln(w, `<p>
-Les données transmises à l’application sont matériellement stockées sur les serveurs loués par l'Amicale des élèves. À aucun moment Insapp ne stocke, diffuse ou a accès aux identifiants INSA des utilisateurs, pour des raisons de sécurité et de confidentialité.
+Les données transmises à l’application sont matériellement stockées sur les serveurs loués par l'AEIR. À aucun moment Insapp ne stocke, diffuse ou a accès aux identifiants INSA des utilisateurs, pour des raisons de sécurité et de confidentialité.
 		</p>`)
 
 	fmt.Fprintln(w, `<p>
@@ -97,7 +98,7 @@ Les sources des informations diffusées sur Insapp sont réputées fiables. Tout
 		</p>`)
 
 	fmt.Fprintln(w, `<p>
-L’application permet aux membres de publier des commentaires. Dans ses publications, l'Utilisateur s’engage à respecter la charte informatique de l’INSA de Rennes et les règles de droit en vigueur. Insapp exerce une modération a posteriori sur les publications et se réserve le droit de refuser leur mise en ligne, sans avoir à s’en justifier auprès du membre. L’application permet également à l’utilisateur, s’il le souhaite, de compléter son profil.
+L’application permet aux membres de publier des commentaires. Dans ses publications, l'Utilisateur s’engage à respecter la charte informatique de l’INSA Rennes et les règles de droit en vigueur. Insapp exerce une modération a posteriori sur les publications et se réserve le droit de refuser leur mise en ligne, sans avoir à s’en justifier auprès du membre. L’application permet également à l’utilisateur, s’il le souhaite, de compléter son profil.
 		</p>`)
 
 	fmt.Fprintln(w, `<p>
