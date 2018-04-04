@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	apns "github.com/anachronistic/apns"
+	"github.com/anachronistic/apns"
 	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -92,21 +92,16 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 	if Contains("iOS", event.Plateforms) {
 		triggeriOSNotification(notification, users)
 	}
-	/*
-		androidUsers := getAndroidUsers("")
-		users = []NotificationUser{}
-		for _, notificationUser := range androidUsers {
-			var user = GetUser(notificationUser.UserId)
-			if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
-				users = append(users, notificationUser)
-			}
+	androidUsers := getAndroidUsers("")
+	users = []NotificationUser{}
+	for _, notificationUser := range androidUsers {
+		var user = GetUser(notificationUser.UserId)
+		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+			users = append(users, notificationUser)
 		}
-		if Contains("android", event.Plateforms) {
-			triggerAndroidNotification(notification, users)
-		}
-	*/
+	}
 	if Contains("android", event.Plateforms) {
-		triggerAndroidTopicNotification(notification, []string{"events"})
+		triggerAndroidTopicNotification(notification, users, []string{"events"})
 	}
 }
 
@@ -123,21 +118,16 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 	if Contains("iOS", post.Plateforms) {
 		triggeriOSNotification(notification, users)
 	}
-	/*
-		androidUsers := getAndroidUsers("")
-		users = []NotificationUser{}
-		for _, notificationUser := range androidUsers {
-			var user = GetUser(notificationUser.UserId)
-			if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
-				users = append(users, notificationUser)
-			}
+	androidUsers := getAndroidUsers("")
+	users = []NotificationUser{}
+	for _, notificationUser := range androidUsers {
+		var user = GetUser(notificationUser.UserId)
+		if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+			users = append(users, notificationUser)
 		}
-		if Contains("android", post.Plateforms) {
-			triggerAndroidNotification(notification, users)
-		}
-	*/
+	}
 	if Contains("android", post.Plateforms) {
-		triggerAndroidTopicNotification(notification, []string{"news"})
+		triggerAndroidTopicNotification(notification, users, []string{"news"})
 	}
 }
 
@@ -152,9 +142,13 @@ func triggerAndroidNotification(notification Notification, users []NotificationU
 	<-done
 }
 
-func triggerAndroidTopicNotification(notification Notification, topics []string) {
+func triggerAndroidTopicNotification(notification Notification, users []NotificationUser, topics []string) {
 	done := make(chan bool)
-	sendAndroidNotificationToTopics(topics, notification, 0, done)
+	for _, user := range users {
+		notification.Receiver = user.UserId
+		notification = AddNotification(notification)
+	}
+	go sendAndroidNotificationToTopics(topics, notification, 0, done)
 	<-done
 }
 

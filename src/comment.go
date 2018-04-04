@@ -130,7 +130,7 @@ func GetComment(postId bson.ObjectId, id bson.ObjectId) (Comment, error) {
 			return comment, nil
 		}
 	}
-	return Comment{}, errors.New("No Comment Found")
+	return Comment{}, errors.New("no comment found")
 }
 
 func GetCommentForEvent(eventId bson.ObjectId, id bson.ObjectId) (Comment, error) {
@@ -140,7 +140,7 @@ func GetCommentForEvent(eventId bson.ObjectId, id bson.ObjectId) (Comment, error
 			return comment, nil
 		}
 	}
-	return Comment{}, errors.New("No Comment Found")
+	return Comment{}, errors.New("no comment found")
 }
 
 func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {

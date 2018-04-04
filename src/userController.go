@@ -45,7 +45,7 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 	isValidAssociation := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
 	if !isValidUser && !isValidAssociation {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := UpdateUser(bson.ObjectIdHex(userID), user)
@@ -61,7 +61,7 @@ func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	isAssociationValid := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
 	if !isUserValid && !isAssociationValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	user := GetUser(bson.ObjectIdHex(userID))

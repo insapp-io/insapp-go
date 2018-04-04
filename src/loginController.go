@@ -48,7 +48,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "master": master, "associationID": auth})
 	} else {
 		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode(bson.M{"error": "Failed to authentificate"})
+		json.NewEncoder(w).Encode(bson.M{"error": "failed to authenticate"})
 	}
 }
 
@@ -81,11 +81,6 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 
 	username, err := verifyTicket(ticket)
 	login.Username = username
-
-	if login.Username == "fthomasm" {
-		login.Username = "fthomasm" + RandomString(4)
-	}
-
 	login.Username = strings.ToLower(login.Username)
 
 	if err == nil && len(login.Username) > 0 && len(login.Device) > 0 {
@@ -151,30 +146,30 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	if len(result) > 0 {
 		return result[0].Association, result[0].Master, nil
 	}
-	return bson.ObjectId(""), false, errors.New("Failed to authentificate")
+	return bson.ObjectId(""), false, errors.New("failed to authenticate")
 }
 
 func verifyTicket(ticket string) (string, error) {
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
 	if err != nil {
-		return "", errors.New("Impossible de verfifier l'identité")
+		return "", errors.New("unable to verify identity (1)")
 	}
 	defer response.Body.Close()
 
 	htmlData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", errors.New("Impossible de verfifier l'identité")
+		return "", errors.New("unable to verify identity (2)")
 	}
 	xml := string(htmlData)
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>") {
-		return "", errors.New("Impossible de verfifier l'identité")
+		return "", errors.New("unable to verify identity (3)")
 	}
 
 	username := strings.Split(xml, "<cas:user>")[1]
 	username = strings.Split(username, "</cas:user>")[0]
 
 	if !(len(username) > 2) {
-		return "", errors.New("Impossible de verfifier l'identité")
+		return "", errors.New("unable to verify identity (4)")
 	}
 	return username, nil
 }
@@ -190,7 +185,7 @@ func checkLoginForUser(credentials Credentials) (Credentials, error) {
 	if len(result) > 0 {
 		return result[0], nil
 	}
-	return Credentials{}, errors.New("Wrong Credentials")
+	return Credentials{}, errors.New("wrong credentials")
 }
 
 func logAssociation(id bson.ObjectId, master bool) *memstore.MemoryToken {
