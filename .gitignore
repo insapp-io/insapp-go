@@ -1,5 +1,8 @@
 .DS_Store
 
+Dockerfile
+config.json
+
 # JetBrains
 .idea/workspace.xml
 .idea/tasks.xml
@@ -28,6 +31,3 @@ _testmain.go
 *.exe
 *.test
 *.prof
-
-config.json
-src

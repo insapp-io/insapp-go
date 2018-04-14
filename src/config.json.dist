@@ -1,0 +1,8 @@
+{
+  "email":"REPLACE_WITH_YOUR_EMAIL",
+  "password":"pass",
+  "googlekey":"example",
+  "database":"db",
+  "env":"dev",
+  "port":"REPLACE_WITH_THE_API_PORT"
+}

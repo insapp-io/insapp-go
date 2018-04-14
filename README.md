@@ -16,7 +16,7 @@ go get gopkg.in/mgo.v2
 Edit the configuration file:
 
 ```
-cp config.example.json config.json
+cp config.json.dist config.json
 vi config.json
 ```
 
