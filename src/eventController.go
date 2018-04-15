@@ -49,7 +49,7 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, event.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -71,7 +71,7 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, event.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -88,7 +88,7 @@ func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, event.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -103,7 +103,7 @@ func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, userID)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	event, user := AddParticipantToGoingList(eventID, userID)
@@ -120,7 +120,7 @@ func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, userID)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	if status == "going" {
@@ -147,7 +147,7 @@ func RemoveParticipantController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, userID)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	RemoveParticipant(eventID, userID, "participants")
@@ -166,14 +166,14 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	var comment Comment
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(bson.M{"error": "Mauvais Format"})
+		json.NewEncoder(w).Encode(bson.M{"error": "wrong format"})
 		return
 	}
 
 	isValid := VerifyUserRequest(r, comment.User)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 

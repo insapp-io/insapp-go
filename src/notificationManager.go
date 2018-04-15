@@ -75,7 +75,7 @@ func TriggerNotificationForUser(sender bson.ObjectId, receiver bson.ObjectId, co
 		triggeriOSNotification(notification, []NotificationUser{user})
 	}
 	if user.Os == "android" {
-		triggerAndroidNotification(notification, []NotificationUser{user})
+		triggerAndroidNotification(GetUser(sender).Username, message, notification, []NotificationUser{user})
 	}
 }
 
@@ -101,7 +101,7 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 		}
 	}
 	if Contains("android", event.Plateforms) {
-		triggerAndroidTopicNotification(notification, users, []string{"events"})
+		triggerAndroidTopicNotification(event.Name, message, notification, users, []string{"events"})
 	}
 }
 
@@ -127,28 +127,28 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 		}
 	}
 	if Contains("android", post.Plateforms) {
-		triggerAndroidTopicNotification(notification, users, []string{"news"})
+		triggerAndroidTopicNotification(post.Title, message, notification, users, []string{"news"})
 	}
 }
 
-func triggerAndroidNotification(notification Notification, users []NotificationUser) {
+func triggerAndroidNotification(title string, message string, notification Notification, users []NotificationUser) {
 	done := make(chan bool)
 	for _, user := range users {
 		notification.Receiver = user.UserId
 		notification = AddNotification(notification)
 		number := len(GetUnreadNotificationsForUser(user.UserId))
-		go sendAndroidNotificationToDevice(user.Token, notification, number, done)
+		go sendAndroidNotificationToDevice(user.Token, title, message, notification, number, done)
 	}
 	<-done
 }
 
-func triggerAndroidTopicNotification(notification Notification, users []NotificationUser, topics []string) {
+func triggerAndroidTopicNotification(title string, message string, notification Notification, users []NotificationUser, topics []string) {
 	done := make(chan bool)
 	for _, user := range users {
 		notification.Receiver = user.UserId
 		notification = AddNotification(notification)
 	}
-	go sendAndroidNotificationToTopics(topics, notification, 0, done)
+	go sendAndroidNotificationToTopics(topics, title, message, notification, 0, done)
 	<-done
 }
 
@@ -196,7 +196,7 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 	done <- true
 }
 
-func sendAndroidNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+func sendAndroidNotificationToDevice(token string, title string, message string, notification Notification, number int, done chan bool) {
 	url := "https://fcm.googleapis.com/fcm/send"
 	notificationJson, _ := json.Marshal(notification)
 
@@ -204,9 +204,19 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 	config, _ := Configuration()
 
 	if config.Environment != "prod" {
-		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+		jsonStr = "{" +
+			"\"to\":\"" + token + "\"," +
+			"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+			"\"data\":" + string(notificationJson) + "," +
+			"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
+			"}"
 	} else {
-		jsonStr = "{\"to\":\"" + token + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+		jsonStr = "{" +
+			"\"to\":\"" + token + "\"," +
+			"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+			"\"data\":" + string(notificationJson) + "," +
+			"\"restricted_package_name\":\"fr.insapp.insapp\"" +
+			"}"
 	}
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
@@ -233,7 +243,7 @@ func sendAndroidNotificationToDevice(token string, notification Notification, nu
 	done <- true
 }
 
-func sendAndroidNotificationToTopics(topics []string, notification Notification, number int, done chan bool) {
+func sendAndroidNotificationToTopics(topics []string, title string, message string, notification Notification, number int, done chan bool) {
 	url := "https://fcm.googleapis.com/fcm/send"
 	notificationJson, _ := json.Marshal(notification)
 
@@ -248,9 +258,19 @@ func sendAndroidNotificationToTopics(topics []string, notification Notification,
 		topicsStr = "/topics/" + topics[0]
 
 		if config.Environment != "prod" {
-			jsonStr = "{\"to\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+			jsonStr = "{" +
+				"\"to\":\"" + topicsStr + "\"," +
+				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+				"\"data\":" + string(notificationJson) + "," +
+				"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
+				"}"
 		} else {
-			jsonStr = "{\"to\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+			jsonStr = "{" +
+				"\"to\":\"" + topicsStr + "\"," +
+				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+				"\"data\":" + string(notificationJson) + "," +
+				"\"restricted_package_name\":\"fr.insapp.insapp\"" +
+				"}"
 		}
 	} else {
 		for i := 0; i < len(topics); i++ {
@@ -261,9 +281,19 @@ func sendAndroidNotificationToTopics(topics []string, notification Notification,
 		}
 
 		if config.Environment != "prod" {
-			jsonStr = "{\"condition\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp.debug\"}"
+			jsonStr = "{" +
+				"\"condition\":\"" + topicsStr + "\"," +
+				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+				"\"data\":" + string(notificationJson) + "," +
+				"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
+				"}"
 		} else {
-			jsonStr = "{\"condition\":\"" + topicsStr + "\", \"data\":" + string(notificationJson) + ", \"restricted_package_name\":\"fr.insapp.insapp\"}"
+			jsonStr = "{" +
+				"\"condition\":\"" + topicsStr + "\"," +
+				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\"}," +
+				"\"data\":" + string(notificationJson) + "," +
+				"\"restricted_package_name\":\"fr.insapp.insapp\"" +
+				"}"
 		}
 	}
 
