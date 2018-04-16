@@ -14,8 +14,8 @@ import (
 // from the given "id" in the URL. (cf Routes in routes.go)
 func GetEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	var res = GetEvent(bson.ObjectIdHex(assocationID))
+	associationID := vars["id"]
+	var res = GetEvent(bson.ObjectIdHex(associationID))
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -111,7 +111,7 @@ func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 }
 
 // AddParticipantController will answer the JSON
-// of the event with the given partipant added
+// of the event with the given attendee added
 func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := bson.ObjectIdHex(vars["id"])
@@ -206,7 +206,7 @@ func UncommentEventController(w http.ResponseWriter, r *http.Request) {
 	comment, err := GetCommentForEvent(bson.ObjectIdHex(eventID), bson.ObjectIdHex(commentID))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Inexistant"})
+		json.NewEncoder(w).Encode(bson.M{"error": "content not found"})
 		return
 	}
 	event := GetEvent(bson.ObjectIdHex(eventID))
@@ -214,7 +214,7 @@ func UncommentEventController(w http.ResponseWriter, r *http.Request) {
 	isAssociationValid := VerifyAssociationRequest(r, event.Association)
 	if !isUserValid && !isAssociationValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := UncommentEvent(bson.ObjectIdHex(eventID), bson.ObjectIdHex(commentID))
