@@ -194,7 +194,7 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, tag := range comment.Tags {
-		go TriggerNotificationForUser(comment.User, bson.ObjectIdHex(tag.User), event.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur \""+event.Name+"\"", comment, "eventTag")
+		go TriggerNotificationForUserFromEvent(comment.User, bson.ObjectIdHex(tag.User), event.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur \""+event.Name+"\"", comment, "eventTag")
 	}
 }
 
