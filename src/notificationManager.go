@@ -214,19 +214,19 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	config, _ := Configuration()
 
 	if config.Environment != "prod" {
-		jsonStr = "{" +
-			"\"to\":\"" + token + "\"," +
-			"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-			"\"data\":{\"ID\":\"" + objectId + "\"}," +
-			"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
-			"}"
+		jsonStr = fmt.Sprintf(`{
+			"condition":"%s",
+			"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+			"data":{"ID":"%s"},
+			"restricted_package_name":"fr.insapp.insapp.debug"
+			}`, token, title, message, clickAction, objectId)
 	} else {
-		jsonStr = "{" +
-			"\"to\":\"" + token + "\"," +
-			"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-			"\"data\":{\"ID\":\"" + objectId + "\"}," +
-			"\"restricted_package_name\":\"fr.insapp.insapp\"" +
-			"}"
+		jsonStr = fmt.Sprintf(`{
+			"to":"%s",
+			"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+			"data":{"ID":"%s"},
+			"restricted_package_name":"fr.insapp.insapp"
+			}`, token, title, message, clickAction, objectId)
 	}
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
@@ -267,19 +267,19 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 		topicsStr = "/topics/" + topics[0]
 
 		if config.Environment != "prod" {
-			jsonStr = "{" +
-				"\"to\":\"" + topicsStr + "\"," +
-				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-				"\"data\":{\"ID\":\"" + objectId + "\"}," +
-				"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
-				"}"
+			jsonStr = fmt.Sprintf(`{
+				"to":"%s",
+				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+				"data":{"ID":"%s"},
+				"restricted_package_name":"fr.insapp.insapp.debug"
+				}`, topicsStr, title, message, clickAction, objectId)
 		} else {
-			jsonStr = "{" +
-				"\"to\":\"" + topicsStr + "\"," +
-				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-				"\"data\":{\"ID\":\"" + objectId + "\"}," +
-				"\"restricted_package_name\":\"fr.insapp.insapp\"" +
-				"}"
+			jsonStr = fmt.Sprintf(`{
+				"to":"%s",
+				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+				"data":{"ID":"%s"},
+				"restricted_package_name":"fr.insapp.insapp"
+				}`, topicsStr, title, message, clickAction, objectId)
 		}
 	} else {
 		for i := 0; i < len(topics); i++ {
@@ -290,19 +290,19 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 		}
 
 		if config.Environment != "prod" {
-			jsonStr = "{" +
-				"\"condition\":\"" + topicsStr + "\"," +
-				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-				"\"data\":{\"ID\":\"" + objectId + "\"}," +
-				"\"restricted_package_name\":\"fr.insapp.insapp.debug\"" +
-				"}"
+			jsonStr = fmt.Sprintf(`{
+				"condition":"%s",
+				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+				"data":{"ID":"%s"},
+				"restricted_package_name":"fr.insapp.insapp.debug"
+				}`, topicsStr, title, message, clickAction, objectId)
 		} else {
-			jsonStr = "{" +
-				"\"condition\":\"" + topicsStr + "\"," +
-				"\"notification\":{\"title\":\"" + title + "\",\"body\":\"" + message + "\",\"sound\":\"default\",\"click_action\":\"" + clickAction + "\"}," +
-				"\"data\":{\"ID\":\"" + objectId + "\"}," +
-				"\"restricted_package_name\":\"fr.insapp.insapp\"" +
-				"}"
+			jsonStr = fmt.Sprintf(`{
+				"condition":"%s",
+				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
+				"data":{"ID":"%s"},
+				"restricted_package_name":"fr.insapp.insapp"
+				}`, topicsStr, title, message, clickAction, objectId)
 		}
 	}
 
