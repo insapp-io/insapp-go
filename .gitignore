@@ -1,11 +1,24 @@
-.DS_Store
-
 Dockerfile
 config.json
 
-# JetBrains
-.idea/workspace.xml
-.idea/tasks.xml
+# macOS
+.DS_Store
+
+# JetBrains user-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# JetBrains sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o

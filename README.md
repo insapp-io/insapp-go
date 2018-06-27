@@ -1,5 +1,5 @@
 # insapp-go
-Backend part of the Insapp project written in Go-lang
+Backend part of the Insapp project written in Golang
 
 ## Dependencies
 
@@ -8,6 +8,7 @@ Don't forget to install Go dependencies:
 ```
 cd src
 go get github.com/gorilla/mux
+go get github.com/thomas-bouvier/palette-extractor
 go get gopkg.in/mgo.v2
 ```
 

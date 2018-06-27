@@ -32,14 +32,14 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 
 func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	var res = GetAssociation(bson.ObjectIdHex(assocationID))
+	associationID := vars["id"]
+	var res = GetAssociation(bson.ObjectIdHex(associationID))
 
 	decoder := json.NewDecoder(r.Body)
 	var user AssociationUser
 	decoder.Decode(&user)
 
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assocationID))
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
@@ -64,7 +64,7 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, association.ID)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := AddAssociation(association)
@@ -90,14 +90,14 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	var association Association
 	decoder.Decode(&association)
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assocationID))
+	associationID := vars["id"]
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	res := UpdateAssociation(bson.ObjectIdHex(assocationID), association)
+	res := UpdateAssociation(bson.ObjectIdHex(associationID), association)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -105,14 +105,14 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 // empty association if the deletation has succeed
 func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assoID := vars["id"]
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(assoID))
+	associationID := vars["id"]
+	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	res := DeleteAssociation(bson.ObjectIdHex(assoID))
+	res := DeleteAssociation(bson.ObjectIdHex(associationID))
 	json.NewEncoder(w).Encode(res)
 }
 

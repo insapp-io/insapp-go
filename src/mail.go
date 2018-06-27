@@ -29,7 +29,7 @@ func SendAssociationEmailSubscription(email string, password string) error {
 		Email    string
 		Password string
 	}{Email: email, Password: password}
-	body, err := parseTemplate("association_subscription_template.html", data)
+	body, err := parseTemplate("templates/association_subscription_template.html", data)
 	if err == nil {
 		SendEmail(email, "Tes identifiants Insapp", body)
 	}
@@ -50,7 +50,7 @@ func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Co
 		CommentContent   string
 		Username         string
 	}{EventName: event.Name, EventImage: cdn + event.Image, EventDescription: event.Description, CommentContent: comment.Content, Username: user.Username}
-	body, err := parseTemplate("association_comment_event_template.html", data)
+	body, err := parseTemplate("templates/association_comment_event_template.html", data)
 	if err == nil {
 		SendEmail(email, "Nouveau commentaire sur \""+event.Name+"\"", body)
 	}
@@ -71,7 +71,7 @@ func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comme
 		CommentContent  string
 		Username        string
 	}{PostName: post.Title, PostImage: cdn + post.Image, PostDescription: post.Description, CommentContent: comment.Content, Username: user.Username}
-	body, err := parseTemplate("association_comment_post_template.html", data)
+	body, err := parseTemplate("templates/association_comment_post_template.html", data)
 	if err == nil {
 		SendEmail(email, "Nouveau commentaire sur \""+post.Title+"\"", body)
 	}

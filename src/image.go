@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/thomas-bouvier/palette-extractor"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -8,9 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
-
-	"strconv"
 	"strings"
 )
 
@@ -71,38 +69,5 @@ func GetImageDimension(fileName string) (int, int) {
 }
 
 func GetImageColors(fileName string) [][]int {
-	var result [][]int
-
-	bytes, err := exec.Command("python", "color-thief.py", "./img/"+fileName).Output()
-
-	if err != nil {
-		return result
-	}
-
-	out := string(bytes)
-	out = strings.Replace(out, "[", "", -1)
-	out = strings.Replace(out, "]", "", -1)
-	out = strings.Replace(out, " ", "", -1)
-	out = strings.Replace(out, ",", " ", -1)
-	out = strings.Replace(out, ")", "", -1)
-	out = strings.Replace(out, "(", "", 1)
-	split := strings.Split(out, "(")
-
-	for _, colorData := range split {
-
-		var colors []int
-
-		colorData = strings.Replace(colorData, "(", "", -1)
-		colorData = strings.Replace(colorData, ")", "", -1)
-		stringColors := strings.Split(colorData, " ")
-
-		for _, col := range stringColors {
-			i, err := strconv.Atoi(strings.TrimSpace(col))
-			if err == nil {
-				colors = append(colors, i)
-			}
-		}
-		result = append(result, colors)
-	}
-	return result
+	return extractor.NewExtractor("./img/"+fileName, 10).GetPalette(6)
 }
