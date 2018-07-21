@@ -7,7 +7,7 @@ import (
 
 // Index is just a test actually
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Insapp REST API - v.0.1")
+	fmt.Fprintln(w, "Insapp REST API - v1.0")
 }
 
 func Credit(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, `<p>
 Insapp est une application promouvant l'associatif au sein de l'INSA Rennes.
 L'application a été initialement imaginée et développée par Antoine Crochet et Florent Thomas-Morel début 2016. Dès octobre 2016, Thomas Bouvier et Guillaume Courtet ont rejoint l'équipe de développement.
-Thomas Bouvier maintient actuellement le projet.
+Thomas Bouvier, Pierre Duc-Martin ainsi qu'Antoine Pégné maintiennent actuellement le projet.
 Insapp est un projet lancé en collaboration avec l'AEIR et le CRI de l'INSA Rennes. Merci à Théau Jubin et Antoine Tulasne (2016), Laura Frouin (2017) et Titouan Le Hir (2018) pour leurs contributions !
 		</p>`)
 
@@ -45,36 +45,9 @@ Les notifications peuvent être activées ou désactivées dans les réglages du
 Le code source d'Insapp est ouvert et libre de droits. Le code des applications Android (Java & Kotlin) et iOS (Swift), de l'interface web (AngularJS) et de l'API (Golang) est accessible sur Github, aux adresses suivantes :
 </br>
 </br>
-https://github.com/tomatrocho/insapp-server.git</br>
-https://github.com/tomatrocho/insapp-android.git</br>
-https://github.com/fthomasmorel/insapp-iOS.git</br>
-</br>
-		</p>`)
-
-	fmt.Fprintln(w, "<h2>Testeurs</h2>")
-
-	fmt.Fprintln(w, `<p>
-Insapp a été testé pendant 3 semaines par des beta-testeurs volontaires issus de différents départements de l'INSA. Nous tenons à remercier pour leurs retours :
-</br>
-</br>
-Nans Préjean</br>
-Hugo David</br>
-Valentin Marc</br>
-Alex Gravier</br>
-Mathieu Cassard</br>
-Célestin Bodet</br>
-Etienne Rebout</br>
-Rémy Garcia</br>
-Jean-Baptiste Nou</br>
-Tanguy Le Quéré</br>
-Laurent Quénach de Quivillic</br>
-Florian Arnoud</br>
-Anthony Sharpe</br>
-Sebastien Turpin</br>
-Luc Geffrault</br>
-Agathe Duboue</br>
-Alexis Brard</br>
-Timothé Frignac</br>
+https://github.com/thomas-bouvier/insapp-server.git</br>
+https://github.com/thomas-bouvier/insapp-android.git</br>
+https://github.com/RobAddict/insapp-iOS.git</br>
 </br>
 		</p>`)
 

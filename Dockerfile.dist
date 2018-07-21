@@ -1,8 +1,8 @@
 # Docker builder for Golang
-FROM golang AS builder
+FROM golang as builder
 LABEL maintainer "Thomas Bouvier <contact@thomas-bouvier.io>"
 
-RUN apt-get update ; apt-get install -y uuid-runtime
+RUN apt-get update ; apt-get install -y ca-certificates
 
 WORKDIR /go/src/app
 COPY ./src .
@@ -10,10 +10,14 @@ RUN set -x && \
     go get -d -v . && \
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
+# Golang application
 FROM scratch
-WORKDIR /root/
-COPY --from=builder /go/src/app .
+LABEL maintainer "Thomas Bouvier <contact@thomas-bouvier.io>"
+
+COPY --from=builder /go/src/app /root
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs
 
 EXPOSE REPLACE_WITH_THE_API_PORT
 
+WORKDIR /root
 CMD ["./app"]
