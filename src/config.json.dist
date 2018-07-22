@@ -1,8 +1,9 @@
 {
-  "email":"REPLACE_WITH_YOUR_EMAIL",
-  "password":"pass",
-  "googlekey":"example",
-  "database":"db",
-  "env":"dev",
+  "google_email":"REPLACE_WITH_YOUR_GOOGLE_EMAIL",
+  "google_password":"REPLACE_WITH_YOUR_GOOGLE_PASSWORD",
+  "google_key":"example",
+  "mongo_database_name":"db",
+  "mongo_database_password":"REPLACE_WITH_THE_MONGO_PASSWORD",
+  "env":"REPLACE_WITH_THE_ENVIRONMENT_TYPE",
   "port":"REPLACE_WITH_THE_API_PORT"
 }

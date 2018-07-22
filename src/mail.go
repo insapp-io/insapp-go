@@ -7,13 +7,16 @@ import (
 )
 
 func SendEmail(to string, subject string, body string) {
-	config, _ := Configuration()
-	from := config.Email
-	pass := config.Password
-	cc := config.Email
-	if config.Environment != "prod" {
+	configuration, _, _ := Configuration()
+
+	from := configuration.GoogleEmail
+	pass := configuration.GooglePassword
+	cc := configuration.GoogleEmail
+	if configuration.Environment != "prod" {
 		to = from
+		subject = "[DEV] " + subject
 	}
+
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
 		"Cc: " + cc + "\n" +
@@ -37,40 +40,34 @@ func SendAssociationEmailSubscription(email string, password string) error {
 }
 
 func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Comment, user User) error {
-	config, _ := Configuration()
-	cdn := "https://"
-	if config.Environment == "dev" {
-		cdn += "dev."
-	}
-	cdn += "insapp.fr/cdn/"
+	configuration, _, _ := Configuration()
+
 	data := struct {
 		EventName        string
 		EventImage       string
 		EventDescription string
 		CommentContent   string
 		Username         string
-	}{EventName: event.Name, EventImage: cdn + event.Image, EventDescription: event.Description, CommentContent: comment.Content, Username: user.Username}
+	}{EventName: event.Name, EventImage: configuration.GetCDN() + event.Image, EventDescription: event.Description, CommentContent: comment.Content, Username: user.Username}
+
 	body, err := parseTemplate("templates/association_comment_event_template.html", data)
 	if err == nil {
 		SendEmail(email, "Nouveau commentaire sur \""+event.Name+"\"", body)
 	}
+
 	return err
 }
 
 func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comment, user User) error {
-	config, _ := Configuration()
-	cdn := "https://"
-	if config.Environment == "dev" {
-		cdn += "dev."
-	}
-	cdn += "insapp.fr/cdn/"
+	configuration, _, _ := Configuration()
+
 	data := struct {
 		PostName        string
 		PostImage       string
 		PostDescription string
 		CommentContent  string
 		Username        string
-	}{PostName: post.Title, PostImage: cdn + post.Image, PostDescription: post.Description, CommentContent: comment.Content, Username: user.Username}
+	}{PostName: post.Title, PostImage: configuration.GetCDN() + post.Image, PostDescription: post.Description, CommentContent: comment.Content, Username: user.Username}
 	body, err := parseTemplate("templates/association_comment_post_template.html", data)
 	if err == nil {
 		SendEmail(email, "Nouveau commentaire sur \""+post.Title+"\"", body)

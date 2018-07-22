@@ -43,6 +43,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	var login Login
 	decoder.Decode(&login)
 	auth, master, err := checkLoginForAssociation(login)
+
 	if err == nil {
 		sessionToken := logAssociation(auth, master)
 		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "master": master, "associationID": auth})
@@ -57,6 +58,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	var credentials Credentials
 	decoder.Decode(&credentials)
 	cred, err := checkLoginForUser(credentials)
+
 	if err == nil {
 		sessionToken := logUser(cred.User)
 		user := GetUser(cred.User)
@@ -84,11 +86,12 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	login.Username = strings.ToLower(login.Username)
 
 	if err == nil && len(login.Username) > 0 && len(login.Device) > 0 {
-		conf, _ := Configuration()
-		session, _ := mgo.Dial(conf.Database)
+		_, info, _ := Configuration()
+		session, _ := mgo.DialWithInfo(info)
 		defer session.Close()
 		session.SetMode(mgo.Monotonic, true)
 		db := session.DB("insapp").C("user")
+
 		count, _ := db.Find(bson.M{"username": login.Username}).Count()
 		var user User
 		if count == 0 {
@@ -96,6 +99,7 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 		} else {
 			db.Find(bson.M{"username": login.Username}).One(&user)
 		}
+
 		token := generateAuthToken()
 		credentials := Credentials{AuthToken: token, User: user.ID, Username: user.Username, Device: login.Device}
 		result := addCredentials(credentials)
@@ -112,79 +116,87 @@ func generateAuthToken() string {
 }
 
 func DeleteCredentialsForUser(id bson.ObjectId) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
+
 	db.Remove(bson.M{"user": id})
 }
 
 func addCredentials(credentials Credentials) Credentials {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
+
 	var cred Credentials
 	db.Find(bson.M{"username": credentials.Username}).One(&cred)
 	db.RemoveId(cred.ID)
 	db.Insert(credentials)
+
 	var result Credentials
 	db.Find(bson.M{"username": credentials.Username}).One(&result)
+
 	return result
 }
 
 func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
+
 	var result []AssociationUser
 	db.Find(bson.M{"username": login.Username, "password": GetMD5Hash(login.Password)}).All(&result)
 	if len(result) > 0 {
 		return result[0].Association, result[0].Master, nil
 	}
+
 	return bson.ObjectId(""), false, errors.New("failed to authenticate")
 }
 
 func verifyTicket(ticket string) (string, error) {
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
 	if err != nil {
-		return "", errors.New("unable to verify identity (1)")
+		return "", errors.New("unable to verify identity")
 	}
 	defer response.Body.Close()
 
 	htmlData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", errors.New("unable to verify identity (2)")
+		return "", errors.New("unable to verify identity")
 	}
 	xml := string(htmlData)
 	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>") {
-		return "", errors.New("unable to verify identity (3)")
+		return "", errors.New("unable to verify identity")
 	}
 
 	username := strings.Split(xml, "<cas:user>")[1]
 	username = strings.Split(username, "</cas:user>")[0]
 
 	if !(len(username) > 2) {
-		return "", errors.New("unable to verify identity (4)")
+		return "", errors.New("unable to verify identity")
 	}
 	return username, nil
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
+
 	var result []Credentials
 	db.Find(bson.M{"username": credentials.Username, "authtoken": credentials.AuthToken}).All(&result)
 	if len(result) > 0 {
 		return result[0], nil
 	}
+
 	return Credentials{}, errors.New("wrong credentials")
 }
 

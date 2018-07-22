@@ -30,79 +30,92 @@ type Tags []Tag
 // CommentPost will add the given comment object to the
 // list of comments of the post linked to the given id
 func CommentPost(id bson.ObjectId, comment Comment) Post {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+
 	postID := bson.M{"_id": id}
 	change := bson.M{"$addToSet": bson.M{
 		"comments": comment,
 	}}
+
 	db.Update(postID, change)
 	var post Post
 	db.Find(bson.M{"_id": id}).One(&post)
+
 	return post
 }
 
 // UncommentPost will remove the given comment object from the
 // list of comments of the post linked to the given id
 func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+
 	DeleteNotificationsForComment(commentID)
 	postID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"comments": bson.M{"_id": commentID},
 	}}
+
 	db.Update(postID, change)
 	var post Post
 	db.Find(bson.M{"_id": id}).One(&post)
+
 	return post
 }
 
 func CommentEvent(id bson.ObjectId, comment Comment) Event {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
+
 	eventID := bson.M{"_id": id}
 	change := bson.M{"$addToSet": bson.M{
 		"comments": comment,
 	}}
+
 	db.Update(eventID, change)
 	var event Event
 	db.Find(bson.M{"_id": id}).One(&event)
+
 	return event
 }
 
 func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
+
 	DeleteNotificationsForComment(commentID)
 	eventID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"comments": bson.M{"_id": commentID},
 	}}
+
 	db.Update(eventID, change)
 	var event Event
 	db.Find(bson.M{"_id": id}).One(&event)
+
 	return event
 }
 
 func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.ObjectId) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+
 	var post Post
 	db.Find(bson.M{"_id": id}).One(&post)
 	db = session.DB("insapp").C("user")
@@ -188,11 +201,12 @@ func DeleteCommentsForUserOnEvents(userId bson.ObjectId) {
 }
 
 func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
+
 	events := GetEvents()
 	for _, event := range events {
 		comments := event.Comments
@@ -213,11 +227,12 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 }
 
 func DeleteTagsForUser(userId bson.ObjectId) {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
+
 	var posts Posts
 	db.Find(bson.M{}).All(&posts)
 	for _, post := range posts {

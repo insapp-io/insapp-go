@@ -10,8 +10,8 @@ import (
 
 func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	var res = GetMyAssociations(bson.ObjectIdHex(assocationID))
+	associationID := vars["id"]
+	var res = GetMyAssociations(bson.ObjectIdHex(associationID))
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -42,7 +42,7 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 

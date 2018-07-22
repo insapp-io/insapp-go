@@ -28,48 +28,55 @@ type fcmResponseStatus struct {
 }
 
 func getiOSUsers(user string) []NotificationUser {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
+
 	var result []NotificationUser
 	if user == "" {
 		db.Find(bson.M{"os": "iOS"}).All(&result)
 	} else {
 		db.Find(bson.M{"os": "iOS", "userid": user}).All(&result)
 	}
+
 	return result
 }
 
 func getAndroidUsers(user string) []NotificationUser {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
+
 	var result []NotificationUser
 	if user == "" {
 		db.Find(bson.M{"os": "android"}).All(&result)
 	} else {
 		db.Find(bson.M{"os": "android", "userid": user}).All(&result)
 	}
+
 	return result
 }
 
 func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
-	conf, _ := Configuration()
-	session, _ := mgo.Dial(conf.Database)
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
+
 	var result NotificationUser
 	db.Find(bson.M{"userid": user}).One(&result)
+
 	return result
 }
 
 func TriggerNotificationForUserFromPost(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
+
 	user := getNotificationUserForUser(receiver)
 	if user.Os == "iOS" {
 		triggeriOSNotification(notification, []NotificationUser{user})
@@ -81,6 +88,7 @@ func TriggerNotificationForUserFromPost(sender bson.ObjectId, receiver bson.Obje
 
 func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
+
 	user := getNotificationUserForUser(receiver)
 	if user.Os == "iOS" {
 		triggeriOSNotification(notification, []NotificationUser{user})
@@ -93,6 +101,7 @@ func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.Obj
 func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
 	iOSUsers := getiOSUsers("")
+
 	var users []NotificationUser
 	for _, notificationUser := range iOSUsers {
 		var user = GetUser(notificationUser.UserId)
@@ -100,17 +109,21 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 			users = append(users, notificationUser)
 		}
 	}
+
 	if Contains("iOS", event.Plateforms) {
 		triggeriOSNotification(notification, users)
 	}
+
 	androidUsers := getAndroidUsers("")
 	users = []NotificationUser{}
+
 	for _, notificationUser := range androidUsers {
 		var user = GetUser(notificationUser.UserId)
 		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
 			users = append(users, notificationUser)
 		}
 	}
+
 	if Contains("android", event.Plateforms) {
 		triggerAndroidTopicNotification(event.Name, message, event.ID.String(), ".activities.EventActivity", notification, users, []string{"events"})
 	}
@@ -192,9 +205,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 		pn.Set("comment", notification.Comment.ID)
 	}
 
-	config, _ := Configuration()
+	configuration, _, _ := Configuration()
 
-	if config.Environment != "prod" {
+	if configuration.Environment != "prod" {
 		client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
 		client.Send(pn)
 		pn.PayloadString()
@@ -211,9 +224,9 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
-	config, _ := Configuration()
+	configuration, _, _ := Configuration()
 
-	if config.Environment != "prod" {
+	if configuration.Environment != "prod" {
 		jsonStr = fmt.Sprintf(`{
 			"condition":"%s",
 			"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
@@ -232,7 +245,7 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "key="+config.GoogleKey)
+	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
 
 	client := &http.Client{}
 	resp, _ := client.Do(req)
@@ -257,7 +270,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
-	config, _ := Configuration()
+	configuration, _, _ := Configuration()
 
 	var topicsStr string
 
@@ -266,7 +279,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	} else if len(topics) == 1 {
 		topicsStr = "/topics/" + topics[0]
 
-		if config.Environment != "prod" {
+		if configuration.Environment != "prod" {
 			jsonStr = fmt.Sprintf(`{
 				"to":"%s",
 				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
@@ -289,7 +302,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 			topicsStr += "'" + topics[i] + "' in topics"
 		}
 
-		if config.Environment != "prod" {
+		if configuration.Environment != "prod" {
 			jsonStr = fmt.Sprintf(`{
 				"condition":"%s",
 				"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
@@ -309,7 +322,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "key="+config.GoogleKey)
+	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
 
 	client := &http.Client{}
 	resp, _ := client.Do(req)

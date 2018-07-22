@@ -16,7 +16,7 @@ func UpdateNotificationUserController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, user.UserId)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	CreateOrUpdateNotificationUser(user)
@@ -29,7 +29,7 @@ func GetNotificationController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := GetNotificationsForUser(bson.ObjectIdHex(userID))
@@ -39,13 +39,13 @@ func GetNotificationController(w http.ResponseWriter, r *http.Request) {
 func DeleteNotificationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["userID"]
-	notifID := vars["id"]
+	notificationID := vars["id"]
 	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "Contenu Protégé"})
+		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	res := ReadNotificationForUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(notifID))
+	res := ReadNotificationForUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(notificationID))
 	json.NewEncoder(w).Encode(bson.M{"notifications": res})
 }

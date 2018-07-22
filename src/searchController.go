@@ -38,8 +38,8 @@ func SearchAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var search Search
 	decoder.Decode(&search)
-	assos := SearchAssociation(search.Terms)
-	json.NewEncoder(w).Encode(bson.M{"associations": assos})
+	associations := SearchAssociation(search.Terms)
+	json.NewEncoder(w).Encode(bson.M{"associations": associations})
 }
 
 func SearchUniversalController(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +50,6 @@ func SearchUniversalController(w http.ResponseWriter, r *http.Request) {
 	users := SearchUser(search.Terms)
 	posts := SearchPost(search.Terms)
 	events := SearchEvent(search.Terms)
-	assos := SearchAssociation(search.Terms)
-	json.NewEncoder(w).Encode(bson.M{"associations": assos, "users": users, "posts": posts, "events": events})
+	associations := SearchAssociation(search.Terms)
+	json.NewEncoder(w).Encode(bson.M{"associations": associations, "users": users, "posts": posts, "events": events})
 }
