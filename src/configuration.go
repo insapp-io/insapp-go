@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"gopkg.in/mgo.v2"
 	"os"
+	"time"
 )
 
 // Post defines how to model a Post
@@ -11,7 +12,6 @@ type Config struct {
 	GoogleEmail      string `json:"google_email"`
 	GooglePassword   string `json:"google_password"`
 	GoogleKey        string `json:"google_key"`
-	DatabaseName     string `json:"mongo_database_name"`
 	DatabasePassword string `json:"mongo_database_password"`
 	Environment      string `json:"env"`
 	Port             string `json:"port"`
@@ -25,9 +25,12 @@ func Configuration() (Config, *mgo.DialInfo, error) {
 	err := decoder.Decode(&configuration)
 
 	info := &mgo.DialInfo{
-		Database: configuration.DatabaseName,
-		Username: "Insapp",
+		Addrs:    []string{"db"},
+		Database: "insapp",
+		Source:   "admin",
+		Username: "admin-insapp",
 		Password: configuration.DatabasePassword,
+		Timeout:  time.Second * 10,
 	}
 
 	return configuration, info, err
