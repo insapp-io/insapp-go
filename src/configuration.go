@@ -28,7 +28,7 @@ func Configuration() (Config, *mgo.DialInfo, error) {
 		Addrs:    []string{"db"},
 		Database: "insapp",
 		Source:   "admin",
-		Username: "admin-insapp",
+		Username: "insapp-admin",
 		Password: configuration.DatabasePassword,
 		Timeout:  time.Second * 10,
 	}
