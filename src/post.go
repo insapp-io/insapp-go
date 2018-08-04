@@ -103,8 +103,8 @@ func GetPost(id bson.ObjectId) Post {
 	return result
 }
 
-// GetLastestPosts will return an array of the last N Posts
-func GetLastestPosts(number int) Posts {
+// GetLatestPosts will return an array of the last N Posts
+func GetLatestPosts(number int) Posts {
 	_, info, _ := Configuration()
 	session, _ := mgo.DialWithInfo(info)
 	defer session.Close()

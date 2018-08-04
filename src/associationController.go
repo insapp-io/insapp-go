@@ -19,8 +19,8 @@ func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
 // linked to the given id in the URL
 func GetAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	assocationID := vars["id"]
-	var res = GetAssociation(bson.ObjectIdHex(assocationID))
+	associationID := vars["id"]
+	var res = GetAssociation(bson.ObjectIdHex(associationID))
 	json.NewEncoder(w).Encode(res)
 }
 

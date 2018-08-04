@@ -19,7 +19,7 @@ type Route struct {
 // Routes type is an array of Route
 type Routes []Route
 
-// NewRouter is the constructeur of the Router
+// NewRouter is the constructor of the Router
 // It will create every routes from the routes variable just above
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
@@ -96,8 +96,7 @@ var associationRoutes = Routes{
 	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
 	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
 
-	//Image
-	//DEPENDENCIES : https://github.com/fengsp/color-thief-py
+	//IMAGE
 	Route{"UploadNewImage", "POST", "/image", UploadNewImageController},
 	Route{"UploadImage", "POST", "/image/{name}", UploadImageController},
 }
@@ -110,28 +109,27 @@ var userRoutes = Routes{
 	//EVENTS
 	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
 	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
-	Route{"AddParticipantOldVersion", "POST", "/event/{id}/participant/{userID}", AddParticipantController},
 	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}/status/{status}", ChangeAttendeeStatusController},
 	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
 	Route{"CommentEvent", "POST", "/event/{id}/comment", CommentEventController},
 	Route{"UncommentEvent", "DELETE", "/event/{id}/comment/{commentID}", UncommentEventController},
 
 	//POSTS
+	Route{"GetPost", "GET", "/post", GetAllPostsController},
 	Route{"GetPost", "GET", "/post/{id}", GetPostController},
-	Route{"GetLastestPost", "GET", "/post", GetLastestPostsController},
 	Route{"LikePost", "POST", "/post/{id}/like/{userID}", LikePostController},
 	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
 	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
 	Route{"UncommentPost", "DELETE", "/post/{id}/comment/{commentID}", UncommentPostController},
 	Route{"ReportComment", "PUT", "/report/{id}/comment/{commentID}", ReportCommentController},
 
-	//USER
+	//USERS
 	Route{"GetUser", "GET", "/user/{id}", GetUserController},
 	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
 	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
 	Route{"ReportUser", "PUT", "/report/user/{id}", ReportUserController},
 
-	//NOTIFICATION
+	//NOTIFICATIONS
 	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},
 	Route{"Notification", "GET", "/notification/{userID}", GetNotificationController},
 	Route{"Notification", "DELETE", "/notification/{userID}/{id}", DeleteNotificationController},

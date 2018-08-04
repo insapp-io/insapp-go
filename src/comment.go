@@ -181,7 +181,7 @@ func getCommentForUserOnEvent(id bson.ObjectId, userId bson.ObjectId) []bson.Obj
 }
 
 func DeleteCommentsForUser(userId bson.ObjectId) {
-	posts := GetLastestPosts(100)
+	posts := GetLatestPosts(100)
 	for _, post := range posts {
 		comments := getCommentforUser(post.ID, userId)
 		for _, commentId := range comments {

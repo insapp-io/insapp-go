@@ -20,13 +20,13 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-// GetLastestPostsController will answer a JSON of the
+// GetAllPostsController will answer a JSON of the
 // N lastest post. Here N = 50.
-func GetLastestPostsController(w http.ResponseWriter, r *http.Request) {
+func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	userId := GetUserFromRequest(r)
 	user := GetUser(bson.ObjectIdHex(userId))
 	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
-	posts := GetLastestPosts(50)
+	posts := GetLatestPosts(50)
 	res := Posts{}
 	if user.ID != "" {
 		for _, post := range posts {
