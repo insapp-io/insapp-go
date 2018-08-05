@@ -21,7 +21,7 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetAllPostsController will answer a JSON of the
-// N lastest post. Here N = 50.
+// N latest posts. Here N = 50.
 func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	userId := GetUserFromRequest(r)
 	user := GetUser(bson.ObjectIdHex(userId))
@@ -56,9 +56,9 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := AddPost(post)
-	asso := GetAssociation(post.Association)
+	association := GetAssociation(post.Association)
 	json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForPost(post, asso.ID, res.ID, "@"+strings.ToLower(asso.Name)+" a posté une nouvelle news 📰")
+	go TriggerNotificationForPost(post, association.ID, res.ID, "@"+strings.ToLower(association.Name)+" a posté une nouvelle news 📰")
 }
 
 // UpdatePostController will answer the JSON of the
@@ -82,7 +82,7 @@ func UpdatePostController(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeletePostController will answer a JSON of an
-// empty post if the deletation has succeed
+// empty post if the deletion has succeed
 func DeletePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	post := GetPost(bson.ObjectIdHex(vars["id"]))

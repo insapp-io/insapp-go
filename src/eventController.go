@@ -106,7 +106,7 @@ func AddParticipantController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	event, user := AddParticipantToGoingList(eventID, userID)
+	event, user := AddAttendeeToGoingList(eventID, userID)
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
@@ -124,7 +124,7 @@ func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if status == "going" {
-		event, user := AddParticipantToGoingList(eventID, userID)
+		event, user := AddAttendeeToGoingList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 	} else if status == "maybe" {
 		event, user := AddParticipantToMaybeList(eventID, userID)

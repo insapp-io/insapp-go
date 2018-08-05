@@ -30,6 +30,20 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	associationID := vars["id"]
+	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
+	json.NewEncoder(w).Encode(posts)
+}
+
+func GetEventsForAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	associationID := vars["id"]
+	events := GetEventsForAssociation(bson.ObjectIdHex(associationID))
+	json.NewEncoder(w).Encode(events)
+}
+
 func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
@@ -102,7 +116,7 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteAssociationController will answer a JSON of an
-// empty association if the deletation has succeed
+// empty association if the deletion has succeed
 func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]

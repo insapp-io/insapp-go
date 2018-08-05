@@ -76,65 +76,69 @@ var publicRoutes = Routes{
 }
 
 var superRoutes = Routes{
-	Route{"GetUsers", "GET", "/user", GetAllUserController},
-	Route{"AddAssociation", "POST", "/association", AddAssociationController},
-	Route{"DeleteAssociation", "DELETE", "/association/{id}", DeleteAssociationController},
-	Route{"GetMyAssociations", "GET", "/association/{id}/myassociations", GetMyAssociationController},
+	Route{"GetUsers", "GET", "/users", GetAllUserController},
+	Route{"AddAssociation", "POST", "/associations", AddAssociationController},
+	Route{"DeleteAssociation", "DELETE", "/associations/{id}", DeleteAssociationController},
+	Route{"GetMyAssociations", "GET", "/associations/{id}/myassociations", GetMyAssociationController},
 }
 
 var associationRoutes = Routes{
 	//ASSOCIATIONS
-	Route{"UpdateAssociation", "PUT", "/association/{id}", UpdateAssociationController},
+	Route{"UpdateAssociation", "PUT", "/associations/{id}", UpdateAssociationController},
 
 	//EVENTS
-	Route{"AddEvent", "POST", "/event", AddEventController},
-	Route{"UpdateEvent", "PUT", "/event/{id}", UpdateEventController},
-	Route{"DeleteEvent", "DELETE", "/event/{id}", DeleteEventController},
+	Route{"AddEvent", "POST", "/events", AddEventController},
+	Route{"UpdateEvent", "PUT", "/events/{id}", UpdateEventController},
+	Route{"DeleteEvent", "DELETE", "/events/{id}", DeleteEventController},
 
 	//POSTS
-	Route{"AddPost", "POST", "/post", AddPostController},
-	Route{"UpdatePost", "PUT", "/post/{id}", UpdatePostController},
-	Route{"DeletePost", "DELETE", "/post/{id}", DeletePostController},
+	Route{"AddPost", "POST", "/posts", AddPostController},
+	Route{"UpdatePost", "PUT", "/posts/{id}", UpdatePostController},
+	Route{"DeletePost", "DELETE", "/posts/{id}", DeletePostController},
 
 	//IMAGE
-	Route{"UploadNewImage", "POST", "/image", UploadNewImageController},
-	Route{"UploadImage", "POST", "/image/{name}", UploadImageController},
+	Route{"UploadNewImage", "POST", "/images", UploadNewImageController},
+	Route{"UploadImage", "POST", "/images/{name}", UploadImageController},
 }
 
 var userRoutes = Routes{
 	//ASSOCIATIONS
-	Route{"GetAssociation", "GET", "/association", GetAllAssociationsController},
-	Route{"GetAssociation", "GET", "/association/{id}", GetAssociationController},
+	Route{"GetAssociation", "GET", "/associations", GetAllAssociationsController},
+	Route{"GetAssociation", "GET", "/associations/{id}", GetAssociationController},
+	Route{"GetPostsForAssociation", "GET", "/associations/{id}/posts", GetPostsForAssociationController},
+	Route{"GetEventsForAssociation", "GET", "/associations/{id}/events", GetEventsForAssociationController},
 
 	//EVENTS
-	Route{"GetFutureEvents", "GET", "/event", GetFutureEventsController},
-	Route{"GetEvent", "GET", "/event/{id}", GetEventController},
-	Route{"AddParticipant", "POST", "/event/{id}/participant/{userID}/status/{status}", ChangeAttendeeStatusController},
-	Route{"RemoveParticipant", "DELETE", "/event/{id}/participant/{userID}", RemoveParticipantController},
-	Route{"CommentEvent", "POST", "/event/{id}/comment", CommentEventController},
-	Route{"UncommentEvent", "DELETE", "/event/{id}/comment/{commentID}", UncommentEventController},
+	Route{"GetFutureEvents", "GET", "/events", GetFutureEventsController},
+	Route{"GetEvent", "GET", "/events/{id}", GetEventController},
+	Route{"AddParticipant", "POST", "/events/{id}/attend/{userID}/status/{status}", ChangeAttendeeStatusController},
+	Route{"RemoveParticipant", "DELETE", "/events/{id}/attend/{userID}", RemoveParticipantController},
+	Route{"CommentEvent", "POST", "/events/{id}/comment", CommentEventController},
+	Route{"UncommentEvent", "DELETE", "/events/{id}/comment/{commentID}", UncommentEventController},
 
 	//POSTS
-	Route{"GetPost", "GET", "/post", GetAllPostsController},
-	Route{"GetPost", "GET", "/post/{id}", GetPostController},
-	Route{"LikePost", "POST", "/post/{id}/like/{userID}", LikePostController},
-	Route{"DislikePost", "DELETE", "/post/{id}/like/{userID}", DislikePostController},
-	Route{"CommentPost", "POST", "/post/{id}/comment", CommentPostController},
-	Route{"UncommentPost", "DELETE", "/post/{id}/comment/{commentID}", UncommentPostController},
-	Route{"ReportComment", "PUT", "/report/{id}/comment/{commentID}", ReportCommentController},
+	Route{"GetPost", "GET", "/posts", GetAllPostsController},
+	Route{"GetPost", "GET", "/posts/{id}", GetPostController},
+	Route{"LikePost", "POST", "/posts/{id}/like/{userID}", LikePostController},
+	Route{"DislikePost", "DELETE", "/posts/{id}/like/{userID}", DislikePostController},
+	Route{"CommentPost", "POST", "/posts/{id}/comment", CommentPostController},
+	Route{"UncommentPost", "DELETE", "/posts/{id}/comment/{commentID}", UncommentPostController},
 
 	//USERS
-	Route{"GetUser", "GET", "/user/{id}", GetUserController},
-	Route{"UpdateUser", "PUT", "/user/{id}", UpdateUserController},
-	Route{"DeleteUser", "DELETE", "/user/{id}", DeleteUserController},
-	Route{"ReportUser", "PUT", "/report/user/{id}", ReportUserController},
+	Route{"GetUser", "GET", "/users/{id}", GetUserController},
+	Route{"UpdateUser", "PUT", "/users/{id}", UpdateUserController},
+	Route{"DeleteUser", "DELETE", "/users/{id}", DeleteUserController},
 
 	//NOTIFICATIONS
-	Route{"Notification", "POST", "/notification", UpdateNotificationUserController},
-	Route{"Notification", "GET", "/notification/{userID}", GetNotificationController},
-	Route{"Notification", "DELETE", "/notification/{userID}/{id}", DeleteNotificationController},
+	Route{"Notification", "POST", "/notifications", UpdateNotificationUserController},
+	Route{"Notification", "GET", "/notifications/{userID}", GetNotificationController},
+	Route{"Notification", "DELETE", "/notifications/{userID}/{id}", DeleteNotificationController},
 
-	//SEARCH
+	//REPORTING
+	Route{"ReportUser", "PUT", "/report/user/{id}", ReportUserController},
+	Route{"ReportComment", "PUT", "/report/{id}/comment/{commentID}", ReportCommentController},
+
+	//SEARCHING
 	Route{"SearchUser", "POST", "/search/users", SearchUserController},
 	Route{"SearchAssociation", "POST", "/search/associations", SearchAssociationController},
 	Route{"SearchEvent", "POST", "/search/events", SearchEventController},

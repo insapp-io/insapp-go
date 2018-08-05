@@ -47,6 +47,7 @@ func GetEvent(id bson.ObjectId) Event {
 	return result
 }
 
+// GetEvents returns an array of Events
 func GetEvents() Events {
 	_, info, _ := Configuration()
 	session, _ := mgo.DialWithInfo(info)
@@ -60,7 +61,7 @@ func GetEvents() Events {
 	return result
 }
 
-// GetFutureEvents returns an array of Event objects
+// GetFutureEvents returns an array of Event
 // that will happen after "NOW"
 func GetFutureEvents() Events {
 	_, info, _ := Configuration()
@@ -72,6 +73,20 @@ func GetFutureEvents() Events {
 	var result Events
 	var now = time.Now()
 	db.Find(bson.M{"dateend": bson.M{"$gt": now}}).All(&result)
+
+	return result
+}
+
+// GetEventsForAssociation returns an array of all Events from the given association ID
+func GetEventsForAssociation(id bson.ObjectId) Events {
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("event")
+
+	var result Events
+	db.Find(bson.M{"association": id}).All(&result)
 
 	return result
 }
@@ -144,7 +159,7 @@ func DeleteEvent(event Event) Event {
 }
 
 // AddParticipant add the given userID to the given eventID as a participant
-func AddParticipantToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
+func AddAttendeeToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	RemoveParticipant(id, userID, "notgoing")
 	RemoveParticipant(id, userID, "maybe")
 

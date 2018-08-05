@@ -58,7 +58,7 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
-	assosID := bson.M{"_id": id}
+	associationID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
 		"name":          association.Name,
 		"email":         association.Email,
@@ -71,7 +71,7 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 		"fgcolor":       association.FgColor,
 	}}
 
-	db.Update(assosID, change)
+	db.Update(associationID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 
@@ -168,12 +168,12 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
-	assosID := bson.M{"_id": id}
+	associationID := bson.M{"_id": id}
 	change := bson.M{"$addToSet": bson.M{
 		"events": event,
 	}}
 
-	db.Update(assosID, change)
+	db.Update(associationID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 
@@ -188,12 +188,12 @@ func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Associati
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
-	assosID := bson.M{"_id": id}
+	associationID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"events": event,
 	}}
 
-	db.Update(assosID, change)
+	db.Update(associationID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 
@@ -207,12 +207,12 @@ func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
-	assosID := bson.M{"_id": id}
+	associationID := bson.M{"_id": id}
 	change := bson.M{"$addToSet": bson.M{
 		"posts": post,
 	}}
 
-	db.Update(assosID, change)
+	db.Update(associationID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 
@@ -226,12 +226,12 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
-	assosID := bson.M{"_id": id}
+	associationID := bson.M{"_id": id}
 	change := bson.M{"$pull": bson.M{
 		"posts": post,
 	}}
 
-	db.Update(assosID, change)
+	db.Update(associationID, change)
 	var result Association
 	db.Find(bson.M{"_id": id}).One(&result)
 

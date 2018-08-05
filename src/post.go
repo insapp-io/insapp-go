@@ -103,6 +103,20 @@ func GetPost(id bson.ObjectId) Post {
 	return result
 }
 
+// GetPosts will return an array of Posts
+func GetPosts() Posts {
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("post")
+
+	var result Posts
+	db.Find(bson.M{}).All(&result)
+
+	return result
+}
+
 // GetLatestPosts will return an array of the last N Posts
 func GetLatestPosts(number int) Posts {
 	_, info, _ := Configuration()
@@ -113,6 +127,20 @@ func GetLatestPosts(number int) Posts {
 
 	var result Posts
 	db.Find(bson.M{}).Sort("-date").Limit(number).All(&result)
+
+	return result
+}
+
+// GetPostsForAssociation returns an array of Posts from the given association ID
+func GetPostsForAssociation(id bson.ObjectId) Posts {
+	_, info, _ := Configuration()
+	session, _ := mgo.DialWithInfo(info)
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+	db := session.DB("insapp").C("post")
+
+	var result Posts
+	db.Find(bson.M{"association": id}).Sort("-date").All(&result)
 
 	return result
 }
