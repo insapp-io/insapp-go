@@ -41,13 +41,16 @@ You can now manually launch your process with `./src`. It is listening on 0.0.0.
 | Type      | Endpoint calls                                    | Description
 |-----------|---------------------------------------------------|--------------------------------------
 | `GET`     | `/`                                               | `Index`
+| `GET`     | `/how-to-post`                                    | `Get the tutorial for posting content`
 | `GET`     | `/credit`                                         | `Get the credits`
 | `GET`     | `/legal`                                          | `Get the legal conditions`
 | `POST`    | `/login/association`                              | `Log an association in`
 | `POST`    | `/login/user`                                     | `Log a user in`
-| `POST`    | `/signin/user/{ticket}`                           | `Sign a user in with the ticket {ticket}`
+| `POST`    | `/signin/user/{ticket}`                           | `Sign a user in with the ticket {ticket} and generate his token`
 
 ### User routes
+
+These endpoints must include the user token as a query string : `?token=<token>`.
 
 | Type      | Endpoint calls                                    | Description
 |-----------|---------------------------------------------------|--------------------------------------

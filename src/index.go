@@ -10,6 +10,25 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Insapp REST API - v1.0")
 }
 
+func HowToPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
+	fmt.Fprintln(w, "<h1>Insapp</h1>")
+
+	fmt.Fprintln(w, "<h2>Comment publier ?</h2>")
+
+	fmt.Fprintln(w, `<p>
+L'adresse de l'interface d'administration est la suivante : insapp.fr/admin.
+		</p>`)
+
+	fmt.Fprintln(w, `<p>
+Pour pouvoir publier depuis l'interface d'administration, un compte d'association est nécessaire.
+Si votre association n'en dispose pas encore, ou si vous avez oublié le mot de passe, n'hésitez pas à envoyer un mail à aeir-insapp@insa-rennes.fr.
+Nous répondons sous peu !
+		</p>`)
+
+	fmt.Fprintln(w, "</body>")
+}
+
 func Credit(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<body style='font-family: \"Arial\", Arial, sans-serif; text-align: justify;'>")
 	fmt.Fprintln(w, "<h1>Insapp</h1>")
@@ -35,8 +54,8 @@ Vous n'êtes en aucun cas obligé de renseigner votre identité dans la page pro
 
 	fmt.Fprintln(w, `<p>
 Les associations ont accès au nombre de "like", le nombre de participants pour leurs évènements, ainsi qu'au contenu des commentaires postés sur leurs posts.
-Ces commentaires restent anonymes et les associations se réservent le droit de supprimer des commentaires.
-Les notifications peuvent être activées ou désactivées dans les réglages du téléphone.
+Ces commentaires restent anonymes et les associations se réservent le droit d'en supprimer.
+Les notifications peuvent être activées ou désactivées dans les paramètres de l'application.
 		</p>`)
 
 	fmt.Fprintln(w, "<h2>Sources</h2>")

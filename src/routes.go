@@ -68,6 +68,7 @@ var memStoreUser = memstore.New("user")
 
 var publicRoutes = Routes{
 	Route{"Index", "GET", "/", Index},
+	Route{"HowToPost", "GET", "/how-to-post", HowToPost},
 	Route{"Credit", "GET", "/credit", Credit},
 	Route{"Legal", "GET", "/legal", Legal},
 	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
