@@ -1,4 +1,6 @@
 # insapp-go
+[![Go Report Card](https://goreportcard.com/badge/github.com/thomas-bouvier/insapp-go)](https://goreportcard.com/report/thomas-bouvier/insapp-go)
+
 Backend part of the Insapp project written in Golang
 
 ## Dependencies

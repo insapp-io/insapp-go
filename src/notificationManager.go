@@ -248,8 +248,10 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
 
 	client := &http.Client{}
-	resp, _ := client.Do(req)
-
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
 	defer resp.Body.Close()
 
 	fmt.Println("Android notification response :")
@@ -325,11 +327,13 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
 
 	client := &http.Client{}
-	resp, _ := client.Do(req)
-
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
 	defer resp.Body.Close()
 
-	fmt.Println("Android notification response :")
+	fmt.Println("Android notification response:")
 	fmt.Println("Condition:", topicsStr)
 	fmt.Println("Status:", resp.StatusCode)
 

@@ -7,6 +7,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -26,18 +28,35 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	userId := GetUserFromRequest(r)
 	user := GetUser(bson.ObjectIdHex(userId))
 	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
-	posts := GetLatestPosts(50)
-	res := Posts{}
+	posts := GetPosts()
+	filteredPosts := Posts{}
 	if user.ID != "" {
 		for _, post := range posts {
 			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
-				res = append(res, post)
+				filteredPosts = append(filteredPosts, post)
 			}
 		}
 	} else {
-		res = posts
+		filteredPosts = posts
 	}
-	json.NewEncoder(w).Encode(res)
+	paginatedPosts := filteredPosts
+	pagination := r.URL.Query()["range"]
+	if pagination != nil {
+		re := regexp.MustCompile("\\[([0-9]+),\\s*?([0-9]+)\\]")
+		matches := re.FindStringSubmatch(pagination)
+		if len(matches) == 3 {
+			if start, err := strconv.Atoi(matches[1]); err == nil {
+				if end, err := strconv.Atoi(matches[2]); err == nil {
+					if end >= start && len(filteredPosts) > start {
+						for i := start; i <= end || i < len(filteredPosts); i++ {
+							paginatedPosts = append(paginatedPosts, filteredPosts[i])
+						}
+					}
+				}
+			}
+		}
+	}
+	json.NewEncoder(w).Encode(paginatedPosts)
 }
 
 // AddPostController will answer a JSON of the
