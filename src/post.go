@@ -112,7 +112,7 @@ func GetPosts() Posts {
 	db := session.DB("insapp").C("post")
 
 	var result Posts
-	db.Find(bson.M{}).All(&result)
+	db.Find(bson.M{}).Sort("-date").All(&result)
 
 	return result
 }
@@ -154,7 +154,7 @@ func SearchPost(name string) Posts {
 
 	var result Posts
 	db.Find(bson.M{"$or": []interface{}{
-		bson.M{"title": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+		bson.M{"title": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}}}).All(&result)
 
 	return result
 }

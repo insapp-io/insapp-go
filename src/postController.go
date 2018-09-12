@@ -39,24 +39,28 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	} else {
 		filteredPosts = posts
 	}
-	paginatedPosts := filteredPosts
-	pagination := r.URL.Query()["range"]
-	if pagination != nil {
+
+	pagination := r.URL.Query().Get("range")
+	if len(pagination) > 0 {
 		re := regexp.MustCompile("\\[([0-9]+),\\s*?([0-9]+)\\]")
 		matches := re.FindStringSubmatch(pagination)
 		if len(matches) == 3 {
 			if start, err := strconv.Atoi(matches[1]); err == nil {
 				if end, err := strconv.Atoi(matches[2]); err == nil {
 					if end >= start && len(filteredPosts) > start {
+						paginatedPosts := Posts{}
 						for i := start; i <= end || i < len(filteredPosts); i++ {
 							paginatedPosts = append(paginatedPosts, filteredPosts[i])
 						}
+						json.NewEncoder(w).Encode(paginatedPosts)
+						return
 					}
 				}
 			}
 		}
 	}
-	json.NewEncoder(w).Encode(paginatedPosts)
+
+	json.NewEncoder(w).Encode(filteredPosts)
 }
 
 // AddPostController will answer a JSON of the
