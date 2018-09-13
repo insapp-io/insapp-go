@@ -26,6 +26,32 @@ Si votre association n'en dispose pas encore, ou si vous avez oublié le mot de 
 Nous répondons sous peu !
 		</p>`)
 
+	fmt.Fprintln(w, `<p>
+Une nouvelle interface d'administration est en cours de développement.'
+		</p>`)
+
+	fmt.Fprintln(w, "<h2>Pourquoi publier ?</h2>")
+
+	fmt.Fprintln(w, `<p>
+Quels sont les avantages d'Insapp par rapport aux mails ?
+<ul>
+	<li>L’information ayant attrait à la vie insalienne est centralisée et accessible via une API</li>
+	<li>Côté utilisateur, le système d’événements permet de ne rien manquer</li>
+	<li>Côté utilisateur, l’interaction est possible et profitable à tous grâce aux commentaires</li>
+</ul>
+	</p>`)
+
+	fmt.Fprintln(w, `<p>
+Quels sont les avantages d'Insapp par rapport à Facebook ?
+<ul>
+	<li>L’information ayant attrait à la vie insalienne est centralisée et accessible via une API</li>
+	<li>L’information est stockée localement, et nous en avons le contrôle</li>
+	<li>L'information n'est pas noyée dans Entraide INSA</li>
+	<li>Toutes les associations ont la même visibilité</li>
+	<li>Côté utilisateur, pas besoin d’un compte Facebook</li>
+</ul>
+	</p>`)
+
 	fmt.Fprintln(w, "</body>")
 }
 

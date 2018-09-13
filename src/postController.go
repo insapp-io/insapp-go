@@ -28,7 +28,7 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	userId := GetUserFromRequest(r)
 	user := GetUser(bson.ObjectIdHex(userId))
 	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
-	posts := GetPosts()
+	posts := GetLatestPosts(10)
 	filteredPosts := Posts{}
 	if user.ID != "" {
 		for _, post := range posts {
@@ -49,7 +49,7 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 				if end, err := strconv.Atoi(matches[2]); err == nil {
 					if end >= start && len(filteredPosts) > start {
 						paginatedPosts := Posts{}
-						for i := start; i <= end || i < len(filteredPosts); i++ {
+						for i := start; i <= end && i < len(filteredPosts); i++ {
 							paginatedPosts = append(paginatedPosts, filteredPosts[i])
 						}
 						json.NewEncoder(w).Encode(paginatedPosts)

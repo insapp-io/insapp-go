@@ -125,7 +125,7 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 	}
 
 	if Contains("android", event.Plateforms) {
-		triggerAndroidTopicNotification(event.Name, message, event.ID.String(), ".activities.EventActivity", notification, users, []string{"events"})
+		triggerAndroidTopicNotification(event.Name, message, content.Hex(), ".activities.EventActivity", notification, users, []string{"events"})
 	}
 }
 
@@ -151,7 +151,7 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 		}
 	}
 	if Contains("android", post.Plateforms) {
-		triggerAndroidTopicNotification(post.Title, message, post.ID.String(), ".activities.PostActivity", notification, users, []string{"news"})
+		triggerAndroidTopicNotification(post.Title, message, content.Hex(), ".activities.PostActivity", notification, users, []string{"news"})
 	}
 }
 
