@@ -11,7 +11,7 @@ import (
 type Config struct {
 	GoogleEmail      string `json:"google_email"`
 	GooglePassword   string `json:"google_password"`
-	GoogleKey        string `json:"google_key"`
+	FirebaseKey      string `json:"firebase_key"`
 	DatabasePassword string `json:"mongo_database_password"`
 	Environment      string `json:"env"`
 	Port             string `json:"port"`

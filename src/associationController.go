@@ -30,20 +30,6 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	associationID := vars["id"]
-	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
-	json.NewEncoder(w).Encode(posts)
-}
-
-func GetEventsForAssociationController(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	associationID := vars["id"]
-	events := GetEventsForAssociation(bson.ObjectIdHex(associationID))
-	json.NewEncoder(w).Encode(events)
-}
-
 func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]

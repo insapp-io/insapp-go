@@ -39,6 +39,13 @@ func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func GetEventsForAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	associationID := vars["id"]
+	events := GetEventsForAssociation(bson.ObjectIdHex(associationID))
+	json.NewEncoder(w).Encode(events)
+}
+
 // AddEventController will answer the JSON
 // of the brand new created event from the JSON body
 func AddEventController(w http.ResponseWriter, r *http.Request) {
@@ -54,9 +61,9 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := AddEvent(event)
-	asso := GetAssociation(event.Association)
+	association := GetAssociation(event.Association)
 	json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForEvent(event, asso.ID, res.ID, "@"+strings.ToLower(asso.Name)+" t'invite à "+res.Name+" 📅")
+	go TriggerNotificationForEvent(event, association.ID, res.ID, "@"+strings.ToLower(association.Name)+" t'invite à "+res.Name+" 📅")
 }
 
 // UpdateEventController will answer the JSON
@@ -80,7 +87,7 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteEventController will answer an empty JSON
-// if the deletation has succeed
+// if the deletion has succeed
 func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := GetEvent(bson.ObjectIdHex(vars["id"]))

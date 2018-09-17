@@ -63,6 +63,30 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filteredPosts)
 }
 
+// GetAllPostsController will answer a JSON of the post owned by
+// the given association
+func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	associationID := vars["id"]
+	userId := GetUserFromRequest(r)
+	user := GetUser(bson.ObjectIdHex(userId))
+	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
+	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
+
+	filteredPosts := Posts{}
+	if user.ID != "" {
+		for _, post := range posts {
+			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
+				filteredPosts = append(filteredPosts, post)
+			}
+		}
+	} else {
+		filteredPosts = posts
+	}
+
+	json.NewEncoder(w).Encode(filteredPosts)
+}
+
 // AddPostController will answer a JSON of the
 // brand new created post (from the JSON Body)
 func AddPostController(w http.ResponseWriter, r *http.Request) {

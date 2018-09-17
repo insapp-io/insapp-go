@@ -69,7 +69,7 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 	return result
 }
 
-// DeletePost will delete the given post from the database
+// DeletePost will delete the given Post from the database
 func DeletePost(post Post) Post {
 	_, info, _ := Configuration()
 	session, _ := mgo.DialWithInfo(info)
@@ -89,7 +89,7 @@ func DeletePost(post Post) Post {
 	return result
 }
 
-// GetPost will return an Post object from the given ID
+// GetPost will return a Post object from the given ID
 func GetPost(id bson.ObjectId) Post {
 	_, info, _ := Configuration()
 	session, _ := mgo.DialWithInfo(info)

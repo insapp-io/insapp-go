@@ -245,7 +245,7 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
+	req.Header.Set("Authorization", "key="+configuration.FirebaseKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -324,7 +324,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "key="+configuration.GoogleKey)
+	req.Header.Set("Authorization", "key="+configuration.FirebaseKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
