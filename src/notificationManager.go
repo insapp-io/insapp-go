@@ -100,94 +100,91 @@ func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.Obj
 
 func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
-	iOSUsers := getiOSUsers("")
-
 	var users []NotificationUser
-	for _, notificationUser := range iOSUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
-			users = append(users, notificationUser)
-		}
-	}
 
 	if Contains("iOS", event.Plateforms) {
+		iOSUsers := getiOSUsers("")
+		for _, notificationUser := range iOSUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+				users = append(users, notificationUser)
+			}
+		}
+
 		triggeriOSNotification(notification, users)
 	}
 
-	androidUsers := getAndroidUsers("")
-	users = []NotificationUser{}
-
-	for _, notificationUser := range androidUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
-			users = append(users, notificationUser)
-		}
-	}
-
 	if Contains("android", event.Plateforms) {
-		triggerAndroidTopicNotification(event.Name, message, content.Hex(), ".activities.EventActivity", notification, users, []string{"events"})
+		androidUsers := getAndroidUsers("")
+		users = []NotificationUser{}
+		for _, notificationUser := range androidUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+				users = append(users, notificationUser)
+			}
+		}
+		for _, user := range users {
+			notification.Receiver = user.UserId
+			AddNotification(notification)
+		}
+
+		sendAndroidNotificationToTopics([]string{"events"}, event.Name, message, content.Hex(), ".activities.EventActivity")
 	}
 }
 
 func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
-	iOSUsers := getiOSUsers("")
 	var users []NotificationUser
-	for _, notificationUser := range iOSUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
-			users = append(users, notificationUser)
-		}
-	}
+
 	if Contains("iOS", post.Plateforms) {
+		iOSUsers := getiOSUsers("")
+		for _, notificationUser := range iOSUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+				users = append(users, notificationUser)
+			}
+		}
+
 		triggeriOSNotification(notification, users)
 	}
-	androidUsers := getAndroidUsers("")
-	users = []NotificationUser{}
-	for _, notificationUser := range androidUsers {
-		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
-			users = append(users, notificationUser)
-		}
-	}
+
 	if Contains("android", post.Plateforms) {
-		triggerAndroidTopicNotification(post.Title, message, content.Hex(), ".activities.PostActivity", notification, users, []string{"news"})
+		androidUsers := getAndroidUsers("")
+		users = []NotificationUser{}
+		for _, notificationUser := range androidUsers {
+			var user = GetUser(notificationUser.UserId)
+			if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+				users = append(users, notificationUser)
+			}
+		}
+		for _, user := range users {
+			notification.Receiver = user.UserId
+			AddNotification(notification)
+		}
+
+		sendAndroidNotificationToTopics([]string{"news"}, post.Title, message, content.Hex(), ".activities.PostActivity")
 	}
 }
 
 func triggerAndroidNotification(title string, message string, objectId string, clickAction string, notification Notification, users []NotificationUser) {
-	done := make(chan bool)
 	for _, user := range users {
 		notification.Receiver = user.UserId
 		notification = AddNotification(notification)
 		//number := len(GetUnreadNotificationsForUser(user.UserId))
-		go sendAndroidNotificationToDevice(user.Token, title, message, objectId, clickAction, done)
+		sendAndroidNotificationToDevice(user.Token, title, message, objectId, clickAction)
 	}
-	<-done
-}
-
-func triggerAndroidTopicNotification(title string, message string, objectId string, clickAction string, notification Notification, users []NotificationUser, topics []string) {
-	done := make(chan bool)
-	for _, user := range users {
-		notification.Receiver = user.UserId
-		notification = AddNotification(notification)
-	}
-	go sendAndroidNotificationToTopics(topics, title, message, objectId, clickAction, done)
-	<-done
 }
 
 func triggeriOSNotification(notification Notification, users []NotificationUser) {
-	done := make(chan bool)
 	for _, user := range users {
 		notification.Receiver = user.UserId
 		notification = AddNotification(notification)
 		number := len(GetUnreadNotificationsForUser(user.UserId))
-		go sendiOSNotificationToDevice(user.Token, notification, number, done)
+		sendiOSNotificationToDevice(user.Token, notification, number)
 	}
-	<-done
 }
 
-func sendiOSNotificationToDevice(token string, notification Notification, number int, done chan bool) {
+func sendiOSNotificationToDevice(token string, notification Notification, number int) {
 	payload := apns.NewPayload()
 	payload.Alert = notification.Message
 	payload.Badge = number
@@ -216,11 +213,9 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 		client.Send(pn)
 		pn.PayloadString()
 	}
-
-	done <- true
 }
 
-func sendAndroidNotificationToDevice(token string, title string, message string, objectId string, clickAction string, done chan bool) {
+func sendAndroidNotificationToDevice(token string, title string, message string, objectId string, clickAction string) {
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
@@ -228,7 +223,7 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 
 	if configuration.Environment != "prod" {
 		jsonStr = fmt.Sprintf(`{
-			"condition":"%s",
+			"to":"%s",
 			"notification":{"title":"%s","body":"%s","sound":"default","color":"#ec5d57","click_action":"%s"},
 			"data":{"ID":"%s"},
 			"restricted_package_name":"fr.insapp.insapp.debug"
@@ -264,11 +259,9 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	json.Unmarshal([]byte(body), &res)
 
 	spew.Dump(res)
-
-	done <- true
 }
 
-func sendAndroidNotificationToTopics(topics []string, title string, message string, objectId string, clickAction string, done chan bool) {
+func sendAndroidNotificationToTopics(topics []string, title string, message string, objectId string, clickAction string) {
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
@@ -277,7 +270,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	var topicsStr string
 
 	if topics == nil || len(topics) == 0 {
-		done <- true
+		return
 	} else if len(topics) == 1 {
 		topicsStr = "/topics/" + topics[0]
 
@@ -343,6 +336,4 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	json.Unmarshal([]byte(body), &res)
 
 	spew.Dump(res)
-
-	done <- true
 }

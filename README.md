@@ -23,7 +23,7 @@ cp config.json.dist config.json
 vi config.json
 ```
 
-Attributes `google_email` and `google_password` refer to the credentials of your Google account. `google_key` refers to the Firebase key to be used to send push notifications. `mongo_database_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `dev` or `prod`. Finally, `port` refers to the API port.
+Attributes `google_email` and `google_password` refer to the credentials of your Google account. `firebase_key` refers to the Firebase server key to be used to send push notifications. `mongo_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `dev` or `prod`. Finally, `port` refers to the API port.
 
 ## Build & Launch
 
