@@ -82,7 +82,7 @@ func TriggerNotificationForUserFromPost(sender bson.ObjectId, receiver bson.Obje
 		triggeriOSNotification(notification, []NotificationUser{user})
 	}
 	if user.Os == "android" {
-		triggerAndroidNotification(GetUser(sender).Username, message, content.String(), ".activities.PostActivity", notification, []NotificationUser{user})
+		triggerAndroidNotification(GetUser(sender).Username, message, content.Hex(), ".activities.PostActivity", notification, []NotificationUser{user})
 	}
 }
 
@@ -94,7 +94,7 @@ func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.Obj
 		triggeriOSNotification(notification, []NotificationUser{user})
 	}
 	if user.Os == "android" {
-		triggerAndroidNotification(GetUser(sender).Username, message, content.String(), ".activities.EventActivity", notification, []NotificationUser{user})
+		triggerAndroidNotification(GetUser(sender).Username, message, content.Hex(), ".activities.EventActivity", notification, []NotificationUser{user})
 	}
 }
 
