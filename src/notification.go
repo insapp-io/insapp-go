@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
 )
@@ -30,10 +29,8 @@ type Notification struct {
 type Notifications []Notification
 
 func GetNotificationUserForUser(userID bson.ObjectId) NotificationUser {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	var result NotificationUser
@@ -47,10 +44,8 @@ func CreateOrUpdateNotificationUser(user NotificationUser) {
 		return
 	}
 
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	res, _ := db.Find(bson.M{"token": user.Token}).Count()
@@ -66,10 +61,8 @@ func CreateOrUpdateNotificationUser(user NotificationUser) {
 }
 
 func AddNotification(notification Notification) Notification {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	notification.ID = bson.NewObjectId()
@@ -80,10 +73,8 @@ func AddNotification(notification Notification) Notification {
 }
 
 func GetNotificationsForUser(userID bson.ObjectId) Notifications {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	var result Notifications
@@ -93,10 +84,8 @@ func GetNotificationsForUser(userID bson.ObjectId) Notifications {
 }
 
 func GetUnreadNotificationsForUser(userID bson.ObjectId) Notifications {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	var result Notifications
@@ -105,10 +94,8 @@ func GetUnreadNotificationsForUser(userID bson.ObjectId) Notifications {
 }
 
 func ReadNotificationForUser(userID bson.ObjectId, notifID bson.ObjectId) Notifications {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	db.Update(bson.M{"_id": notifID}, bson.M{"$set": bson.M{"seen": true}})
@@ -117,50 +104,40 @@ func ReadNotificationForUser(userID bson.ObjectId, notifID bson.ObjectId) Notifi
 }
 
 func DeleteNotificationsForUser(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	db.RemoveAll(bson.M{"receiver": id})
 }
 
 func DeleteNotificationsForComment(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	db.RemoveAll(bson.M{"comment._id": id})
 }
 
 func DeleteNotificationsForPost(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	db.RemoveAll(bson.M{"content": id})
 }
 
 func DeleteNotificationsForEvent(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification")
 
 	db.RemoveAll(bson.M{"content": id})
 }
 
 func DeleteNotificationTokenForUser(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	db.RemoveAll(bson.M{"userid": id})

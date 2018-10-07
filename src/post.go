@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -28,10 +27,8 @@ type Posts []Post
 
 // AddPost will add the given post to the database
 func AddPost(post Post) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	db.Insert(post)
@@ -45,10 +42,8 @@ func AddPost(post Post) Post {
 // UpdatePost will update the post linked to the given ID,
 // with the field of the given post, in the database
 func UpdatePost(id bson.ObjectId, post Post) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	postID := bson.M{"_id": id}
@@ -71,10 +66,8 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 
 // DeletePost will delete the given Post from the database
 func DeletePost(post Post) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	db.RemoveId(post.ID)
@@ -91,10 +84,8 @@ func DeletePost(post Post) Post {
 
 // GetPost will return a Post object from the given ID
 func GetPost(id bson.ObjectId) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var result Post
@@ -105,10 +96,8 @@ func GetPost(id bson.ObjectId) Post {
 
 // GetPosts will return an array of Posts
 func GetPosts() Posts {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var result Posts
@@ -119,10 +108,8 @@ func GetPosts() Posts {
 
 // GetLatestPosts will return an array of the last N Posts
 func GetLatestPosts(number int) Posts {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var result Posts
@@ -133,10 +120,8 @@ func GetLatestPosts(number int) Posts {
 
 // GetPostsForAssociation returns an array of Posts from the given association ID
 func GetPostsForAssociation(id bson.ObjectId) Posts {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var result Posts
@@ -146,10 +131,8 @@ func GetPostsForAssociation(id bson.ObjectId) Posts {
 }
 
 func SearchPost(name string) Posts {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var result Posts
@@ -162,10 +145,8 @@ func SearchPost(name string) Posts {
 // LikePostWithUser will add the user to the list of
 // user that liked the post (cf. Likes field)
 func LikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	postID := bson.M{"_id": id}
@@ -184,10 +165,8 @@ func LikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
 // DislikePostWithUser will remove the user to the list of
 // users that liked the post (cf. Likes field)
 func DislikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	postID := bson.M{"_id": id}

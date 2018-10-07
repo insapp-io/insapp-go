@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
 )
@@ -33,10 +32,8 @@ type Users []User
 
 // AddUser will add the given user from JSON body to the database
 func AddUser(user User) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	db.Insert(user)
@@ -49,10 +46,8 @@ func AddUser(user User) User {
 // UpdateUser will update the user link to the given ID,
 // with the field of the given user, in the database
 func UpdateUser(id bson.ObjectId, user User) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	promotion := ""
@@ -90,10 +85,8 @@ func UpdateUser(id bson.ObjectId, user User) User {
 
 // DeleteUser will delete the given user from the database
 func DeleteUser(user User) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	DeleteCredentialsForUser(user.ID)
@@ -101,9 +94,9 @@ func DeleteUser(user User) User {
 	DeleteNotificationTokenForUser(user.ID)
 
 	for _, eventId := range user.Events {
-		RemoveParticipant(eventId, user.ID, "going")
-		RemoveParticipant(eventId, user.ID, "notgoing")
-		RemoveParticipant(eventId, user.ID, "maybe")
+		RemoveAttendee(eventId, user.ID, "going")
+		RemoveAttendee(eventId, user.ID, "notgoing")
+		RemoveAttendee(eventId, user.ID, "maybe")
 	}
 
 	for _, postId := range user.PostsLiked {
@@ -124,10 +117,8 @@ func DeleteUser(user User) User {
 
 // GetUser will return an User object from the given ID
 func GetAllUser() Users {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	var result Users
@@ -138,10 +129,8 @@ func GetAllUser() Users {
 
 // GetUser will return an User object from the given ID
 func GetUser(id bson.ObjectId) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	var result User
@@ -153,10 +142,8 @@ func GetUser(id bson.ObjectId) User {
 // LikePost will add the postID to the list of liked post
 // of the user linked to the given id
 func LikePost(id bson.ObjectId, postID bson.ObjectId) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	userID := bson.M{"_id": id}
@@ -174,10 +161,8 @@ func LikePost(id bson.ObjectId, postID bson.ObjectId) User {
 // DislikePost will remove the postID from the list of liked
 // post of the user linked to the given id
 func DislikePost(id bson.ObjectId, postID bson.ObjectId) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	userID := bson.M{"_id": id}
@@ -195,10 +180,8 @@ func DislikePost(id bson.ObjectId, postID bson.ObjectId) User {
 // AddEventToUser will add the eventID to the list
 // of the user's event linked to the given id
 func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	userID := bson.M{"_id": id}
@@ -216,10 +199,8 @@ func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
 // RemoveEventFromUser will remove the eventID from the list
 // of the user's event linked to the given id
 func RemoveEventFromUser(id bson.ObjectId, eventID bson.ObjectId) User {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	userID := bson.M{"_id": id}
@@ -235,10 +216,8 @@ func RemoveEventFromUser(id bson.ObjectId, eventID bson.ObjectId) User {
 }
 
 func SearchUser(name string) Users {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	var result Users
@@ -249,10 +228,8 @@ func SearchUser(name string) Users {
 }
 
 func ReportUser(id bson.ObjectId, reporterID bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("user")
 
 	var user User

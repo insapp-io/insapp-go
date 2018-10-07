@@ -7,7 +7,7 @@ import (
 )
 
 func SendEmail(to string, subject string, body string) {
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	from := configuration.GoogleEmail
 	pass := configuration.GooglePassword
@@ -40,7 +40,7 @@ func SendAssociationEmailSubscription(email string, password string) error {
 }
 
 func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Comment, user User) error {
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	data := struct {
 		EventName        string
@@ -59,7 +59,7 @@ func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Co
 }
 
 func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comment, user User) error {
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	data := struct {
 		PostName        string

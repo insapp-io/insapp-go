@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -35,10 +34,8 @@ type Events []Event
 
 // GetEvent returns an Event object from the given ID
 func GetEvent(id bson.ObjectId) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	var result Event
@@ -49,10 +46,8 @@ func GetEvent(id bson.ObjectId) Event {
 
 // GetEvents returns an array of Events
 func GetEvents() Events {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	var result Events
@@ -64,10 +59,8 @@ func GetEvents() Events {
 // GetFutureEvents returns an array of Event
 // that will happen after "NOW"
 func GetFutureEvents() Events {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	var result Events
@@ -79,10 +72,8 @@ func GetFutureEvents() Events {
 
 // GetEventsForAssociation returns an array of all Events from the given association ID
 func GetEventsForAssociation(id bson.ObjectId) Events {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	var result Events
@@ -93,10 +84,8 @@ func GetEventsForAssociation(id bson.ObjectId) Events {
 
 // AddEvent will add the Event event to the database
 func AddEvent(event Event) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	db.Insert(event)
@@ -109,10 +98,8 @@ func AddEvent(event Event) Event {
 
 // UpdateEvent will update the Event event in the database
 func UpdateEvent(id bson.ObjectId, event Event) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -139,10 +126,8 @@ func UpdateEvent(id bson.ObjectId, event Event) Event {
 
 // DeleteEvent will delete the given Event
 func DeleteEvent(event Event) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	db.Remove(event)
@@ -160,13 +145,11 @@ func DeleteEvent(event Event) Event {
 
 // AddParticipant add the given userID to the given eventID as a participant
 func AddAttendeeToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
-	RemoveParticipant(id, userID, "notgoing")
-	RemoveParticipant(id, userID, "maybe")
+	RemoveAttendee(id, userID, "notgoing")
+	RemoveAttendee(id, userID, "maybe")
 
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -182,14 +165,12 @@ func AddAttendeeToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User
 	return event, user
 }
 
-func AddParticipantToMaybeList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
-	RemoveParticipant(id, userID, "notgoing")
-	RemoveParticipant(id, userID, "participants")
+func AddAttendeeToMaybeList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
+	RemoveAttendee(id, userID, "notgoing")
+	RemoveAttendee(id, userID, "participants")
 
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -205,14 +186,12 @@ func AddParticipantToMaybeList(id bson.ObjectId, userID bson.ObjectId) (Event, U
 	return event, user
 }
 
-func AddParticipantToNotGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
-	RemoveParticipant(id, userID, "maybe")
-	RemoveParticipant(id, userID, "participants")
+func AddAttendeeToNotGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
+	RemoveAttendee(id, userID, "maybe")
+	RemoveAttendee(id, userID, "participants")
 
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -228,12 +207,10 @@ func AddParticipantToNotGoingList(id bson.ObjectId, userID bson.ObjectId) (Event
 	return event, user
 }
 
-// RemoveParticipant remove the given userID from the given eventID as a participant
-func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId, list string) (Event, User) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+// RemoveAttendee remove the given userID from the given eventID as a participant
+func RemoveAttendee(id bson.ObjectId, userID bson.ObjectId, list string) (Event, User) {
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -250,10 +227,8 @@ func RemoveParticipant(id bson.ObjectId, userID bson.ObjectId, list string) (Eve
 }
 
 func SearchEvent(name string) Events {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	var result Events

@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
 )
@@ -30,10 +29,8 @@ type Tags []Tag
 // CommentPost will add the given comment object to the
 // list of comments of the post linked to the given id
 func CommentPost(id bson.ObjectId, comment Comment) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	postID := bson.M{"_id": id}
@@ -51,10 +48,8 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 // UncommentPost will remove the given comment object from the
 // list of comments of the post linked to the given id
 func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	DeleteNotificationsForComment(commentID)
@@ -71,10 +66,8 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 }
 
 func CommentEvent(id bson.ObjectId, comment Comment) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	eventID := bson.M{"_id": id}
@@ -90,10 +83,8 @@ func CommentEvent(id bson.ObjectId, comment Comment) Event {
 }
 
 func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	DeleteNotificationsForComment(commentID)
@@ -110,10 +101,8 @@ func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
 }
 
 func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var post Post
@@ -201,10 +190,8 @@ func DeleteCommentsForUserOnEvents(userId bson.ObjectId) {
 }
 
 func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("event")
 
 	events := GetEvents()
@@ -227,10 +214,8 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 }
 
 func DeleteTagsForUser(userId bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("post")
 
 	var posts Posts

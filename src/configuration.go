@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"gopkg.in/mgo.v2"
+	"log"
 	"os"
 	"time"
 )
@@ -17,12 +18,17 @@ type Config struct {
 	Port             string `json:"port"`
 }
 
-func Configuration() (Config, *mgo.DialInfo, error) {
+var mgoSession *mgo.Session
+
+func Configuration() (Config, *mgo.DialInfo) {
 	file, _ := os.Open("config.json")
 	decoder := json.NewDecoder(file)
 
 	configuration := Config{}
 	err := decoder.Decode(&configuration)
+	if err != nil {
+		log.Fatal("Error when parsing config file. Make sure the configuration file (config.json) is valid.")
+	}
 
 	info := &mgo.DialInfo{
 		Addrs:    []string{"db"},
@@ -33,7 +39,22 @@ func Configuration() (Config, *mgo.DialInfo, error) {
 		Timeout:  time.Second * 10,
 	}
 
-	return configuration, info, err
+	return configuration, info
+}
+
+//Creates a new session if mgoSession is nil i.e there is no active mongo session.
+//If there is an active mongo session it will return a Clone
+func GetMongoSession() *mgo.Session {
+	if mgoSession == nil {
+		var err error
+		_, info := Configuration()
+		mgoSession, err = mgo.DialWithInfo(info)
+		if err != nil {
+			log.Fatal("Failed to start the Mongo session")
+		}
+		mgoSession.SetMode(mgo.Monotonic, true)
+	}
+	return mgoSession.Clone()
 }
 
 func (configuration Config) GetCDN() string {

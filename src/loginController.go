@@ -7,7 +7,6 @@ import (
 	"errors"
 	"github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
@@ -86,10 +85,8 @@ func SignInUserController(w http.ResponseWriter, r *http.Request) {
 	login.Username = strings.ToLower(login.Username)
 
 	if err == nil && len(login.Username) > 0 && len(login.Device) > 0 {
-		_, info, _ := Configuration()
-		session, _ := mgo.DialWithInfo(info)
+		session := GetMongoSession()
 		defer session.Close()
-		session.SetMode(mgo.Monotonic, true)
 		db := session.DB("insapp").C("user")
 
 		count, _ := db.Find(bson.M{"username": login.Username}).Count()
@@ -116,20 +113,16 @@ func generateAuthToken() string {
 }
 
 func DeleteCredentialsForUser(id bson.ObjectId) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
 
 	db.Remove(bson.M{"user": id})
 }
 
 func addCredentials(credentials Credentials) Credentials {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
 
 	var cred Credentials
@@ -144,10 +137,8 @@ func addCredentials(credentials Credentials) Credentials {
 }
 
 func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
 
 	var result []AssociationUser
@@ -185,10 +176,8 @@ func verifyTicket(ticket string) (string, error) {
 }
 
 func checkLoginForUser(credentials Credentials) (Credentials, error) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("credentials")
 
 	var result []Credentials

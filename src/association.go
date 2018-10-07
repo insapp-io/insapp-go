@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -25,10 +24,8 @@ type Association struct {
 type Associations []Association
 
 func AddAssociationUser(user AssociationUser) {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 
 	db := session.DB("insapp").C("association_user")
 	db.Insert(user)
@@ -36,10 +33,8 @@ func AddAssociationUser(user AssociationUser) {
 
 // AddAssociation will add the given association to the database
 func AddAssociation(association Association) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	db.Insert(association)
@@ -52,10 +47,8 @@ func AddAssociation(association Association) Association {
 // UpdateAssociation will update the given association link to the given ID,
 // with the field of the given association, in the database
 func UpdateAssociation(id bson.ObjectId, association Association) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	associationID := bson.M{"_id": id}
@@ -80,10 +73,8 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 
 // DeleteAssociation will delete the given association from the database
 func DeleteAssociation(id bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	association := GetAssociation(id)
@@ -103,10 +94,8 @@ func DeleteAssociation(id bson.ObjectId) Association {
 
 // GetAssociation will return an Association object from the given ID
 func GetAssociation(id bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	var result Association
@@ -117,10 +106,8 @@ func GetAssociation(id bson.ObjectId) Association {
 
 // GetAllAssociation will return an array of all the existing Association
 func GetAllAssociation() Associations {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	var result Associations
@@ -130,10 +117,8 @@ func GetAllAssociation() Associations {
 }
 
 func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
 
 	var result []AssociationUser
@@ -147,10 +132,8 @@ func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 }
 
 func SearchAssociation(name string) Associations {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	var result Associations
@@ -162,10 +145,8 @@ func SearchAssociation(name string) Associations {
 
 // AddEventToAssociation will add the given event ID to the given association
 func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	associationID := bson.M{"_id": id}
@@ -182,10 +163,8 @@ func AddEventToAssociation(id bson.ObjectId, event bson.ObjectId) Association {
 
 // RemoveEventFromAssociation will remove the given event ID from the given association
 func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	associationID := bson.M{"_id": id}
@@ -201,10 +180,8 @@ func RemoveEventFromAssociation(id bson.ObjectId, event bson.ObjectId) Associati
 }
 
 func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	associationID := bson.M{"_id": id}
@@ -220,10 +197,8 @@ func AddPostToAssociation(id bson.ObjectId, post bson.ObjectId) Association {
 }
 
 func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association")
 
 	associationID := bson.M{"_id": id}
@@ -239,10 +214,8 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 }
 
 func GetAssociationUser(id bson.ObjectId) AssociationUser {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("association_user")
 
 	var result AssociationUser

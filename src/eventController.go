@@ -134,10 +134,10 @@ func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 		event, user := AddAttendeeToGoingList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 	} else if status == "maybe" {
-		event, user := AddParticipantToMaybeList(eventID, userID)
+		event, user := AddAttendeeToMaybeList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 	} else if status == "notgoing" {
-		event, user := AddParticipantToNotGoingList(eventID, userID)
+		event, user := AddAttendeeToNotGoingList(eventID, userID)
 		json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 	} else {
 		w.WriteHeader(http.StatusNotAcceptable)
@@ -157,9 +157,9 @@ func RemoveAttendeeController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	RemoveParticipant(eventID, userID, "participants")
-	RemoveParticipant(eventID, userID, "notgoing")
-	event, user := RemoveParticipant(eventID, userID, "maybe")
+	RemoveAttendee(eventID, userID, "participants")
+	RemoveAttendee(eventID, userID, "notgoing")
+	event, user := RemoveAttendee(eventID, userID, "maybe")
 	json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
@@ -201,7 +201,7 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, tag := range comment.Tags {
-		go TriggerNotificationForUserFromEvent(comment.User, bson.ObjectIdHex(tag.User), event.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur \""+event.Name+"\"", comment, "eventTag")
+		go TriggerNotificationForUserFromEvent(comment.User, bson.ObjectIdHex(tag.User), event.ID, "@"+GetUser(comment.User).Username+" t'a taggé sur '"+event.Name+"'", comment, "eventTag")
 	}
 }
 

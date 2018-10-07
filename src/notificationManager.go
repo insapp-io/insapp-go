@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/anachronistic/apns"
 	"github.com/davecgh/go-spew/spew"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
@@ -28,10 +27,8 @@ type fcmResponseStatus struct {
 }
 
 func getiOSUsers(user string) []NotificationUser {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	var result []NotificationUser
@@ -45,10 +42,8 @@ func getiOSUsers(user string) []NotificationUser {
 }
 
 func getAndroidUsers(user string) []NotificationUser {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	var result []NotificationUser
@@ -62,10 +57,8 @@ func getAndroidUsers(user string) []NotificationUser {
 }
 
 func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
-	_, info, _ := Configuration()
-	session, _ := mgo.DialWithInfo(info)
+	session := GetMongoSession()
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 	db := session.DB("insapp").C("notification_user")
 
 	var result NotificationUser
@@ -202,7 +195,7 @@ func sendiOSNotificationToDevice(token string, notification Notification, number
 		pn.Set("comment", notification.Comment.ID)
 	}
 
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	if configuration.Environment != "prod" {
 		client := apns.NewClient("gateway.sandbox.push.apple.com:2195", "InsappDevCert.pem", "InsappDev.pem")
@@ -219,7 +212,7 @@ func sendAndroidNotificationToDevice(token string, title string, message string,
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	if configuration.Environment != "prod" {
 		jsonStr = fmt.Sprintf(`{
@@ -265,7 +258,7 @@ func sendAndroidNotificationToTopics(topics []string, title string, message stri
 	url := "https://fcm.googleapis.com/fcm/send"
 
 	var jsonStr string
-	configuration, _, _ := Configuration()
+	configuration, _ := Configuration()
 
 	var topicsStr string
 
