@@ -35,7 +35,7 @@ func UploadImage(r *http.Request) string {
 
 // UploadImage will manage the upload image from a POST request
 func UploadImageWithName(r *http.Request, name string) string {
-	r.ParseMultipartForm(32 << 20)
+	_ = r.ParseMultipartForm(32 << 20)
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		return "error"
@@ -64,8 +64,8 @@ func GetImageDimension(fileName string) (int, int) {
 	if err != nil {
 		return 0, 0
 	}
-	image, _, _ := image.DecodeConfig(file)
-	return image.Width, image.Height
+	decodedImage, _, _ := image.DecodeConfig(file)
+	return decodedImage.Width, decodedImage.Height
 }
 
 func GetImageColors(fileName string) [][]int {

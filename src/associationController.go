@@ -12,7 +12,7 @@ func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
 	var res = GetMyAssociations(bson.ObjectIdHex(associationID))
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // GetAssociationController will answer a JSON of the association
@@ -21,13 +21,13 @@ func GetAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
 	var res = GetAssociation(bson.ObjectIdHex(associationID))
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // GetAllAssociationsController will answer a JSON of all associations
 func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	var res = GetAllAssociation()
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
@@ -37,12 +37,12 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 
 	decoder := json.NewDecoder(r.Body)
 	var user AssociationUser
-	decoder.Decode(&user)
+	_ = decoder.Decode(&user)
 
 	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -51,8 +51,8 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 	user.Username = res.Email
 	user.Password = GetMD5Hash(password)
 	AddAssociationUser(user)
-	SendAssociationEmailSubscription(user.Username, password)
-	json.NewEncoder(w).Encode(res)
+	_ = SendAssociationEmailSubscription(user.Username, password)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // AddAssociationController will answer a JSON of the
@@ -60,11 +60,11 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
-	decoder.Decode(&association)
+	_ = decoder.Decode(&association)
 	isValid := VerifyAssociationRequest(r, association.ID)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := AddAssociation(association)
@@ -79,8 +79,8 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	user.Owner = id
 	user.Password = GetMD5Hash(password)
 	AddAssociationUser(user)
-	SendAssociationEmailSubscription(user.Username, password)
-	json.NewEncoder(w).Encode(res)
+	_ = SendAssociationEmailSubscription(user.Username, password)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // UpdateAssociationController will answer the JSON of the
@@ -88,17 +88,17 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
-	decoder.Decode(&association)
+	_ = decoder.Decode(&association)
 	vars := mux.Vars(r)
 	associationID := vars["id"]
 	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := UpdateAssociation(bson.ObjectIdHex(associationID), association)
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // DeleteAssociationController will answer a JSON of an
@@ -109,11 +109,11 @@ func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := DeleteAssociation(bson.ObjectIdHex(associationID))
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 func VerifyAssociationRequest(r *http.Request, associationId bson.ObjectId) bool {

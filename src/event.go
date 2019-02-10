@@ -39,7 +39,7 @@ func GetEvent(id bson.ObjectId) Event {
 	db := session.DB("insapp").C("event")
 
 	var result Event
-	db.FindId(id).One(&result)
+	_ = db.FindId(id).One(&result)
 
 	return result
 }
@@ -51,7 +51,7 @@ func GetEvents() Events {
 	db := session.DB("insapp").C("event")
 
 	var result Events
-	db.Find(bson.M{}).All(&result)
+	_ = db.Find(bson.M{}).All(&result)
 
 	return result
 }
@@ -65,7 +65,7 @@ func GetFutureEvents() Events {
 
 	var result Events
 	var now = time.Now()
-	db.Find(bson.M{"dateend": bson.M{"$gt": now}}).All(&result)
+	_ = db.Find(bson.M{"dateend": bson.M{"$gt": now}}).All(&result)
 
 	return result
 }
@@ -77,7 +77,7 @@ func GetEventsForAssociation(id bson.ObjectId) Events {
 	db := session.DB("insapp").C("event")
 
 	var result Events
-	db.Find(bson.M{"association": id}).All(&result)
+	_ = db.Find(bson.M{"association": id}).All(&result)
 
 	return result
 }
@@ -88,9 +88,9 @@ func AddEvent(event Event) Event {
 	defer session.Close()
 	db := session.DB("insapp").C("event")
 
-	db.Insert(event)
+	_ = db.Insert(event)
 	var result Event
-	db.Find(bson.M{"name": event.Name, "datestart": event.DateStart}).One(&result)
+	_ = db.Find(bson.M{"name": event.Name, "datestart": event.DateStart}).One(&result)
 	AddEventToAssociation(result.Association, result.ID)
 
 	return result
@@ -118,9 +118,9 @@ func UpdateEvent(id bson.ObjectId, event Event) Event {
 		"fgcolor":        event.FgColor,
 		"nonotification": event.NoNotification,
 	}}
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 	var result Event
-	db.Find(bson.M{"_id": id}).One(&result)
+	_ = db.Find(bson.M{"_id": id}).One(&result)
 	return result
 }
 
@@ -130,7 +130,7 @@ func DeleteEvent(event Event) Event {
 	defer session.Close()
 	db := session.DB("insapp").C("event")
 
-	db.Remove(event)
+	_ = db.Remove(event)
 	DeleteNotificationsForEvent(event.ID)
 	RemoveEventFromAssociation(event.Association, event.ID)
 	for _, userId := range event.Participants {
@@ -138,7 +138,7 @@ func DeleteEvent(event Event) Event {
 	}
 
 	var result Event
-	db.Find(event.ID).One(result)
+	_ = db.Find(event.ID).One(result)
 
 	return result
 }
@@ -156,10 +156,10 @@ func AddAttendeeToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User
 	change := bson.M{"$addToSet": bson.M{
 		"participants": userID,
 	}}
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 	user := AddEventToUser(userID, event.ID)
 
 	return event, user
@@ -177,10 +177,10 @@ func AddAttendeeToMaybeList(id bson.ObjectId, userID bson.ObjectId) (Event, User
 	change := bson.M{"$addToSet": bson.M{
 		"maybe": userID,
 	}}
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 	user := GetUser(userID)
 
 	return event, user
@@ -198,10 +198,10 @@ func AddAttendeeToNotGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, U
 	change := bson.M{"$addToSet": bson.M{
 		"notgoing": userID,
 	}}
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 	user := GetUser(userID)
 
 	return event, user
@@ -217,10 +217,10 @@ func RemoveAttendee(id bson.ObjectId, userID bson.ObjectId, list string) (Event,
 	change := bson.M{"$pull": bson.M{
 		list: userID,
 	}}
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 	user := RemoveEventFromUser(userID, event.ID)
 
 	return event, user
@@ -232,8 +232,8 @@ func SearchEvent(name string) Events {
 	db := session.DB("insapp").C("event")
 
 	var result Events
-	db.Find(bson.M{"$or": []interface{}{
-		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+	_ = db.Find(bson.M{"$or": []interface{}{
+		bson.M{"name": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}}}).All(&result)
 
 	return result
 }

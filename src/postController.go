@@ -84,7 +84,7 @@ func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 		filteredPosts = posts
 	}
 
-	json.NewEncoder(w).Encode(filteredPosts)
+	_ = json.NewEncoder(w).Encode(filteredPosts)
 }
 
 // AddPostController will answer a JSON of the
@@ -92,19 +92,19 @@ func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 func AddPostController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var post Post
-	decoder.Decode(&post)
+	_ = decoder.Decode(&post)
 	post.Date = time.Now()
 
 	isValid := VerifyAssociationRequest(r, post.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
 	res := AddPost(post)
 	association := GetAssociation(post.Association)
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 	go TriggerNotificationForPost(post, association.ID, res.ID, "@"+strings.ToLower(association.Name)+" a posté une nouvelle news 📰")
 }
 
@@ -113,19 +113,19 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 func UpdatePostController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var post Post
-	decoder.Decode(&post)
+	_ = decoder.Decode(&post)
 	vars := mux.Vars(r)
 	postID := vars["id"]
 
 	isValid := VerifyAssociationRequest(r, post.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
 	res := UpdatePost(bson.ObjectIdHex(postID), post)
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // DeletePostController will answer a JSON of an
@@ -137,12 +137,12 @@ func DeletePostController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyAssociationRequest(r, post.Association)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
 	res := DeletePost(post)
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // LikePostController will answer a JSON of the
@@ -154,11 +154,11 @@ func LikePostController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	post, user := LikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
-	json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
+	_ = json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
 // DislikePostController will answer a JSON of the
@@ -170,11 +170,11 @@ func DislikePostController(w http.ResponseWriter, r *http.Request) {
 	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	post, user := DislikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
-	json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
+	_ = json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
 // CommentPostController will answer a JSON of the post
@@ -182,19 +182,19 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(bson.M{"error": "unable to read the request body"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "unable to read the request body"})
 	}
 	var comment Comment
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(bson.M{"error": "wrong format"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "wrong format"})
 		return
 	}
 
 	isValid := VerifyUserRequest(r, comment.User)
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -208,10 +208,10 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	association := GetAssociation(post.Association)
 	user := GetUser(comment.User)
 
-	json.NewEncoder(w).Encode(post)
+	_ = json.NewEncoder(w).Encode(post)
 
 	if !post.NoNotification {
-		SendAssociationEmailForCommentOnPost(association.Email, post, comment, user)
+		_ = SendAssociationEmailForCommentOnPost(association.Email, post, comment, user)
 	}
 
 	for _, tag := range comment.Tags {
@@ -227,7 +227,7 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	comment, err := GetComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(bson.M{"error": "content not available"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "content not available"})
 		return
 	}
 	post := GetPost(bson.ObjectIdHex(postID))
@@ -235,11 +235,11 @@ func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	isAssociationValid := VerifyAssociationRequest(r, post.Association)
 	if !isUserValid && !isAssociationValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 	res := UncommentPost(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 func ReportCommentController(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +249,7 @@ func ReportCommentController(w http.ResponseWriter, r *http.Request) {
 	token := tauth.Get(r)
 	userID := token.Claims("id").(string)
 	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), bson.ObjectIdHex(userID))
-	json.NewEncoder(w).Encode(bson.M{})
+	_ = json.NewEncoder(w).Encode(bson.M{})
 }
 
 // // AddImagePostController will set the image of the post and return the post

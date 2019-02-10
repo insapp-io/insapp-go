@@ -25,15 +25,15 @@ type Post struct {
 // Posts is an array of Post
 type Posts []Post
 
-// AddPost will add the given post to the database
+// AddPost will add the given Post to the database
 func AddPost(post Post) Post {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("post")
 
-	db.Insert(post)
+	_ = db.Insert(post)
 	var result Post
-	db.Find(bson.M{"title": post.Title, "date": post.Date}).One(&result)
+	_ = db.Find(bson.M{"title": post.Title, "date": post.Date}).One(&result)
 	AddPostToAssociation(result.Association, result.ID)
 
 	return result
@@ -56,10 +56,10 @@ func UpdatePost(id bson.ObjectId, post Post) Post {
 		"imageSize":      post.ImageSize,
 		"nonotification": post.NoNotification,
 	}}
-	db.Update(postID, change)
+	_ = db.Update(postID, change)
 
 	var result Post
-	db.Find(bson.M{"_id": id}).One(&result)
+	_ = db.Find(bson.M{"_id": id}).One(&result)
 
 	return result
 }
@@ -70,9 +70,9 @@ func DeletePost(post Post) Post {
 	defer session.Close()
 	db := session.DB("insapp").C("post")
 
-	db.RemoveId(post.ID)
+	_ = db.RemoveId(post.ID)
 	var result Post
-	db.FindId(post.ID).One(result)
+	_ = db.FindId(post.ID).One(result)
 	DeleteNotificationsForPost(post.ID)
 	RemovePostFromAssociation(post.Association, post.ID)
 	for _, userId := range post.Likes {
@@ -89,7 +89,7 @@ func GetPost(id bson.ObjectId) Post {
 	db := session.DB("insapp").C("post")
 
 	var result Post
-	db.FindId(id).One(&result)
+	_ = db.FindId(id).One(&result)
 
 	return result
 }
@@ -101,7 +101,7 @@ func GetPosts() Posts {
 	db := session.DB("insapp").C("post")
 
 	var result Posts
-	db.Find(bson.M{}).Sort("-date").All(&result)
+	_ = db.Find(bson.M{}).Sort("-date").All(&result)
 
 	return result
 }
@@ -113,7 +113,7 @@ func GetLatestPosts(number int) Posts {
 	db := session.DB("insapp").C("post")
 
 	var result Posts
-	db.Find(bson.M{}).Sort("-date").Limit(number).All(&result)
+	_ = db.Find(bson.M{}).Sort("-date").Limit(number).All(&result)
 
 	return result
 }
@@ -125,7 +125,7 @@ func GetPostsForAssociation(id bson.ObjectId) Posts {
 	db := session.DB("insapp").C("post")
 
 	var result Posts
-	db.Find(bson.M{"association": id}).Sort("-date").All(&result)
+	_ = db.Find(bson.M{"association": id}).Sort("-date").All(&result)
 
 	return result
 }
@@ -136,7 +136,7 @@ func SearchPost(name string) Posts {
 	db := session.DB("insapp").C("post")
 
 	var result Posts
-	db.Find(bson.M{"$or": []interface{}{
+	_ = db.Find(bson.M{"$or": []interface{}{
 		bson.M{"title": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{Pattern: `^.*` + name + `.*`, Options: "i"}}}}}).All(&result)
 
 	return result
@@ -153,10 +153,10 @@ func LikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
 	change := bson.M{"$addToSet": bson.M{
 		"likes": userID,
 	}}
-	db.Update(postID, change)
+	_ = db.Update(postID, change)
 
 	var post Post
-	db.Find(bson.M{"_id": id}).One(&post)
+	_ = db.Find(bson.M{"_id": id}).One(&post)
 	user := LikePost(userID, post.ID)
 
 	return post, user
@@ -173,10 +173,10 @@ func DislikePostWithUser(id bson.ObjectId, userID bson.ObjectId) (Post, User) {
 	change := bson.M{"$pull": bson.M{
 		"likes": userID,
 	}}
-	db.Update(postID, change)
+	_ = db.Update(postID, change)
 
 	var post Post
-	db.Find(bson.M{"_id": id}).One(&post)
+	_ = db.Find(bson.M{"_id": id}).One(&post)
 	user := DislikePost(userID, post.ID)
 
 	return post, user

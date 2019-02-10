@@ -38,9 +38,9 @@ func CommentPost(id bson.ObjectId, comment Comment) Post {
 		"comments": comment,
 	}}
 
-	db.Update(postID, change)
+	_ = db.Update(postID, change)
 	var post Post
-	db.Find(bson.M{"_id": id}).One(&post)
+	_ = db.Find(bson.M{"_id": id}).One(&post)
 
 	return post
 }
@@ -58,9 +58,9 @@ func UncommentPost(id bson.ObjectId, commentID bson.ObjectId) Post {
 		"comments": bson.M{"_id": commentID},
 	}}
 
-	db.Update(postID, change)
+	_ = db.Update(postID, change)
 	var post Post
-	db.Find(bson.M{"_id": id}).One(&post)
+	_ = db.Find(bson.M{"_id": id}).One(&post)
 
 	return post
 }
@@ -75,9 +75,9 @@ func CommentEvent(id bson.ObjectId, comment Comment) Event {
 		"comments": comment,
 	}}
 
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 
 	return event
 }
@@ -93,9 +93,9 @@ func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
 		"comments": bson.M{"_id": commentID},
 	}}
 
-	db.Update(eventID, change)
+	_ = db.Update(eventID, change)
 	var event Event
-	db.Find(bson.M{"_id": id}).One(&event)
+	_ = db.Find(bson.M{"_id": id}).One(&event)
 
 	return event
 }
@@ -106,15 +106,15 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 	db := session.DB("insapp").C("post")
 
 	var post Post
-	db.Find(bson.M{"_id": id}).One(&post)
+	_ = db.Find(bson.M{"_id": id}).One(&post)
 	db = session.DB("insapp").C("user")
 	var reporter User
-	db.Find(bson.M{"_id": reporterId}).One(&reporter)
+	_ = db.Find(bson.M{"_id": reporterId}).One(&reporter)
 	for _, comment := range post.Comments {
 		if comment.ID == commentID {
 			var sender User
 			db = session.DB("insapp").C("user")
-			db.Find(bson.M{"_id": comment.User}).One(&sender)
+			_ = db.Find(bson.M{"_id": comment.User}).One(&sender)
 			SendEmail("aeir@insa-rennes.fr", "Un commentaire a été reporté sur Insapp",
 				"Ce commentaire a été reporté le "+time.Now().String()+
 					"\n\nReporteur:\n"+reporter.ID.Hex()+"\n"+reporter.Username+
@@ -209,7 +209,7 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 			comment.Tags = finalTags
 			finalComments = append(finalComments, comment)
 		}
-		db.Update(bson.M{"_id": event.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
+		_ = db.Update(bson.M{"_id": event.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
 	}
 }
 
@@ -219,7 +219,7 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 	db := session.DB("insapp").C("post")
 
 	var posts Posts
-	db.Find(bson.M{}).All(&posts)
+	_ = db.Find(bson.M{}).All(&posts)
 	for _, post := range posts {
 		comments := post.Comments
 		finalComments := Comments{}
@@ -234,6 +234,6 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 			comment.Tags = finalTags
 			finalComments = append(finalComments, comment)
 		}
-		db.Update(bson.M{"_id": post.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
+		_ = db.Update(bson.M{"_id": post.ID}, bson.M{"$set": bson.M{"comments": finalComments}})
 	}
 }
