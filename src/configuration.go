@@ -10,15 +10,15 @@ import (
 
 // Post defines how to model a Post
 type Config struct {
-	GoogleEmail			string `json:"google_email"`
-	GooglePassword		string `json:"google_password"`
-	FirebaseKey			string `json:"firebase_key"`
-	DatabaseName		string `json:"mongo_database_name"`
-	DatabaseSource		string `json:"mongo_database_source"`
-	DatabaseUsername	string `json:"mongo_database_username"`
-	DatabasePassword	string `json:"mongo_database_password"`
-	Environment			string `json:"env"`
-	Port				string `json:"port"`
+	GoogleEmail      string `json:"google_email"`
+	GooglePassword   string `json:"google_password"`
+	FirebaseKey      string `json:"firebase_key"`
+	DatabaseName     string `json:"mongo_database_name"`
+	DatabaseSource   string `json:"mongo_database_source"`
+	DatabaseUsername string `json:"mongo_database_username"`
+	DatabasePassword string `json:"mongo_database_password"`
+	Environment      string `json:"env"`
+	Port             string `json:"port"`
 }
 
 var mgoSession *mgo.Session
