@@ -1,7 +1,6 @@
 {
   "google_email":"REPLACE_WITH_YOUR_GOOGLE_EMAIL",
   "google_password":"REPLACE_WITH_YOUR_GOOGLE_PASSWORD",
-  "firebase_key":"REPLACE_WITH_THE_FIREBASE_KEY",
   "mongo_database_name":"insapp",
   "mongo_database_source":"admin",
   "mongo_database_username":"insapp-admin",

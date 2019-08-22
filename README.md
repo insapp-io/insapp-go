@@ -1,4 +1,5 @@
 # insapp-go
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/thomas-bouvier/insapp-go)](https://goreportcard.com/report/thomas-bouvier/insapp-go)
 
 Backend part of the Insapp project written in Golang
@@ -7,7 +8,7 @@ Backend part of the Insapp project written in Golang
 
 Don't forget to install Go dependencies:
 
-```
+```bash
 cd insapp-go
 go get ./...
 ```
@@ -16,23 +17,30 @@ go get ./...
 
 Edit the configuration file:
 
-```
+```bash
 cp config.json.dist config.json
 vi config.json
 ```
 
-Attributes `google_email` and `google_password` refer to the credentials of your Google account. `firebase_key` refers to the Firebase server key to be used to send push notifications. `mongo_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `local`, `dev` or `prod`. Finally, `port` refers to the API port.
+Attributes `google_email` and `google_password` refer to the credentials of your Google account. These credentials are used to send emails. `mongo_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `local`, `dev` or `prod`. Finally, `port` refers to the API port.
+
+The FCM HTTP v1 API also requires some configuration to send push notifications. The Firebase Admin SDK embeds Google Application Default Credentials (ADC), which is able to implicitly find the credentials as long as the following environment variable is set:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+The `service-account.json` file can be downloaded in the Firebase Cloud Messaging dashboard.
 
 ## Build & Launch
 
 Check that you have MongoDB running.
 
-```
+```bash
 cd src && go build
 ```
 
 You can now manually launch your process with `./src`. It is listening on 0.0.0.0:9000 by default.
-
 
 ## API Endpoints
 

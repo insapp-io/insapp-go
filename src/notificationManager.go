@@ -69,7 +69,7 @@ func buildTopicsStringForPromotions(suffix string, promotions []string) string {
 	topics := ""
 
 	for _, promotion := range promotions {
-		topics += fmt.Sprintf(` || '%s_%s' in topics`, suffix, promotion)
+		topics += fmt.Sprintf(` || '%s-%s' in topics`, suffix, promotion)
 	}
 
 	return topics
@@ -111,13 +111,13 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 
 	if Contains("iOS", event.Plateforms) && Contains("android", event.Plateforms) {
 		filteredUsers = getAllUsers()
-		platforms = "('events_android' in topics || 'events_ios' in topics)"
+		platforms = "('events-android' in topics || 'events-ios' in topics)"
 	} else if Contains("iOS", event.Plateforms) {
 		filteredUsers = getiOSUsers("")
-		platforms = "'events_ios' in topics"
+		platforms = "'events-ios' in topics"
 	} else if Contains("android", event.Plateforms) {
 		filteredUsers = getAndroidUsers("")
-		platforms = "'events_android' in topics"
+		platforms = "'events-android' in topics"
 	}
 
 	for _, notificationUser := range filteredUsers {
@@ -135,7 +135,7 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 		notification,
 		users,
 		fmt.Sprintf(
-			`%s && ('events_unknown_promotion' in topics %s)`,
+			`%s && ('events-unknown-class' in topics %s)`,
 			platforms,
 			buildTopicsStringForPromotions("events", event.Promotions)))
 }
@@ -150,13 +150,13 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 
 	if Contains("iOS", post.Plateforms) && Contains("android", post.Plateforms) {
 		filteredUsers = getAllUsers()
-		platforms = "('posts_android' in topics || 'posts_ios' in topics)"
+		platforms = "('posts-android' in topics || 'posts-ios' in topics)"
 	} else if Contains("iOS", post.Plateforms) {
 		filteredUsers = getiOSUsers("")
-		platforms = "'posts_ios' in topics"
+		platforms = "'posts-ios' in topics"
 	} else if Contains("android", post.Plateforms) {
 		filteredUsers = getAndroidUsers("")
-		platforms = "'posts_android' in topics"
+		platforms = "'posts-android' in topics"
 	}
 
 	for _, notificationUser := range filteredUsers {
@@ -174,7 +174,7 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 		notification,
 		users,
 		fmt.Sprintf(
-			`%s && ('posts_unknown_promotion' in topics %s)`,
+			`%s && ('posts-unknown-class' in topics %s)`,
 			platforms,
 			buildTopicsStringForPromotions("posts", post.Promotions)))
 }
