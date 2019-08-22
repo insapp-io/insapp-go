@@ -1,21 +1,33 @@
 # Docker builder for Golang
-FROM golang as builder
-LABEL maintainer "Thomas Bouvier <contact@thomas-bouvier.io>"
+FROM golang as builder-app
+LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
 WORKDIR /go/src/app
 COPY ./src .
 RUN go get -d -v . && \
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api .
+
+# Docker builder for Golang
+FROM golang as builder-cli
+LABEL maintainer="PitouGames <pitou.games@gmail.com>"
+
+WORKDIR /go/src/app
+COPY ./src .
+# override main.go
+COPY ./cli .
+RUN go get -d -v . && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cli .
 
 # Golang application
 FROM alpine
-LABEL maintainer "Thomas Bouvier <contact@thomas-bouvier.io>"
+LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
 RUN apk add --no-cache ca-certificates
 
 WORKDIR /root
-COPY --from=builder /go/src/app .
+COPY --from=builder-app /go/src/app .
+COPY --from=builder-cli /go/src/app/cli .
 
 EXPOSE REPLACE_WITH_THE_API_PORT
 
-CMD ["./app"]
+CMD ["./api"]
