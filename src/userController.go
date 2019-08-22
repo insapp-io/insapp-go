@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/freehaha/token-auth"
+	tauth "github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -78,10 +78,10 @@ func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bson.M{})
 }
 
-func VerifyUserRequest(r *http.Request, userId bson.ObjectId) bool {
+func VerifyUserRequest(r *http.Request, userID bson.ObjectId) bool {
 	token := tauth.Get(r)
 	id := token.Claims("id").(string)
-	return bson.ObjectIdHex(id) == userId
+	return bson.ObjectIdHex(id) == userID
 }
 
 func GetUserFromRequest(r *http.Request) string {

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 var promotions = []string{"", "1STPI", "2STPI",
@@ -93,14 +94,14 @@ func DeleteUser(user User) User {
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
 
-	for _, eventId := range user.Events {
-		RemoveAttendee(eventId, user.ID, "going")
-		RemoveAttendee(eventId, user.ID, "notgoing")
-		RemoveAttendee(eventId, user.ID, "maybe")
+	for _, eventID := range user.Events {
+		RemoveAttendee(eventID, user.ID, "going")
+		RemoveAttendee(eventID, user.ID, "notgoing")
+		RemoveAttendee(eventID, user.ID, "maybe")
 	}
 
-	for _, postId := range user.PostsLiked {
-		DislikePostWithUser(postId, user.ID)
+	for _, postID := range user.PostsLiked {
+		DislikePostWithUser(postID, user.ID)
 	}
 
 	DeleteTagsForUser(user.ID)
@@ -115,7 +116,7 @@ func DeleteUser(user User) User {
 	return result
 }
 
-// GetUser will return an User object from the given ID
+// GetAllUser will return an User object from the given ID
 func GetAllUser() Users {
 	session := GetMongoSession()
 	defer session.Close()

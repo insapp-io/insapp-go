@@ -2,8 +2,9 @@ package main
 
 import (
 	"errors"
-	"gopkg.in/mgo.v2/bson"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Comment defines how to model a Comment of a Post
@@ -100,7 +101,7 @@ func UncommentEvent(id bson.ObjectId, commentID bson.ObjectId) Event {
 	return event
 }
 
-func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.ObjectId) {
+func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterID bson.ObjectId) {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("post")
@@ -109,7 +110,7 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 	_ = db.Find(bson.M{"_id": id}).One(&post)
 	db = session.DB("insapp").C("user")
 	var reporter User
-	_ = db.Find(bson.M{"_id": reporterId}).One(&reporter)
+	_ = db.Find(bson.M{"_id": reporterID}).One(&reporter)
 	for _, comment := range post.Comments {
 		if comment.ID == commentID {
 			var sender User
@@ -125,8 +126,8 @@ func ReportComment(id bson.ObjectId, commentID bson.ObjectId, reporterId bson.Ob
 	}
 }
 
-func GetComment(postId bson.ObjectId, id bson.ObjectId) (Comment, error) {
-	post := GetPost(postId)
+func GetComment(postID bson.ObjectId, id bson.ObjectId) (Comment, error) {
+	post := GetPost(postID)
 	for _, comment := range post.Comments {
 		if comment.ID == id {
 			return comment, nil
@@ -135,8 +136,8 @@ func GetComment(postId bson.ObjectId, id bson.ObjectId) (Comment, error) {
 	return Comment{}, errors.New("no comment found")
 }
 
-func GetCommentForEvent(eventId bson.ObjectId, id bson.ObjectId) (Comment, error) {
-	event := GetEvent(eventId)
+func GetCommentForEvent(eventID bson.ObjectId, id bson.ObjectId) (Comment, error) {
+	event := GetEvent(eventID)
 	for _, comment := range event.Comments {
 		if comment.ID == id {
 			return comment, nil
@@ -145,51 +146,51 @@ func GetCommentForEvent(eventId bson.ObjectId, id bson.ObjectId) (Comment, error
 	return Comment{}, errors.New("no comment found")
 }
 
-func getCommentforUser(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
+func getCommentforUser(id bson.ObjectId, userID bson.ObjectId) []bson.ObjectId {
 	post := GetPost(id)
 	comments := post.Comments
 	var results []bson.ObjectId
 	for _, comment := range comments {
-		if comment.User == userId {
+		if comment.User == userID {
 			results = append(results, comment.ID)
 		}
 	}
 	return results
 }
 
-func getCommentForUserOnEvent(id bson.ObjectId, userId bson.ObjectId) []bson.ObjectId {
+func getCommentForUserOnEvent(id bson.ObjectId, userID bson.ObjectId) []bson.ObjectId {
 	event := GetEvent(id)
 	comments := event.Comments
 	var results []bson.ObjectId
 	for _, comment := range comments {
-		if comment.User == userId {
+		if comment.User == userID {
 			results = append(results, comment.ID)
 		}
 	}
 	return results
 }
 
-func DeleteCommentsForUser(userId bson.ObjectId) {
+func DeleteCommentsForUser(userID bson.ObjectId) {
 	posts := GetLatestPosts(100)
 	for _, post := range posts {
-		comments := getCommentforUser(post.ID, userId)
-		for _, commentId := range comments {
-			UncommentPost(post.ID, commentId)
+		comments := getCommentforUser(post.ID, userID)
+		for _, commentID := range comments {
+			UncommentPost(post.ID, commentID)
 		}
 	}
 }
 
-func DeleteCommentsForUserOnEvents(userId bson.ObjectId) {
+func DeleteCommentsForUserOnEvents(userID bson.ObjectId) {
 	events := GetEvents()
 	for _, event := range events {
-		comments := getCommentForUserOnEvent(event.ID, userId)
-		for _, commentId := range comments {
-			UncommentEvent(event.ID, commentId)
+		comments := getCommentForUserOnEvent(event.ID, userID)
+		for _, commentID := range comments {
+			UncommentEvent(event.ID, commentID)
 		}
 	}
 }
 
-func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
+func DeleteTagsForUserOnEvents(userID bson.ObjectId) {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("event")
@@ -202,7 +203,7 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 			tags := comment.Tags
 			finalTags := Tags{}
 			for _, tag := range tags {
-				if tag.User != userId.Hex() {
+				if tag.User != userID.Hex() {
 					finalTags = append(finalTags, tag)
 				}
 			}
@@ -213,7 +214,7 @@ func DeleteTagsForUserOnEvents(userId bson.ObjectId) {
 	}
 }
 
-func DeleteTagsForUser(userId bson.ObjectId) {
+func DeleteTagsForUser(userID bson.ObjectId) {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("post")
@@ -227,7 +228,7 @@ func DeleteTagsForUser(userId bson.ObjectId) {
 			tags := comment.Tags
 			finalTags := Tags{}
 			for _, tag := range tags {
-				if tag.User != userId.Hex() {
+				if tag.User != userID.Hex() {
 					finalTags = append(finalTags, tag)
 				}
 			}

@@ -2,13 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
 )
 
-// AddUserController will answer a JSON of the
-// brand new created user (from the JSON Body)
 func UpdateNotificationUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var user NotificationUser

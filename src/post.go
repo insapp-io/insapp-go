@@ -75,8 +75,8 @@ func DeletePost(post Post) Post {
 	_ = db.FindId(post.ID).One(result)
 	DeleteNotificationsForPost(post.ID)
 	RemovePostFromAssociation(post.Association, post.ID)
-	for _, userId := range post.Likes {
-		DislikePost(userId, post.ID)
+	for _, userID := range post.Likes {
+		DislikePost(userID, post.ID)
 	}
 
 	return result

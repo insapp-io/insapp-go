@@ -2,15 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/freehaha/token-auth"
-	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	tauth "github.com/freehaha/token-auth"
+	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // GetPostController will answer a JSON of the post
@@ -25,9 +26,9 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 // GetAllPostsController will answer a JSON of the
 // N latest posts. Here N = 50.
 func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
-	userId := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userId))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
+	userID := GetUserFromRequest(r)
+	user := GetUser(bson.ObjectIdHex(userID))
+	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
 	posts := GetLatestPosts(10)
 	filteredPosts := Posts{}
 	if user.ID != "" {
@@ -63,14 +64,14 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filteredPosts)
 }
 
-// GetAllPostsController will answer a JSON of the post owned by
+// GetPostsForAssociationController will answer a JSON of the post owned by
 // the given association
 func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
-	userId := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userId))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
+	userID := GetUserFromRequest(r)
+	user := GetUser(bson.ObjectIdHex(userID))
+	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
 	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
 
 	filteredPosts := Posts{}
@@ -105,7 +106,7 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 	res := AddPost(post)
 	association := GetAssociation(post.Association)
 	_ = json.NewEncoder(w).Encode(res)
-	go TriggerNotificationForPost(post, association.ID, res.ID, "@"+strings.ToLower(association.Name)+" a posté une nouvelle news 📰")
+	go TriggerNotificationForPost(post, association.ID, res.ID, "@"+strings.ToLower(association.Name)+" a posté une news 📰")
 }
 
 // UpdatePostController will answer the JSON of the

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 // NotificationUser defines how to model a NotificationUser
@@ -13,7 +14,7 @@ type NotificationUser struct {
 	Os     string        `json:"os"`
 }
 
-// NotificationUser defines how to model a NotificationUser
+// Notification defines how to model a Notification
 type Notification struct {
 	ID       bson.ObjectId `bson:"_id,omitempty"`
 	Sender   bson.ObjectId `json:"sender"`

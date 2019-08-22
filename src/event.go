@@ -133,8 +133,8 @@ func DeleteEvent(event Event) Event {
 	_ = db.Remove(event)
 	DeleteNotificationsForEvent(event.ID)
 	RemoveEventFromAssociation(event.Association, event.ID)
-	for _, userId := range event.Participants {
-		RemoveEventFromUser(userId, event.ID)
+	for _, userID := range event.Participants {
+		RemoveEventFromUser(userID, event.ID)
 	}
 
 	var result Event
@@ -143,7 +143,7 @@ func DeleteEvent(event Event) Event {
 	return result
 }
 
-// AddParticipant add the given userID to the given eventID as a participant
+// AddAttendeeToGoingList will add the given userID to the given eventID as an attendee
 func AddAttendeeToGoingList(id bson.ObjectId, userID bson.ObjectId) (Event, User) {
 	RemoveAttendee(id, userID, "notgoing")
 	RemoveAttendee(id, userID, "maybe")

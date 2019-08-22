@@ -157,7 +157,8 @@ func SearchAssociation(name string) Associations {
 
 	var result Associations
 	db.Find(bson.M{"$or": []interface{}{
-		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}},
+		bson.M{"description": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
 
 	return result
 }
