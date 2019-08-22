@@ -20,8 +20,12 @@ LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 RUN apk add --no-cache ca-certificates
 
 WORKDIR /root
+
 COPY --from=builder-app /go/src/app .
 COPY --from=builder-app /go/src/app/cli .
+
+COPY ./service-account.json .
+ENV GOOGLE_APPLICATION_CREDENTIALS /root/service-account.json
 
 EXPOSE REPLACE_WITH_THE_API_PORT
 

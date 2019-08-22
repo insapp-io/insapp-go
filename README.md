@@ -24,13 +24,7 @@ vi config.json
 
 Attributes `google_email` and `google_password` refer to the credentials of your Google account. These credentials are used to send emails. `mongo_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `local`, `dev` or `prod`. Finally, `port` refers to the API port.
 
-The FCM HTTP v1 API also requires some configuration to send push notifications. The Firebase Admin SDK embeds Google Application Default Credentials (ADC), which is able to implicitly find the credentials as long as the following environment variable is set:
-
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
-```
-
-The `service-account.json` file can be downloaded in the Firebase Cloud Messaging dashboard.
+The FCM HTTP v1 API requires some credentials to send push notifications. The `service-account.json` file can be downloaded from the Firebase Cloud Messaging dashboard, and should be copied at the root of this directory. This way, it will be included in the Docker container.
 
 ## Build & Launch
 

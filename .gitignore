@@ -1,5 +1,7 @@
 Dockerfile
 config.json
+service-account.json
+src/src
 
 # macOS
 .DS_Store
