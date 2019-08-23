@@ -20,7 +20,7 @@ func main(){
 	app.Version = "0.0.1"
 		app.Authors = []cli.Author{
 		cli.Author{
-			Name:  "Pitou Games",
+			Name: "Pitou Games",
 			Email: "pitou.games@gmail.com",
 		},
 	}
@@ -35,7 +35,7 @@ func main(){
 			Usage: "Manage associations",
 			Subcommands: []cli.Command{
 				{
-					Name:  "create",
+					Name: "create",
 					Usage: "Create a master association",
 					Flags: []cli.Flag{
 						cli.StringFlag{
@@ -60,75 +60,81 @@ func main(){
 		},
 
 		cli.Command{
-			Name: "cdn-clean",
+			Name: "cdn",
 			Category: "management",
-			Usage: "Clean cdn by removing all images not referenced in database",
-			Flags: []cli.Flag{
-				cli.BoolFlag{
-					Name: "archive, a",
-					Usage: "Move files in an archive sub-folder",
-				},
-				cli.BoolFlag{
-					Name: "delete, d",
-					Usage: "Delete files forever",
-				},
-				cli.BoolFlag{
-					Name: "list, l",
-					Usage: "List all files that will be affected",
-				},
-			},
-			Action: func(c *cli.Context) error {
-				var usedImages = GetUsedImages()
-				cdnImages, _ := GetImagesNames()
-				var toDelete []string
-				for _, cdnImage := range cdnImages {
-				    delete := true
-				    for _, usedImage := range usedImages {
-                        if usedImage == cdnImage {
-				    		delete = false
-							break
-                        }
-                    }
-                    if delete {
-                    	toDelete = append(toDelete, cdnImage)
-                    }
-				}
-
-				if c.Bool("list") {
-					for _, imageName := range toDelete {
-						fmt.Println(imageName)
-					}
-				}
-
-				fmt.Println(len(usedImages), " images found in database")
-				fmt.Println(len(cdnImages), " images found in cdn")
-				fmt.Println(len(toDelete), " images will be affected")
-
-				if c.Bool("archive") {
-					fmt.Println("Archiving files...")
-					for _, imageName := range toDelete {
-						err := ArchiveImage(imageName);
-						if err != nil {
-							return err
+			Usage: "Manage insapp cdn",
+			Subcommands: []cli.Command{
+				{
+					Name: "clean",
+					Usage: "Clean unused images in insapp-cdn folder",
+					Flags: []cli.Flag{
+						cli.BoolFlag{
+							Name: "archive, a",
+							Usage: "Move files in an archive sub-folder",
+						},
+						cli.BoolFlag{
+							Name: "delete, d",
+							Usage: "Delete files forever",
+						},
+						cli.BoolFlag{
+							Name: "list, l",
+							Usage: "List all files that will be affected",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						var usedImages = GetUsedImages()
+						cdnImages, _ := GetImagesNames()
+						var toDelete []string
+						for _, cdnImage := range cdnImages {
+							delete := true
+							for _, usedImage := range usedImages {
+								if usedImage == cdnImage {
+									delete = false
+									break
+								}
+							}
+							if delete {
+								toDelete = append(toDelete, cdnImage)
+							}
 						}
-					}
-					fmt.Println("Done!")
-					return nil
-				} else if c.Bool("delete") {
-					fmt.Println("Deleting files...")
-					for _, imageName := range toDelete {
-						err := DeleteImage(imageName);
-						if err != nil {
-							return err
+
+						if c.Bool("list") {
+							for _, imageName := range toDelete {
+								fmt.Println(imageName)
+							}
 						}
-					}
-					fmt.Println("Done!")
-					return nil
-				} else {
-					fmt.Println("To list files affected, use -l")
-					fmt.Println("If you're sure to delete these files, use -d but we suggest to archive them with -a")
-					return nil
-				}
+
+						fmt.Println(len(usedImages), " images found in database")
+						fmt.Println(len(cdnImages), " images found in cdn")
+						fmt.Println(len(toDelete), " images will be affected")
+
+						if c.Bool("archive") {
+							fmt.Println("Archiving files...")
+							for _, imageName := range toDelete {
+								err := ArchiveImage(imageName);
+								if err != nil {
+									return err
+								}
+							}
+							fmt.Println("Done!")
+							return nil
+						} else if c.Bool("delete") {
+							fmt.Println("Deleting files...")
+							for _, imageName := range toDelete {
+								err := DeleteImage(imageName);
+								if err != nil {
+									return err
+								}
+							}
+							fmt.Println("Done!")
+							return nil
+						} else {
+							fmt.Println("To list files affected, use -l")
+							fmt.Println("If you're sure to delete these files, use -d but we suggest to archive them with -a")
+							return nil
+						}
+					},
+				},
 			},
 		},
 
@@ -172,28 +178,28 @@ func AddAssociationCLI(name string, email string) error {
 func GetUsedImages() []string {
 	var result []string;
 	var assos = GetAllAssociation()
-    for _, ass := range assos {
-    	if ass.Profile != "" {
-    		result = append(result, ass.Profile)
-    	}
-		if ass.Cover != "" {
-    		result = append(result, ass.Cover)
+	for _, ass := range assos {
+		if ass.Profile != "" {
+			result = append(result, ass.Profile)
 		}
-    }
+		if ass.Cover != "" {
+			result = append(result, ass.Cover)
+		}
+	}
 
 	var events = GetEvents()
-    for _, event := range events {
+	for _, event := range events {
 		if event.Image!= "" {
 			result = append(result, event.Image)
 		}
-    }
+	}
 
 	var posts = GetPosts()
-    for _, post := range posts {
+	for _, post := range posts {
 		if post.Image!= "" {
 			result = append(result, post.Image)
 		}
-    }
+	}
 
 	return result;
 }
