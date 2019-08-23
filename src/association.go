@@ -105,7 +105,7 @@ func GetAssociation(id bson.ObjectId) Association {
 }
 
 // GetAssociationEmail will return an Association object from the given email
-func GetAssociationEmail(email string) Association {
+func GetAssociationFromEmail(email string) Association {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("association")

@@ -71,3 +71,33 @@ func GetImageDimension(fileName string) (int, int) {
 func GetImageColors(fileName string) [][]int {
 	return extractor.NewExtractor("./img/"+fileName, 10).GetPalette(6)
 }
+
+func GetImagesNames() ([]string, error) {
+	files, err := ioutil.ReadDir("./img/")
+	if err != nil {
+		return nil, err
+	}
+
+	var result []string;
+    for _, file := range files {
+    	if file.Name() != ".gitignore" && file.Name() != "archive"  && file.Name() != "index.html" {
+			result = append(result, file.Name())
+    	}
+    }
+	return result, nil;
+}
+
+func ArchiveImage(fileName string) error {
+	if _, err := os.Stat("./img/archive/"); os.IsNotExist(err) {
+		os.Mkdir("./img/archive/", 0755) // rwxr-wr-x
+	}
+	oldLocation := "./img/" + fileName
+	newLocation := "./img/archive/" + fileName
+	err := os.Rename(oldLocation, newLocation)
+	return err;
+}
+
+func DeleteImage(fileName string) error {
+	err := os.Remove("./img/" + fileName)
+	return err;
+}
