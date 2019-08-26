@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/thomas-bouvier/palette-extractor"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -10,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	extractor "github.com/thomas-bouvier/palette-extractor"
 )
 
 var magicTable = map[string]string{
@@ -78,13 +79,13 @@ func GetImagesNames() ([]string, error) {
 		return nil, err
 	}
 
-	var result []string;
-    for _, file := range files {
-    	if file.Name() != ".gitignore" && file.Name() != "archive"  && file.Name() != "index.html" {
+	var result []string
+	for _, file := range files {
+		if file.Name() != ".gitignore" && file.Name() != "archive" && file.Name() != "index.html" {
 			result = append(result, file.Name())
-    	}
-    }
-	return result, nil;
+		}
+	}
+	return result, nil
 }
 
 func ArchiveImage(fileName string) error {
@@ -94,10 +95,10 @@ func ArchiveImage(fileName string) error {
 	oldLocation := "./img/" + fileName
 	newLocation := "./img/archive/" + fileName
 	err := os.Rename(oldLocation, newLocation)
-	return err;
+	return err
 }
 
 func DeleteImage(fileName string) error {
 	err := os.Remove("./img/" + fileName)
-	return err;
+	return err
 }

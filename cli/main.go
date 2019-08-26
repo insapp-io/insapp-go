@@ -5,45 +5,44 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"errors"
 	"os"
 
 	"github.com/urfave/cli"
 )
 
-func main(){
-	app := cli.NewApp();
+func main() {
+	app := cli.NewApp()
 	app.Name = "Insapp-api-cli"
 	app.Usage = "A useful cli to manage insapp api"
 	app.Version = "0.0.1"
-		app.Authors = []cli.Author{
+	app.Authors = []cli.Author{
 		cli.Author{
-			Name: "Pitou Games",
+			Name:  "Pitou Games",
 			Email: "pitou.games@gmail.com",
 		},
 	}
 	app.Copyright = "(c) 2019 Insapp"
-
 	app.UseShortOptionHandling = true
 	app.Commands = []cli.Command{
 
 		cli.Command{
-			Name: "association",
+			Name:     "association",
 			Category: "setup",
-			Usage: "Manage associations",
+			Usage:    "Manage associations",
 			Subcommands: []cli.Command{
 				{
-					Name: "create",
+					Name:  "create",
 					Usage: "Create a master association",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name: "name",
+							Name:  "name",
 							Usage: "Name of the association",
 						},
 						cli.StringFlag{
-							Name: "email",
+							Name:  "email",
 							Usage: "Email to contact the association",
 						},
 					},
@@ -60,24 +59,24 @@ func main(){
 		},
 
 		cli.Command{
-			Name: "cdn",
+			Name:     "cdn",
 			Category: "management",
-			Usage: "Manage insapp cdn",
+			Usage:    "Manage insapp cdn",
 			Subcommands: []cli.Command{
 				{
-					Name: "clean",
+					Name:  "clean",
 					Usage: "Clean unused images in insapp-cdn folder",
 					Flags: []cli.Flag{
 						cli.BoolFlag{
-							Name: "archive, a",
+							Name:  "archive, a",
 							Usage: "Move files in an archive sub-folder",
 						},
 						cli.BoolFlag{
-							Name: "delete, d",
+							Name:  "delete, d",
 							Usage: "Delete files forever",
 						},
 						cli.BoolFlag{
-							Name: "list, l",
+							Name:  "list, l",
 							Usage: "List all files that will be affected",
 						},
 					},
@@ -109,24 +108,30 @@ func main(){
 						fmt.Println(len(toDelete), " images will be affected")
 
 						if c.Bool("archive") {
-							fmt.Println("Archiving files...")
-							for _, imageName := range toDelete {
-								err := ArchiveImage(imageName);
-								if err != nil {
-									return err
+							fmt.Println("Are you sure to archive these files ? (Y/n)")
+							if askForConfirmation("Are you sure to archive these files ? (Y/n)") {
+								fmt.Println("Archiving files...")
+								for _, imageName := range toDelete {
+									err := ArchiveImage(imageName)
+									if err != nil {
+										return err
+									}
 								}
+								fmt.Println("Done!")
 							}
-							fmt.Println("Done!")
 							return nil
 						} else if c.Bool("delete") {
-							fmt.Println("Deleting files...")
-							for _, imageName := range toDelete {
-								err := DeleteImage(imageName);
-								if err != nil {
-									return err
+							fmt.Println("Are you sure to delete these files ? (Y/n)")
+							if askForConfirmation("Are you sure to delete these files ? (Y/n)") {
+								fmt.Println("Deleting files...")
+								for _, imageName := range toDelete {
+									err := DeleteImage(imageName)
+									if err != nil {
+										return err
+									}
 								}
+								fmt.Println("Done!")
 							}
-							fmt.Println("Done!")
 							return nil
 						} else {
 							fmt.Println("To list files affected, use -l")
@@ -137,12 +142,30 @@ func main(){
 				},
 			},
 		},
-
 	}
 
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+// https://gist.github.com/albrow/5882501
+func askForConfirmation(message string) bool {
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatal(err)
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else {
+		fmt.Println(message)
+		return askForConfirmation(message)
 	}
 }
 
@@ -176,7 +199,7 @@ func AddAssociationCLI(name string, email string) error {
 }
 
 func GetUsedImages() []string {
-	var result []string;
+	var result []string
 	var assos = GetAllAssociation()
 	for _, ass := range assos {
 		if ass.Profile != "" {
@@ -189,17 +212,17 @@ func GetUsedImages() []string {
 
 	var events = GetEvents()
 	for _, event := range events {
-		if event.Image!= "" {
+		if event.Image != "" {
 			result = append(result, event.Image)
 		}
 	}
 
 	var posts = GetPosts()
 	for _, post := range posts {
-		if post.Image!= "" {
+		if post.Image != "" {
 			result = append(result, post.Image)
 		}
 	}
 
-	return result;
+	return result
 }
