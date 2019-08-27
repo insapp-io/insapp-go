@@ -23,6 +23,7 @@ type Association struct {
 // Associations is an array of Association
 type Associations []Association
 
+// AddAssociationUser will add the given AssociationUser to the database
 func AddAssociationUser(user AssociationUser) {
 	session := GetMongoSession()
 	defer session.Close()
@@ -31,7 +32,7 @@ func AddAssociationUser(user AssociationUser) {
 	db.Insert(user)
 }
 
-// AddAssociation will add the given association to the database
+// AddAssociation will add the given Association to the database
 func AddAssociation(association Association) Association {
 	session := GetMongoSession()
 	defer session.Close()
@@ -44,8 +45,8 @@ func AddAssociation(association Association) Association {
 	return result
 }
 
-// UpdateAssociation will update the given association link to the given ID,
-// with the field of the given association, in the database
+// UpdateAssociation will update the given Association link to the given ID,
+// with the field of the given Association, in the database
 func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	session := GetMongoSession()
 	defer session.Close()
@@ -78,11 +79,11 @@ func DeleteAssociation(id bson.ObjectId) Association {
 	db := session.DB("insapp").C("association")
 
 	association := GetAssociation(id)
-	for _, eventId := range association.Events {
-		DeleteEvent(GetEvent(eventId))
+	for _, eventID := range association.Events {
+		DeleteEvent(GetEvent(eventID))
 	}
-	for _, postId := range association.Posts {
-		DeletePost(GetPost(postId))
+	for _, postID := range association.Posts {
+		DeletePost(GetPost(postID))
 	}
 
 	db.RemoveId(id)
@@ -128,6 +129,7 @@ func GetAllAssociation() Associations {
 	return result
 }
 
+// GetMyAssociations will return an array of all ID from owned existing Association
 func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 	session := GetMongoSession()
 	defer session.Close()
@@ -143,6 +145,7 @@ func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 	return res
 }
 
+// SearchAssociation will return an array of all Association found given a search string
 func SearchAssociation(name string) Associations {
 	session := GetMongoSession()
 	defer session.Close()

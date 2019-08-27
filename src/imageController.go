@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// UploadNewImageController will upload a new image in the cdn
 func UploadNewImageController(w http.ResponseWriter, r *http.Request) {
 	fileName := UploadImage(r)
 	if fileName == "error" {
@@ -25,6 +26,7 @@ func UploadNewImageController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UploadImageController will upload a new image in the cdn
 func UploadImageController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fileName := UploadImageWithName(r, vars["name"])

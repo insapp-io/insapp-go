@@ -9,6 +9,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// GetMyAssociationController will answer a JSON of the associations owned by the applicant master association
 func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
@@ -130,11 +131,12 @@ func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(res)
 }
 
-func VerifyAssociationRequest(r *http.Request, associationId bson.ObjectId) bool {
+// VerifyAssociationRequest return true if requester association is a master account
+func VerifyAssociationRequest(r *http.Request, associationID bson.ObjectId) bool {
 	token := tauth.Get(r)
 	id := token.Claims("id").(string)
 	// Request come from a master association
-	if bson.ObjectIdHex(id) != associationId {
+	if bson.ObjectIdHex(id) != associationID {
 		result := GetAssociationUser(bson.ObjectIdHex(id))
 		return result.Master
 	}
