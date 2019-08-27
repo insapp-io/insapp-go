@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/freehaha/token-auth"
+	"net/http"
+
+	tauth "github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
 )
 
 func GetMyAssociationController(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,8 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(res)
 }
 
-func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
+// Now unused function
+/*func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
 	var res = GetAssociation(bson.ObjectIdHex(associationID))
@@ -53,7 +55,7 @@ func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) 
 	AddAssociationUser(user)
 	_ = SendAssociationEmailSubscription(user.Username, password)
 	_ = json.NewEncoder(w).Encode(res)
-}
+}*/
 
 // AddAssociationController will answer a JSON of the
 // brand new created association (from the JSON Body)
@@ -65,6 +67,12 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	if !isValid {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
+		return
+	}
+	isValidMail := VerifyEmail(association.Email)
+	if !isValidMail {
+		w.WriteHeader(http.StatusConflict)
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
 		return
 	}
 	res := AddAssociation(association)
@@ -97,6 +105,12 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
+	isValidMail := VerifyEmail(association.Email)
+	if !isValidMail {
+		w.WriteHeader(http.StatusConflict)
+		_ = json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
+		return
+	}
 	res := UpdateAssociation(bson.ObjectIdHex(associationID), association)
 	_ = json.NewEncoder(w).Encode(res)
 }
@@ -119,9 +133,16 @@ func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 func VerifyAssociationRequest(r *http.Request, associationId bson.ObjectId) bool {
 	token := tauth.Get(r)
 	id := token.Claims("id").(string)
+	// Request come from a master association
 	if bson.ObjectIdHex(id) != associationId {
 		result := GetAssociationUser(bson.ObjectIdHex(id))
 		return result.Master
 	}
 	return true
+}
+
+// VerifyEmail return true if email is not already used
+func VerifyEmail(email string) bool {
+	association := GetAssociationFromEmail(email)
+	return association.Email == ""
 }

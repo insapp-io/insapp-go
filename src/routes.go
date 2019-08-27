@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/freehaha/token-auth"
-	"github.com/freehaha/token-auth/memory"
+	tauth "github.com/freehaha/token-auth"
+	memstore "github.com/freehaha/token-auth/memory"
 	"github.com/gorilla/mux"
 )
 

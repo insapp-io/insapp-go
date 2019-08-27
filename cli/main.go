@@ -150,7 +150,7 @@ func main() {
 	}
 }
 
-// https://gist.github.com/albrow/5882501
+// Comes from https://gist.github.com/albrow/5882501
 func askForConfirmation(message string) bool {
 	var response string
 	_, err := fmt.Scanln(&response)
@@ -169,12 +169,12 @@ func askForConfirmation(message string) bool {
 	}
 }
 
-// brand new created master association
+// AddAssociationCLI create a brand new master association
 func AddAssociationCLI(name string, email string) error {
 	var association Association
-	association = GetAssociationFromEmail(email)
-	if association.Email != "" {
-		return errors.New("This email is already used by " + association.Name)
+	isValidEmail := VerifyEmail(email)
+	if !isValidEmail {
+		return errors.New("This email is already used")
 	}
 
 	fmt.Println("Creating Association:", name, email)
@@ -198,6 +198,7 @@ func AddAssociationCLI(name string, email string) error {
 	return nil
 }
 
+// GetUsedImages return an array of all images file name found in db
 func GetUsedImages() []string {
 	var result []string
 	var assos = GetAllAssociation()

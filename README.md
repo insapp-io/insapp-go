@@ -64,7 +64,7 @@ These endpoints must include the user token as a query string : `?token=<token>`
 | `DELETE`  | `/events/{id}/attend/{userID}`                    | `Delete the attendee status of the user with id {userID} on the event with id {id}`
 | `POST`    | `/events/{id}/comment`                            | `Post a comment on the event with id {id}`
 | `DELETE`  | `/events/{id}/comment/{commentID}`                | `Delete the comment with id {commentID} on the event with id {id}`
-| `GET`     | `/posts`                                          | `Get all posts`
+| `GET`     | `/posts`                                          | `Get all posts. You can provide ?range=[{start},{count}] to get only some posts`
 | `GET`     | `/posts/{id}`                                     | `Get the post with id {id}`
 | `POST`    | `/posts/{id}/like/{userID}`                       | `Post a like for the user with id {userID} on the post with id {id}`
 | `DELETE`  | `/posts/{id}/like/{userID}`                       | `Post an unlike for the user with id {userID} on the post with id {id}`
