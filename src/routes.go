@@ -99,7 +99,6 @@ var associationRoutes = Routes{
 
 	//IMAGE
 	Route{"UploadNewImage", "POST", "/images", UploadNewImageController},
-	Route{"UploadImage", "POST", "/images/{name}", UploadImageController},
 }
 
 var userRoutes = Routes{

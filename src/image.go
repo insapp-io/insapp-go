@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"image"
 	_ "image/gif"
 	"image/jpeg"
@@ -33,34 +34,34 @@ func mimeFromIncipit(incipit []byte) string {
 }
 
 // UploadImage will give a random name and upload the image
-func UploadImage(r *http.Request) string {
+func UploadImage(r *http.Request) (string, error) {
 	return UploadImageWithName(r, RandomString(40))
 }
 
 // UploadImageWithName will manage the upload image from a POST request
-func UploadImageWithName(r *http.Request, name string) string {
+func UploadImageWithName(r *http.Request, name string) (string, error) {
 	_ = r.ParseMultipartForm(32 << 20)
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		return "error"
+		return "", err
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return "error"
+		return "", err
 	}
 	imgType := mimeFromIncipit(data)
 
 	if imgType == "" {
-		return "error"
+		return "", errors.New("Can't get image format")
 	}
 	defer file.Close()
 
 	fileName := name
 	err = ioutil.WriteFile("./img/"+fileName+"."+imgType, data, 0666)
 	if err != nil {
-		return "error"
+		return "", err
 	}
-	return fileName + "." + imgType
+	return fileName + "." + imgType, nil
 }
 
 // GetImageDimension will return image dimention in pixels
@@ -113,7 +114,7 @@ func ResizeImage(imageName string, newWidth uint, newHeight uint) (string, error
 	}
 	defer out.Close()
 	err = jpeg.Encode(out, newImage, nil)
-	return name, err
+	return name + ".jpeg", err
 }
 
 // ArchiveImage will move images in a subdirectory "archive"

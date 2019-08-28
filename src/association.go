@@ -6,18 +6,19 @@ import (
 
 // Association defines the model of a Association
 type Association struct {
-	ID            bson.ObjectId   `bson:"_id,omitempty"`
-	Name          string          `json:"name"`
-	Email         string          `json:"email"`
-	Description   string          `json:"description"`
-	Events        []bson.ObjectId `json:"events"`
-	Posts         []bson.ObjectId `json:"posts"`
-	Palette       [][]int         `json:"palette"`
-	SelectedColor int             `json:"selectedcolor"`
-	Profile       string          `json:"profile"`
-	Cover         string          `json:"cover"`
-	BgColor       string          `json:"bgcolor"`
-	FgColor       string          `json:"fgcolor"`
+	ID              bson.ObjectId   `bson:"_id,omitempty"`
+	Name            string          `json:"name"`
+	Email           string          `json:"email"`
+	Description     string          `json:"description"`
+	Events          []bson.ObjectId `json:"events"`
+	Posts           []bson.ObjectId `json:"posts"`
+	Palette         [][]int         `json:"palette"`
+	SelectedColor   int             `json:"selectedcolor"`
+	Profile         string          `json:"profile"`
+	ProfileUploaded string          `json:"profileuploaded"`
+	Cover           string          `json:"cover"`
+	BgColor         string          `json:"bgcolor"`
+	FgColor         string          `json:"fgcolor"`
 }
 
 // Associations is an array of Association
@@ -52,17 +53,20 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	defer session.Close()
 	db := session.DB("insapp").C("association")
 
+	association.Profile, _ = ResizeImage(association.ProfileUploaded, 256, 256)
+
 	associationID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{
-		"name":          association.Name,
-		"email":         association.Email,
-		"description":   association.Description,
-		"profile":       association.Profile,
-		"cover":         association.Cover,
-		"palette":       association.Palette,
-		"selectedcolor": association.SelectedColor,
-		"bgcolor":       association.BgColor,
-		"fgcolor":       association.FgColor,
+		"name":            association.Name,
+		"email":           association.Email,
+		"description":     association.Description,
+		"profile":         association.Profile,
+		"profileuploaded": association.ProfileUploaded,
+		"cover":           association.Cover,
+		"palette":         association.Palette,
+		"selectedcolor":   association.SelectedColor,
+		"bgcolor":         association.BgColor,
+		"fgcolor":         association.FgColor,
 	}}
 
 	db.Update(associationID, change)

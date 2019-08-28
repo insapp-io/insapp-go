@@ -55,6 +55,13 @@ func main() {
 						}
 					},
 				},
+				{
+					Name:  "update",
+					Usage: "Update all associations' profile pictures",
+					Action: func(c *cli.Context) error {
+						return UpdateAssociationsCLI()
+					},
+				},
 			},
 		},
 
@@ -198,6 +205,20 @@ func AddAssociationCLI(name string, email string) error {
 	return nil
 }
 
+// UpdateAssociationsCLI update all associations
+func UpdateAssociationsCLI() error {
+	var assos = GetAllAssociation()
+	for _, ass := range assos {
+		// Migrate profile picture
+		if ass.ProfileUploaded == "" && ass.Profile != "" {
+			ass.ProfileUploaded = ass.Profile
+			ass.Profile = ""
+			UpdateAssociation(ass.ID, ass)
+		}
+	}
+	return nil
+}
+
 // GetUsedImages return an array of all images file name found in db
 func GetUsedImages() []string {
 	var result []string
@@ -205,6 +226,9 @@ func GetUsedImages() []string {
 	for _, ass := range assos {
 		if ass.Profile != "" {
 			result = append(result, ass.Profile)
+		}
+		if ass.ProfileUploaded != "" {
+			result = append(result, ass.ProfileUploaded)
 		}
 		if ass.Cover != "" {
 			result = append(result, ass.Cover)

@@ -96,7 +96,6 @@ These endpoints must include the user token as a query string : `?token=<token>`
 | `PUT`     | `/posts/{id}`                                     | `Update the post with id {id}`
 | `DELETE`  | `/posts/{id}`                                     | `Delete the post with id {id}`
 | `POST`    | `/images`                                         | `Post an image`
-| `POST`    | `/images/{name}`                                  | `Update the image with name {name}`
 
 ### Super user routes
 
