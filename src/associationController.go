@@ -106,12 +106,6 @@ func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
-	isValidMail := VerifyEmail(association.Email)
-	if !isValidMail {
-		w.WriteHeader(http.StatusConflict)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
-		return
-	}
 	res := UpdateAssociation(bson.ObjectIdHex(associationID), association)
 	_ = json.NewEncoder(w).Encode(res)
 }
