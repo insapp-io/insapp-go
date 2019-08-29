@@ -8,10 +8,20 @@ import (
 	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2/bson"
 
+	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 )
 
 // Please refer to https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages
+
+func initializeFirebaseApp() *firebase.App {
+	firebaseApp, err := firebase.NewApp(context.Background(), nil)
+	if err != nil {
+		log.Fatalf("error initializing Firebase app: %v\n", err)
+	}
+
+	return firebaseApp
+}
 
 func getAllUsers() []NotificationUser {
 	session := GetMongoSession()

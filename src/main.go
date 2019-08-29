@@ -5,9 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
-
-	firebase "firebase.google.com/go"
 )
 
 type WithCORS struct {
@@ -21,15 +18,6 @@ func main() {
 
 	log.Println("Starting server on 0.0.0.0:" + configuration.Port)
 	log.Fatal(http.ListenAndServe(":"+configuration.Port, &WithCORS{NewRouter()}))
-}
-
-func initializeFirebaseApp() *firebase.App {
-	firebaseApp, err := firebase.NewApp(context.Background(), nil)
-	if err != nil {
-		log.Fatalf("error initializing Firebase app: %v\n", err)
-	}
-
-	return firebaseApp
 }
 
 // Simple wrapper to Allow CORS

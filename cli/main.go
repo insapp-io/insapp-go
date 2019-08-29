@@ -13,6 +13,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+var firebaseApp = initializeFirebaseApp()
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "Insapp-api-cli"
