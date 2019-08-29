@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"image"
+	"image/color"
+	"image/draw"
 	_ "image/gif"
 	"image/jpeg"
 	_ "image/jpeg"
@@ -99,21 +101,31 @@ func GetImagesNames() ([]string, error) {
 // Put 0 to newWidth or newHeight to make it automatically calculate to keep aspect ratio.
 func ResizeImage(imageName string, newWidth uint, newHeight uint) (string, error) {
 	file, err := os.Open("./img/" + imageName)
+	defer file.Close()
 	if err != nil {
 		return "", err
 	}
-	image, _, err := image.Decode(file)
+
+	origanialImage, _, err := image.Decode(file)
 	if err != nil {
 		return "", err
 	}
-	newImage := resize.Resize(newWidth, newHeight, image, resize.Lanczos3)
+
+	newImg := image.NewRGBA(origanialImage.Bounds())
+	// paste a white background
+	draw.Draw(newImg, newImg.Bounds(), &image.Uniform{color.White}, image.Point{}, draw.Src)
+	// paste original image
+	draw.Draw(newImg, newImg.Bounds(), origanialImage, origanialImage.Bounds().Min, draw.Over)
+
+	finalImage := resize.Resize(newWidth, newHeight, newImg, resize.Lanczos3)
 	name := RandomString(40)
 	out, err := os.Create("./img/" + name + ".jpeg")
 	if err != nil {
 		return "", err
 	}
 	defer out.Close()
-	err = jpeg.Encode(out, newImage, nil)
+
+	err = jpeg.Encode(out, finalImage, nil)
 	return name + ".jpeg", err
 }
 

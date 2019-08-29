@@ -53,7 +53,9 @@ func UpdateAssociation(id bson.ObjectId, association Association) Association {
 	defer session.Close()
 	db := session.DB("insapp").C("association")
 
-	association.Profile, _ = ResizeImage(association.ProfileUploaded, 256, 256)
+	if association.ProfileUploaded != "" {
+		association.Profile, _ = ResizeImage(association.ProfileUploaded, 256, 256)
+	}
 
 	associationID := bson.M{"_id": id}
 	change := bson.M{"$set": bson.M{

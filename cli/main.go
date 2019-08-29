@@ -216,6 +216,8 @@ func UpdateAssociationsCLI() error {
 			ass.ProfileUploaded = ass.Profile
 			ass.Profile = ""
 			UpdateAssociation(ass.ID, ass)
+		} else {
+			UpdateAssociation(ass.ID, ass)
 		}
 	}
 	return nil
