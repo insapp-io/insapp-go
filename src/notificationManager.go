@@ -199,19 +199,10 @@ func sendNotificationToDevices(title string, message string, objectID string, cl
 }
 
 func sendPushNotificationToDevice(title string, message string, objectID string, clickAction string, token string) {
-	configuration, _ := Configuration()
-
 	ctx := context.Background()
 	client, err := firebaseApp.Messaging(ctx)
 	if err != nil {
 		log.Fatalf("error getting Messaging client: %v\n", err)
-	}
-
-	var packageName string
-	if configuration.Environment != "prod" {
-		packageName = "fr.insapp.insapp.debug"
-	} else {
-		packageName = "fr.insapp.insapp"
 	}
 
 	pushNotification := &messaging.Message{
@@ -224,7 +215,6 @@ func sendPushNotificationToDevice(title string, message string, objectID string,
 			"ID": objectID,
 		},
 		Android: &messaging.AndroidConfig{
-			RestrictedPackageName: packageName,
 			Notification: &messaging.AndroidNotification{
 				Sound:       "default",
 				Color:       "#ec5d57",
@@ -256,19 +246,10 @@ func sendNotificationToTopics(title string, message string, objectID string, cli
 }
 
 func sendPushNotificationToTopics(title string, message string, objectID string, clickAction string, topics string) {
-	configuration, _ := Configuration()
-
 	ctx := context.Background()
 	client, err := firebaseApp.Messaging(ctx)
 	if err != nil {
 		log.Fatalf("error getting Messaging client: %v\n", err)
-	}
-
-	var packageName string
-	if configuration.Environment != "prod" {
-		packageName = "fr.insapp.insapp.debug"
-	} else {
-		packageName = "fr.insapp.insapp"
 	}
 
 	pushNotification := &messaging.Message{
@@ -281,7 +262,6 @@ func sendPushNotificationToTopics(title string, message string, objectID string,
 			"ID": objectID,
 		},
 		Android: &messaging.AndroidConfig{
-			RestrictedPackageName: packageName,
 			Notification: &messaging.AndroidNotification{
 				Sound:       "default",
 				Color:       "#ec5d57",
