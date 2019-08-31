@@ -7,10 +7,10 @@ import (
 )
 
 var promotions = []string{"", "1STPI", "2STPI",
-	"3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
-	"4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
-	"5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
-	"Alternant", "Personnel/Enseignant"}
+	"3CDTI", "3EII", "3GM", "3GCU", "3GMA", "3INFO", "3SGM", "3SRC",
+	"4CDTI", "4EII", "4GM", "4GCU", "4GMA", "4INFO", "4SGM", "4SRC",
+	"5CDTI", "5EII", "5GM", "5GCU", "5GMA", "5INFO", "5SGM", "5SRC",
+	"STAFF"}
 
 var genders = []string{"", "female", "male"}
 
