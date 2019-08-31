@@ -75,11 +75,11 @@ func getNotificationUserForUser(user bson.ObjectId) NotificationUser {
 	return result
 }
 
-func buildTopicsStringForPromotions(suffix string, promotions []string) string {
+func buildTopicsStringForPromotions(prefix string, promotions []string) string {
 	topics := ""
 
 	for _, promotion := range promotions {
-		topics += fmt.Sprintf(` || '%s-%s' in topics`, suffix, promotion)
+		topics += fmt.Sprintf(` || '%s-%s' in topics`, prefix, promotion)
 	}
 
 	return topics
@@ -145,9 +145,9 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 		notification,
 		users,
 		fmt.Sprintf(
-			`%s && ('events-unknown-class' in topics)`,
-			platforms))
-	//buildTopicsStringForPromotions("events", event.Promotions)))
+			`%s && ('events-unknown-class' in topics %s)`,
+			platforms,
+			buildTopicsStringForPromotions("events", event.Promotions)))
 }
 
 func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.ObjectId, message string) {
@@ -184,9 +184,9 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 		notification,
 		users,
 		fmt.Sprintf(
-			`%s && ('posts-unknown-class' in topics)`,
-			platforms))
-	//buildTopicsStringForPromotions("posts", post.Promotions)
+			`%s && ('posts-unknown-class' in topics %s)`,
+			platforms,
+			buildTopicsStringForPromotions("posts", post.Promotions)))
 }
 
 func sendNotificationToDevices(title string, message string, objectID string, clickAction string, notification Notification, users []NotificationUser) {
