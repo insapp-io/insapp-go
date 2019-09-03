@@ -28,7 +28,7 @@ func GetAssociationController(w http.ResponseWriter, r *http.Request) {
 
 // GetAllAssociationsController will answer a JSON of all associations
 func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
-	var res = GetAllAssociation()
+	var res = GetAllAssociations()
 	_ = json.NewEncoder(w).Encode(res)
 }
 

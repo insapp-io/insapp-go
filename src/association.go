@@ -123,14 +123,14 @@ func GetAssociationFromEmail(email string) Association {
 	return result
 }
 
-// GetAllAssociation will return an array of all the existing Association
-func GetAllAssociation() Associations {
+// GetAllAssociations will return an array of all the existing Association, hidding "Menu" association and sort by name asc
+func GetAllAssociations() Associations {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("association")
 
 	var result Associations
-	db.Find(bson.M{}).All(&result)
+	db.Find(bson.M{"name": bson.M{"$ne": "Menu"}}).Sort("name").All(&result)
 
 	return result
 }

@@ -209,7 +209,7 @@ func AddAssociationCLI(name string, email string) error {
 
 // UpdateAssociationsCLI update all associations
 func UpdateAssociationsCLI() error {
-	var assos = GetAllAssociation()
+	var assos = GetAllAssociations()
 	for _, ass := range assos {
 		// Migrate profile picture
 		if ass.ProfileUploaded == "" && ass.Profile != "" {
@@ -226,7 +226,7 @@ func UpdateAssociationsCLI() error {
 // GetUsedImages return an array of all images file name found in db
 func GetUsedImages() []string {
 	var result []string
-	var assos = GetAllAssociation()
+	var assos = GetAllAssociations()
 	for _, ass := range assos {
 		if ass.Profile != "" {
 			result = append(result, ass.Profile)
