@@ -85,32 +85,30 @@ func buildTopicsStringForPromotions(prefix string, promotions []string) string {
 	return topics
 }
 
+// TriggerNotificationForUserFromPost will send a Notification as well as a FCM push
+// notification to the given user
 func TriggerNotificationForUserFromPost(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
-
 	user := getNotificationUserForUser(receiver)
-	sendNotificationToDevices(
-		GetUser(sender).Username,
-		message,
-		content.Hex(),
-		".activities.PostActivity",
-		notification,
-		[]NotificationUser{user})
+
+	sendNotificationToUsers(notification, []NotificationUser{user})
+
+	sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.PostActivity", user.Token)
 }
 
+// TriggerNotificationForUserFromEvent will send a Notification as well as a FCM push
+// notification to the given user
 func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
-
 	user := getNotificationUserForUser(receiver)
-	sendNotificationToDevices(
-		GetUser(sender).Username,
-		message,
-		content.Hex(),
-		".activities.EventActivity",
-		notification,
-		[]NotificationUser{user})
+
+	sendNotificationToUsers(notification, []NotificationUser{user})
+
+	sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.EventActivity", user.Token)
 }
 
+// TriggerNotificationForEvent will send a Notification as well as a FCM push
+// notification to users targeted by the Event platform and promotion
 func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
 
@@ -137,19 +135,17 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 		}
 	}
 
-	sendNotificationToTopics(
-		event.Name,
-		message,
-		content.Hex(),
-		".activities.EventActivity",
-		notification,
-		users,
-		fmt.Sprintf(
-			`%s && ('events-unknown-class' in topics %s)`,
-			platforms,
-			buildTopicsStringForPromotions("events", event.Promotions)))
+	sendNotificationToUsers(notification, users)
+
+	for _, promotion := range event.Promotions {
+		var topics = fmt.Sprintf(`%s && 'events-%s' in topics`, platforms, promotion)
+		sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", topics)
+	}
+	sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", fmt.Sprintf(`%s && 'events-unknown-class' in topics`, platforms))
 }
 
+// TriggerNotificationForPost will send a Notification as well as a FCM push
+// notification to users targeted by the Post platform and promotion
 func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
 
@@ -176,25 +172,19 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 		}
 	}
 
-	sendNotificationToTopics(
-		post.Title,
-		message,
-		content.Hex(),
-		".activities.PostActivity",
-		notification,
-		users,
-		fmt.Sprintf(
-			`%s && ('posts-unknown-class' in topics %s)`,
-			platforms,
-			buildTopicsStringForPromotions("posts", post.Promotions)))
+	sendNotificationToUsers(notification, users)
+
+	for _, promotion := range post.Promotions {
+		var topics = fmt.Sprintf(`%s && 'posts-%s' in topics`, platforms, promotion)
+		sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", topics)
+	}
+	sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", fmt.Sprintf(`%s && 'posts-unknown-class' in topics`, platforms))
 }
 
-func sendNotificationToDevices(title string, message string, objectID string, clickAction string, notification Notification, users []NotificationUser) {
+func sendNotificationToUsers(notification Notification, users []NotificationUser) {
 	for _, user := range users {
 		notification.Receiver = user.UserId
 		notification = AddNotification(notification)
-		//number := len(GetUnreadNotificationsForUser(user.UserId))
-		sendPushNotificationToDevice(title, message, objectID, clickAction, user.Token)
 	}
 }
 
@@ -233,16 +223,6 @@ func sendPushNotificationToDevice(title string, message string, objectID string,
 	// Response is a message ID string
 	fmt.Println("Successfully sent message:", response)
 	fmt.Println("Token:", token)
-}
-
-func sendNotificationToTopics(title string, message string, objectID string, clickAction string, notification Notification, users []NotificationUser, topics string) {
-	for _, user := range users {
-		notification.Receiver = user.UserId
-		notification = AddNotification(notification)
-		//number := len(GetUnreadNotificationsForUser(user.UserId))
-	}
-
-	sendPushNotificationToTopics(title, message, objectID, clickAction, topics)
 }
 
 func sendPushNotificationToTopics(title string, message string, objectID string, clickAction string, topics string) {
