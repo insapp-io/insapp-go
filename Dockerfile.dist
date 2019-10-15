@@ -3,15 +3,9 @@ FROM golang as builder-app
 LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
 WORKDIR /go/src/app
-COPY ./src .
-RUN go get -d -v . && \
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api .
-
-LABEL maintainer="PitouGames <pitou.games@gmail.com>"
-# override main.go
-COPY ./cli .
-RUN go get -d -v . && \
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cli .
+COPY . .
+RUN go get -d -v ./cmd/insapp-api && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api .
+RUN go get -d -v ./cmd/insapp-cli && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cli .
 
 # Golang application
 FROM alpine
@@ -22,7 +16,6 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /root
 
 COPY --from=builder-app /go/src/app .
-COPY --from=builder-app /go/src/app/cli .
 
 COPY ./service-account.json .
 ENV GOOGLE_APPLICATION_CREDENTIALS /root/service-account.json
