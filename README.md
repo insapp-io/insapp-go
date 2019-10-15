@@ -6,11 +6,13 @@ Backend part of the Insapp project written in Go
 
 ## Installation
 
+### go get
+
 ```bash
 go get github.com/thomas-bouvier/insapp-go/...
 ```
 
-### API
+#### API
 
 Check that you have MongoDB running.
 
@@ -20,10 +22,24 @@ insapp-api
 
 The process is listening on 0.0.0.0:9000 by default.
 
-### CLI
+#### CLI
 
 ```bash
 insapp-cli
+```
+
+### Docker
+
+#### Build
+
+```bash
+docker build -t insapp-go .
+```
+
+#### Run
+
+```bash
+docker run -it insapp-go
 ```
 
 ## Configuration

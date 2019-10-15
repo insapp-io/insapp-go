@@ -2,10 +2,15 @@
 FROM golang as builder-app
 LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
-WORKDIR /go/src/app
-COPY . .
-RUN go get -d -v ./cmd/insapp-api && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api .
-RUN go get -d -v ./cmd/insapp-cli && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cli .
+ADD . /go/src/github.com/thomas-bouvier/insapp-go
+WORKDIR /go/src/github.com/thomas-bouvier/insapp-go
+
+# Force the go compiler to use modules 
+ENV GO111MODULE=on
+RUN go mod download
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/insapp-api ./cmd/insapp-api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/insapp-cli ./cmd/insapp-cli
 
 # Golang application
 FROM alpine
@@ -13,13 +18,18 @@ LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
 RUN apk add --no-cache ca-certificates
 
-WORKDIR /root
+WORKDIR /go
 
-COPY --from=builder-app /go/src/app .
+COPY --from=builder-app /go/insapp-api .
+COPY --from=builder-app /go/insapp-cli .
 
+RUN chmod +x ./insapp-api
+RUN chmod +x ./insapp-cli
+
+COPY ./config.json .
 COPY ./service-account.json .
-ENV GOOGLE_APPLICATION_CREDENTIALS /root/service-account.json
+ENV GOOGLE_APPLICATION_CREDENTIALS /go/service-account.json
 
 EXPOSE REPLACE_WITH_THE_API_PORT
 
-CMD ["./api"]
+CMD ["./insapp-api"]
