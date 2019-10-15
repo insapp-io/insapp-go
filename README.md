@@ -2,15 +2,28 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/thomas-bouvier/insapp-go)](https://goreportcard.com/report/thomas-bouvier/insapp-go)
 
-Backend part of the Insapp project written in Golang
+Backend part of the Insapp project written in Go
 
-## Dependencies
-
-Don't forget to install Go dependencies:
+## Installation
 
 ```bash
-cd insapp-go
-go get ./...
+go get github.com/thomas-bouvier/insapp-go/...
+```
+
+### API
+
+Check that you have MongoDB running.
+
+```bash
+insapp-api
+```
+
+The process is listening on 0.0.0.0:9000 by default.
+
+### CLI
+
+```bash
+insapp-cli
 ```
 
 ## Configuration
@@ -25,16 +38,6 @@ vi config.json
 Attributes `google_email` and `google_password` refer to the credentials of your Google account. These credentials are used to send emails. `mongo_password` refers to the MongoDB password. `env` refers to the environment type and should be set to `prod` or `dev`. Finally, `port` refers to the API port.
 
 The FCM HTTP v1 API requires some credentials to send push notifications. The `service-account.json` file can be downloaded from the Firebase Cloud Messaging dashboard, and should be copied at the root of this directory. This way, it will be included in the Docker container.
-
-## Build & Launch
-
-Check that you have MongoDB running.
-
-```bash
-cd src && go build
-```
-
-You can now manually launch your process with `./src`. It is listening on 0.0.0.0:9000 by default.
 
 ## API Endpoints
 

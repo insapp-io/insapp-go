@@ -1,7 +1,3 @@
-// To compile this cli, you must copy all code from insapp-go/src.
-// It replace the main.go given in ../src
-// This is done automatically if you're using the Dockerfile
-
 package main
 
 import (
@@ -10,15 +6,14 @@ import (
 	"log"
 	"os"
 
+	insapp "github.com/thomas-bouvier/insapp-go"
 	"github.com/urfave/cli"
 )
 
-var firebaseApp = initializeFirebaseApp()
-
 func main() {
 	app := cli.NewApp()
-	app.Name = "Insapp-api-cli"
-	app.Usage = "A useful cli to manage insapp api"
+	app.Name = "insapp-cli"
+	app.Usage = "A useful CLI to manage Insapp api"
 	app.Version = "0.0.1"
 	app.Authors = []cli.Author{
 		cli.Author{
@@ -27,7 +22,7 @@ func main() {
 		},
 	}
 	app.Copyright = "(c) 2019 Insapp"
-	app.UseShortOptionHandling = true
+	//app.UseShortOptionHandling = true
 	app.Commands = []cli.Command{
 
 		cli.Command{
@@ -52,9 +47,8 @@ func main() {
 						if c.String("name") != "" && c.String("email") != "" {
 							err := AddAssociationCLI(c.String("name"), c.String("email"))
 							return err
-						} else {
-							return errors.New("You must provide a --name and an --email. See association create --help")
 						}
+						return errors.New("You must provide a --name and an --email. See association create --help")
 					},
 				},
 				{
@@ -91,7 +85,7 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						var usedImages = GetUsedImages()
-						cdnImages, _ := GetImagesNames()
+						cdnImages, _ := insapp.GetImagesNames()
 						var toDelete []string
 						for _, cdnImage := range cdnImages {
 							delete := true
@@ -121,7 +115,7 @@ func main() {
 							if askForConfirmation("Are you sure to archive these files ? (Y/n)") {
 								fmt.Println("Archiving files...")
 								for _, imageName := range toDelete {
-									err := ArchiveImage(imageName)
+									err := insapp.ArchiveImage(imageName)
 									if err != nil {
 										return err
 									}
@@ -134,7 +128,7 @@ func main() {
 							if askForConfirmation("Are you sure to delete these files ? (Y/n)") {
 								fmt.Println("Deleting files...")
 								for _, imageName := range toDelete {
-									err := DeleteImage(imageName)
+									err := insapp.DeleteImage(imageName)
 									if err != nil {
 										return err
 									}
@@ -168,9 +162,9 @@ func askForConfirmation(message string) bool {
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
-	if containsString(okayResponses, response) {
+	if insapp.ContainsString(okayResponses, response) {
 		return true
-	} else if containsString(nokayResponses, response) {
+	} else if insapp.ContainsString(nokayResponses, response) {
 		return false
 	} else {
 		fmt.Println(message)
@@ -180,8 +174,8 @@ func askForConfirmation(message string) bool {
 
 // AddAssociationCLI create a brand new master association
 func AddAssociationCLI(name string, email string) error {
-	var association Association
-	isValidEmail := VerifyEmail(email)
+	var association insapp.Association
+	isValidEmail := insapp.VerifyEmail(email)
 	if !isValidEmail {
 		return errors.New("This email is already used")
 	}
@@ -189,17 +183,17 @@ func AddAssociationCLI(name string, email string) error {
 	fmt.Println("Creating Association:", name, email)
 	association.Name = name
 	association.Email = email
-	res := AddAssociation(association)
-	password := GeneratePassword()
+	res := insapp.AddAssociation(association)
+	password := insapp.GeneratePassword()
 	fmt.Println("Association created:", res)
 
-	var user AssociationUser
+	var user insapp.AssociationUser
 	user.Association = res.ID
 	user.Username = res.Email
 	user.Master = true
-	user.Password = GetMD5Hash(password)
-	AddAssociationUser(user)
-	err := SendAssociationEmailSubscription(user.Username, password)
+	user.Password = insapp.GetMD5Hash(password)
+	insapp.AddAssociationUser(user)
+	err := insapp.SendAssociationEmailSubscription(user.Username, password)
 	if err != nil {
 		return err
 	}
@@ -209,15 +203,15 @@ func AddAssociationCLI(name string, email string) error {
 
 // UpdateAssociationsCLI update all associations
 func UpdateAssociationsCLI() error {
-	var assos = GetAllAssociations()
+	var assos = insapp.GetAllAssociations()
 	for _, ass := range assos {
 		// Migrate profile picture
 		if ass.ProfileUploaded == "" && ass.Profile != "" {
 			ass.ProfileUploaded = ass.Profile
 			ass.Profile = ""
-			UpdateAssociation(ass.ID, ass)
+			insapp.UpdateAssociation(ass.ID, ass)
 		} else {
-			UpdateAssociation(ass.ID, ass)
+			insapp.UpdateAssociation(ass.ID, ass)
 		}
 	}
 	return nil
@@ -226,7 +220,7 @@ func UpdateAssociationsCLI() error {
 // GetUsedImages return an array of all images file name found in db
 func GetUsedImages() []string {
 	var result []string
-	var assos = GetAllAssociations()
+	var assos = insapp.GetAllAssociations()
 	for _, ass := range assos {
 		if ass.Profile != "" {
 			result = append(result, ass.Profile)
@@ -239,14 +233,14 @@ func GetUsedImages() []string {
 		}
 	}
 
-	var events = GetEvents()
+	var events = insapp.GetEvents()
 	for _, event := range events {
 		if event.Image != "" {
 			result = append(result, event.Image)
 		}
 	}
 
-	var posts = GetPosts()
+	var posts = insapp.GetPosts()
 	for _, post := range posts {
 		if post.Image != "" {
 			result = append(result, post.Image)

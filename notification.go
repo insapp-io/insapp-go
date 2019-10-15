@@ -1,4 +1,4 @@
-package main
+package insapp
 
 import (
 	"time"

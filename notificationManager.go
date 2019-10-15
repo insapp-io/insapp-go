@@ -1,4 +1,4 @@
-package main
+package insapp
 
 import (
 	"fmt"
@@ -11,6 +11,8 @@ import (
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 )
+
+var firebaseApp = initializeFirebaseApp()
 
 // Please refer to https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages
 

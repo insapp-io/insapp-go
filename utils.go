@@ -1,4 +1,4 @@
-package main
+package insapp
 
 import (
 	"math/rand"
@@ -25,6 +25,11 @@ func RandomString(strlen int) string {
 	return string(result)
 }
 
+// ContainsString returns true if slice contains element
+func ContainsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
+}
+
 // posString returns the first index of element in slice.
 // If slice does not contain element, returns -1.
 func posString(slice []string, element string) int {
@@ -34,9 +39,4 @@ func posString(slice []string, element string) int {
 		}
 	}
 	return -1
-}
-
-// containsString returns true iff slice contains element
-func containsString(slice []string, element string) bool {
-	return !(posString(slice, element) == -1)
 }

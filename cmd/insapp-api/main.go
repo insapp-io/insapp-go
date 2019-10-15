@@ -5,23 +5,22 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	insapp "github.com/thomas-bouvier/insapp-go"
 )
 
-type WithCORS struct {
+type withCORS struct {
 	r *mux.Router
 }
 
-var firebaseApp = initializeFirebaseApp()
-
 func main() {
-	configuration, _ := Configuration()
+	configuration, _ := insapp.Configuration()
 
 	log.Println("Starting server on 0.0.0.0:" + configuration.Port)
-	log.Fatal(http.ListenAndServe(":"+configuration.Port, &WithCORS{NewRouter()}))
+	log.Fatal(http.ListenAndServe(":"+configuration.Port, &withCORS{insapp.NewRouter()}))
 }
 
 // Simple wrapper to Allow CORS
-func (s *WithCORS) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (s *withCORS) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	origin := req.Header.Get("Origin")
 	res.Header().Set("Access-Control-Allow-Origin", origin)
 	res.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
