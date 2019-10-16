@@ -1,4 +1,4 @@
-module insapp
+module github.com/thomas-bouvier/insapp-go
 
 go 1.13
 
