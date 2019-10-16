@@ -1,16 +1,14 @@
 # Docker builder for Golang
-FROM golang as builder-app
+FROM golang:1.13 as builder-app
 LABEL maintainer="Thomas Bouvier <contact@thomas-bouvier.io>"
 
 ADD . /go/src/github.com/thomas-bouvier/insapp-go
 WORKDIR /go/src/github.com/thomas-bouvier/insapp-go
 
-# Force the go compiler to use modules 
-ENV GO111MODULE=on
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/insapp-api ./cmd/insapp-api
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/insapp-cli ./cmd/insapp-cli
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o /go/insapp-api ./cmd/insapp-api
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o /go/insapp-cli ./cmd/insapp-cli
 
 # Golang application
 FROM alpine
