@@ -24,8 +24,12 @@ COPY --from=builder-app /go/insapp-cli .
 RUN chmod +x ./insapp-api
 RUN chmod +x ./insapp-cli
 
+# The CDN is added by the docker-compose file
 COPY ./config.json .
 COPY ./service-account.json .
+COPY ./pages ./pages
+COPY ./templates ./templates
+
 ENV GOOGLE_APPLICATION_CREDENTIALS /go/service-account.json
 
 EXPOSE REPLACE_WITH_THE_API_PORT

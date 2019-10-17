@@ -42,6 +42,12 @@ docker build -t insapp-go .
 docker run -it insapp-go
 ```
 
+To ssh into this container, use the following command:
+
+```bash
+docker exec -it insapp-go ash
+```
+
 ## Configuration
 
 Edit the configuration file:

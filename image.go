@@ -59,7 +59,7 @@ func UploadImageWithName(r *http.Request, name string) (string, error) {
 	defer file.Close()
 
 	fileName := name
-	err = ioutil.WriteFile("./img/"+fileName+"."+imgType, data, 0666)
+	err = ioutil.WriteFile("./cdn/"+fileName+"."+imgType, data, 0666)
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +68,7 @@ func UploadImageWithName(r *http.Request, name string) (string, error) {
 
 // GetImageDimension will return image dimention in pixels
 func GetImageDimension(fileName string) (int, int) {
-	file, err := os.Open("./img/" + fileName)
+	file, err := os.Open("./cdn/" + fileName)
 	if err != nil {
 		return 0, 0
 	}
@@ -78,12 +78,12 @@ func GetImageDimension(fileName string) (int, int) {
 
 // GetImageColors will return a palette of colors found in the image
 func GetImageColors(fileName string) [][]int {
-	return extractor.NewExtractor("./img/"+fileName, 10).GetPalette(6)
+	return extractor.NewExtractor("./cdn/"+fileName, 10).GetPalette(6)
 }
 
 // GetImagesNames will return a string of all images in cdn
 func GetImagesNames() ([]string, error) {
-	files, err := ioutil.ReadDir("./img/")
+	files, err := ioutil.ReadDir("./cdn/")
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func GetImagesNames() ([]string, error) {
 // ResizeImage will resize an image as jpeg and response its new name
 // Put 0 to newWidth or newHeight to make it automatically calculate to keep aspect ratio.
 func ResizeImage(imageName string, newWidth uint, newHeight uint) (string, error) {
-	file, err := os.Open("./img/" + imageName)
+	file, err := os.Open("./cdn/" + imageName)
 	defer file.Close()
 	if err != nil {
 		return "", err
@@ -119,7 +119,7 @@ func ResizeImage(imageName string, newWidth uint, newHeight uint) (string, error
 
 	finalImage := resize.Resize(newWidth, newHeight, newImg, resize.Lanczos3)
 	name := RandomString(40)
-	out, err := os.Create("./img/" + name + ".jpeg")
+	out, err := os.Create("./cdn/" + name + ".jpeg")
 	if err != nil {
 		return "", err
 	}
@@ -131,17 +131,17 @@ func ResizeImage(imageName string, newWidth uint, newHeight uint) (string, error
 
 // ArchiveImage will move images in a subdirectory "archive"
 func ArchiveImage(fileName string) error {
-	if _, err := os.Stat("./img/archive/"); os.IsNotExist(err) {
-		os.Mkdir("./img/archive/", 0755) // rwxr-wr-x
+	if _, err := os.Stat("./cdn/archive/"); os.IsNotExist(err) {
+		os.Mkdir("./cdn/archive/", 0755) // rwxr-wr-x
 	}
-	oldLocation := "./img/" + fileName
-	newLocation := "./img/archive/" + fileName
+	oldLocation := "./cdn/" + fileName
+	newLocation := "./cdn/archive/" + fileName
 	err := os.Rename(oldLocation, newLocation)
 	return err
 }
 
 // DeleteImage will permanently delete an image
 func DeleteImage(fileName string) error {
-	err := os.Remove("./img/" + fileName)
+	err := os.Remove("./cdn/" + fileName)
 	return err
 }
