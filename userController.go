@@ -29,7 +29,7 @@ func AddUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var user User
 	decoder.Decode(&user)
-	res := AddUser(user)
+	res := AddUser(&user)
 	json.NewEncoder(w).Encode(res)
 }
 

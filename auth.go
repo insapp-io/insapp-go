@@ -217,7 +217,7 @@ func updateRefreshTokenExpiration(refreshTokenString string) (string, error) {
 	return refreshJwt.SignedString(signKey)
 }
 
-func revokeRefreshToken(refreshTokenString string) error {
+func RevokeRefreshToken(refreshTokenString string) error {
 	refreshToken, err := jwt.ParseWithClaims(refreshTokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return verifyKey, nil
 	})

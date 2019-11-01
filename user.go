@@ -31,8 +31,22 @@ type User struct {
 // Users is an array of User
 type Users []User
 
+// NewUser creates a new User
+func NewUser(username string) *User {
+	return &User{
+		Name:        "",
+		Username:    username,
+		Description: "",
+		Email:       "",
+		EmailPublic: false,
+		Promotion:   "",
+		Events:      []bson.ObjectId{},
+		PostsLiked:  []bson.ObjectId{},
+	}
+}
+
 // AddUser will add the given user from JSON body to the database
-func AddUser(user User) User {
+func AddUser(user *User) User {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("user")

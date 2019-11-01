@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
@@ -23,13 +25,6 @@ type Login struct {
 	Password string `json:"password"`
 }
 
-type Credentials struct {
-	ID        bson.ObjectId `bson:"_id,omitempty"`
-	Username  string        `json:"username"`
-	AuthToken string        `json:"authtoken"`
-	User      bson.ObjectId `json:"user" bson:"user"`
-}
-
 type AssociationUser struct {
 	ID          bson.ObjectId `bson:"_id,omitempty"`
 	Username    string        `json:"username"`
@@ -39,8 +34,65 @@ type AssociationUser struct {
 	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
 }
 
-// LogInUserController logs the user using CAS. If the credentials are correct,
-// a JWT access token is generated.
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		AuthCookie, authErr := r.Cookie("AuthToken")
+
+		if authErr == http.ErrNoCookie {
+			log.Println("Unauthorized attempt! No auth cookie")
+			nullifyTokenCookies(&w, r)
+			// http.Redirect(w, r, "/login", 302)
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
+
+		if authErr != nil {
+			log.Panic("panic: %+v", authErr)
+			nullifyTokenCookies(&w, r)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		RefreshCookie, refreshErr := r.Cookie("RefreshToken")
+
+		if refreshErr == http.ErrNoCookie {
+			log.Println("Unauthorized attempt! No refresh cookie")
+			nullifyTokenCookies(&w, r)
+			http.Redirect(w, r, "/login", 302)
+			return
+		}
+
+		if refreshErr != nil {
+			nullifyTokenCookies(&w, r)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		// Check the jwt's for validity
+		authTokenString, refreshTokenString, err := CheckAndRefreshTokens(AuthCookie.Value, RefreshCookie.Value)
+		if err != nil {
+			if err.Error() == "Unauthorized" {
+				log.Println("Unauthorized attempt! JWT's not valid!")
+				nullifyTokenCookies(&w, r)
+				// http.Redirect(w, r, "/login", 302)
+				http.Error(w, http.StatusText(401), 401)
+
+				return
+			}
+
+			nullifyTokenCookies(&w, r)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		setAuthAndRefreshCookies(&w, authTokenString, refreshTokenString)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// LogInUserController logs the user using CAS.
+// If the credentials are correct, a JWT access token is generated.
 func LogInUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
@@ -68,16 +120,7 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	if count == 0 {
-		user = AddUser(User{
-			Name:        "",
-			Username:    login.Username,
-			Description: "",
-			Email:       "",
-			EmailPublic: false,
-			Promotion:   "",
-			Events:      []bson.ObjectId{},
-			PostsLiked:  []bson.ObjectId{},
-		})
+		user = AddUser(NewUser(login.Username))
 	} else {
 		db.Find(bson.M{
 			"username": login.Username,
@@ -98,6 +141,34 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// verifyTicket checks the validity of the given ticket with the CAS
+func verifyTicket(ticket string) (string, error) {
+	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
+	if err != nil {
+		return "", errors.New("unable to verify identity")
+	}
+	defer response.Body.Close()
+
+	htmlData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", errors.New("unable to verify identity")
+	}
+
+	xml := string(htmlData)
+	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>") {
+		return "", errors.New("unable to verify identity")
+	}
+
+	username := strings.Split(xml, "<cas:user>")[1]
+	username = strings.Split(username, "</cas:user>")[0]
+
+	if !(len(username) > 2) {
+		return "", errors.New("unable to verify identity")
+	}
+
+	return username, nil
+}
+
 func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshToken string) {
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "AuthToken",
@@ -110,6 +181,39 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshT
 		Value:    refreshToken,
 		HttpOnly: true,
 	})
+}
+
+func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
+	authCookie := http.Cookie{
+		Name:     "AuthToken",
+		Value:    "",
+		Expires:  time.Now().Add(-1000 * time.Hour),
+		HttpOnly: true,
+	}
+
+	http.SetCookie(*w, &authCookie)
+
+	refreshCookie := http.Cookie{
+		Name:     "RefreshToken",
+		Value:    "",
+		Expires:  time.Now().Add(-1000 * time.Hour),
+		HttpOnly: true,
+	}
+
+	http.SetCookie(*w, &refreshCookie)
+
+	// If present, revoke the refresh cookie from the database
+	RefreshCookie, refreshErr := r.Cookie("RefreshToken")
+	if refreshErr == http.ErrNoCookie {
+		// Do nothing, there is no refresh cookie present
+		return
+	}
+
+	if refreshErr != nil {
+		http.Error(*w, http.StatusText(500), 500)
+	}
+
+	RevokeRefreshToken(RefreshCookie.Value)
 }
 
 func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
@@ -128,32 +232,6 @@ func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
 	}
 
 	return bson.ObjectId(""), false, errors.New("failed to authenticate")
-}
-
-// verifyTicket checks the validity of the given ticket with the CAS.
-func verifyTicket(ticket string) (string, error) {
-	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
-	if err != nil {
-		return "", errors.New("unable to verify identity")
-	}
-	defer response.Body.Close()
-
-	htmlData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return "", errors.New("unable to verify identity")
-	}
-	xml := string(htmlData)
-	if !strings.Contains(xml, "<cas:authenticationSuccess>") && !strings.Contains(xml, "<cas:user>") {
-		return "", errors.New("unable to verify identity")
-	}
-
-	username := strings.Split(xml, "<cas:user>")[1]
-	username = strings.Split(username, "</cas:user>")[0]
-
-	if !(len(username) > 2) {
-		return "", errors.New("unable to verify identity")
-	}
-	return username, nil
 }
 
 func CheckRefreshToken(jti string) bool {
