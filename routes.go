@@ -1,6 +1,7 @@
 package insapp
 
 import (
+	"log"
 	"net/http"
 
 	tauth "github.com/freehaha/token-auth"
@@ -21,7 +22,12 @@ type Routes []Route
 
 // NewRouter is the constructor of the Router
 // It will create every routes from the routes variable just above
-func NewRouter() *mux.Router {
+func NewRouter(config Config) *mux.Router {
+	err := InitJWT(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range publicRoutes {
 		router.
@@ -71,9 +77,11 @@ var publicRoutes = Routes{
 	Route{"HowToPost", "GET", "/how-to-post", HowToPost},
 	Route{"Credit", "GET", "/credit", Credit},
 	Route{"Legal", "GET", "/legal", Legal},
-	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
-	Route{"LogUser", "POST", "/login/user", LogUserController},
-	Route{"SignUser", "POST", "/signin/user/{ticket}", SignInUserController},
+	/*
+		Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
+		Route{"LogUser", "POST", "/login/user", LogUserController},
+		Route{"SignUser", "POST", "/signin/user/{ticket}", SignInUserController},
+	*/
 }
 
 var superRoutes = Routes{

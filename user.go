@@ -90,7 +90,7 @@ func DeleteUser(user User) User {
 	defer session.Close()
 	db := session.DB("insapp").C("user")
 
-	DeleteCredentialsForUser(user.ID)
+	//DeleteCredentialsForUser(user.ID)
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
 

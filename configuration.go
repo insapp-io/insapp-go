@@ -2,13 +2,14 @@ package insapp
 
 import (
 	"encoding/json"
-	"gopkg.in/mgo.v2"
 	"log"
 	"os"
 	"time"
+
+	"gopkg.in/mgo.v2"
 )
 
-// Post defines how to model a Post
+// Config defines how to model a Config
 type Config struct {
 	GoogleEmail      string `json:"google_email"`
 	GooglePassword   string `json:"google_password"`
@@ -17,13 +18,16 @@ type Config struct {
 	DatabaseSource   string `json:"mongo_database_source"`
 	DatabaseUsername string `json:"mongo_database_username"`
 	DatabasePassword string `json:"mongo_database_password"`
+	PrivateKeyPath   string `json:"private_key_path"`
+	PublicKeyPath    string `json:"public_key_path"`
 	Environment      string `json:"env"`
 	Port             string `json:"port"`
 }
 
 var mgoSession *mgo.Session
 
-func Configuration() (Config, *mgo.DialInfo) {
+// InitConfig loads the configuration from the filesystem.
+func InitConfig() (Config, *mgo.DialInfo) {
 	file, err1 := os.Open("config.json")
 	decoder := json.NewDecoder(file)
 
@@ -31,14 +35,14 @@ func Configuration() (Config, *mgo.DialInfo) {
 		log.Fatal(err1)
 	}
 
-	configuration := Config{}
-	err2 := decoder.Decode(&configuration)
+	config := Config{}
+	err2 := decoder.Decode(&config)
 	if err2 != nil {
 		log.Fatal("Error when parsing config file. Make sure the configuration file (config.json) is valid.")
 	}
 
 	var address []string
-	if configuration.Environment == "local" {
+	if config.Environment == "local" {
 		address = append(address, "localhost:27017")
 	} else {
 		address = append(address, "db")
@@ -46,36 +50,40 @@ func Configuration() (Config, *mgo.DialInfo) {
 
 	info := &mgo.DialInfo{
 		Addrs:    address,
-		Database: configuration.DatabaseName,
-		Source:   configuration.DatabaseSource,
-		Username: configuration.DatabaseUsername,
-		Password: configuration.DatabasePassword,
+		Database: config.DatabaseName,
+		Source:   config.DatabaseSource,
+		Username: config.DatabaseUsername,
+		Password: config.DatabasePassword,
 		Timeout:  time.Second * 10,
 	}
 
-	return configuration, info
+	return config, info
 }
 
-//Creates a new session if mgoSession is nil i.e there is no active mongo session.
-//If there is an active mongo session it will return a Clone
+// GetMongoSession creates a new session.
+// If there is an active mongo session it will return a Clone.
 func GetMongoSession() *mgo.Session {
 	if mgoSession == nil {
 		var err error
-		_, info := Configuration()
+		_, info := InitConfig()
 		mgoSession, err = mgo.DialWithInfo(info)
+
 		if err != nil {
 			log.Fatal(err)
 			log.Fatal("Failed to start the Mongo session")
 		}
+
 		mgoSession.SetMode(mgo.Monotonic, true)
 	}
+
 	return mgoSession.Clone()
 }
 
-func (configuration Config) GetCDN() string {
+// GetCDN returns the CDN address depending the configuration.
+func (config Config) GetCDN() string {
 	var cdn string
 
-	switch configuration.Environment {
+	switch config.Environment {
 	case "prod":
 		cdn = "https://insapp.fr/cdn/"
 	case "dev":

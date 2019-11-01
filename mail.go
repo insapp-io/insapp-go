@@ -7,12 +7,12 @@ import (
 )
 
 func SendEmail(to string, subject string, body string) {
-	configuration, _ := Configuration()
+	config, _ := InitConfig()
 
-	from := configuration.GoogleEmail
-	pass := configuration.GooglePassword
-	cc := configuration.GoogleEmail
-	if configuration.Environment != "prod" {
+	from := config.GoogleEmail
+	pass := config.GooglePassword
+	cc := config.GoogleEmail
+	if config.Environment != "prod" {
 		to = from
 		subject = "[DEV] " + subject
 	}
@@ -31,16 +31,21 @@ func SendAssociationEmailSubscription(email string, password string) error {
 	data := struct {
 		Email    string
 		Password string
-	}{Email: email, Password: password}
+	}{
+		Email:    email,
+		Password: password,
+	}
+
 	body, err := parseTemplate("templates/association_subscription_template.html", data)
 	if err == nil {
 		SendEmail(email, "Tes identifiants Insapp", body)
 	}
+
 	return err
 }
 
 func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Comment, user User) error {
-	configuration, _ := Configuration()
+	config, _ := InitConfig()
 
 	data := struct {
 		EventName        string
@@ -48,7 +53,13 @@ func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Co
 		EventDescription string
 		CommentContent   string
 		Username         string
-	}{EventName: event.Name, EventImage: configuration.GetCDN() + event.Image, EventDescription: event.Description, CommentContent: comment.Content, Username: user.Username}
+	}{
+		EventName:        event.Name,
+		EventImage:       config.GetCDN() + event.Image,
+		EventDescription: event.Description,
+		CommentContent:   comment.Content,
+		Username:         user.Username,
+	}
 
 	body, err := parseTemplate("templates/association_comment_event_template.html", data)
 	if err == nil {
@@ -59,7 +70,7 @@ func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Co
 }
 
 func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comment, user User) error {
-	configuration, _ := Configuration()
+	config, _ := InitConfig()
 
 	data := struct {
 		PostName        string
@@ -67,11 +78,19 @@ func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comme
 		PostDescription string
 		CommentContent  string
 		Username        string
-	}{PostName: post.Title, PostImage: configuration.GetCDN() + post.Image, PostDescription: post.Description, CommentContent: comment.Content, Username: user.Username}
+	}{
+		PostName:        post.Title,
+		PostImage:       config.GetCDN() + post.Image,
+		PostDescription: post.Description,
+		CommentContent:  comment.Content,
+		Username:        user.Username,
+	}
+
 	body, err := parseTemplate("templates/association_comment_post_template.html", data)
 	if err == nil {
 		SendEmail(email, "Nouveau commentaire sur \""+post.Title+"\"", body)
 	}
+
 	return err
 }
 

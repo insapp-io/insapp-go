@@ -5,6 +5,8 @@
   "mongo_database_source":"admin",
   "mongo_database_username":"insapp-admin",
   "mongo_database_password":"REPLACE_WITH_THE_MONGO_PASSWORD",
+  "private_key_path":"REPLACE_WITH_THE_PRIVATE_KEY_PATH",
+  "public_key_path":"REPLACE_WITH_THE_PUBLIC_KEY_PATH",
   "env":"REPLACE_WITH_THE_ENVIRONMENT_TYPE",
   "port":"REPLACE_WITH_THE_API_PORT"
 }

@@ -1,6 +1,9 @@
 package insapp
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
 	"math/rand"
 	"time"
 )
@@ -25,6 +28,25 @@ func RandomString(strlen int) string {
 	return string(result)
 }
 
+// GenerateRandomBytes returns securely generated random bytes.
+func GenerateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// Note that err == nil only if we read len(b) bytes.
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+// GenerateRandomString returns a URL-safe, base64 encoded
+// securely generated random string.
+func GenerateRandomString(s int) (string, error) {
+	b, err := GenerateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
+}
+
 // ContainsString returns true if slice contains element
 func ContainsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
@@ -39,4 +61,10 @@ func posString(slice []string, element string) int {
 		}
 	}
 	return -1
+}
+
+func GetMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
