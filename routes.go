@@ -72,11 +72,8 @@ var publicRoutes = Routes{
 	Route{"HowToPost", "GET", "/how-to-post", HowToPost},
 	Route{"Credit", "GET", "/credit", Credit},
 	Route{"Legal", "GET", "/legal", Legal},
-	/*
-		Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
-		Route{"LogUser", "POST", "/login/user", LogUserController},
-	*/
-	Route{"SignUser", "POST", "/signin/user/{ticket}", LogInUserController},
+	Route{"LogUser", "POST", "/login/user/{ticket}", LogUserController},
+	Route{"LogAssociation", "POST", "/login/association", LogAssociationController},
 }
 
 var userRoutes = Routes{

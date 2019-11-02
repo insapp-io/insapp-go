@@ -18,20 +18,10 @@ type TokenJTI struct {
 	JTI string        `json:"jti"`
 }
 
-// Login is the data provided by the user to authenticate.
-type Login struct {
+// AssociationLogin is the data provided by an association to authenticate.
+type AssociationLogin struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-// AssociationUser is the data provided by an association to authenticate.
-type AssociationUser struct {
-	ID          bson.ObjectId `bson:"_id,omitempty"`
-	Username    string        `json:"username"`
-	Association bson.ObjectId `json:"association" bson:"association"`
-	Password    string        `json:"password"`
-	Master      bool          `json:"master"`
-	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
 }
 
 // AuthMiddleware makes sure the user is authenticated before handling the request.
@@ -90,11 +80,9 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-// LogInUserController logs the user using CAS.
+// LogUserController logs the user using CAS.
 // If the credentials are correct, a JWT access token is generated.
-func LogInUserController(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-
+func LogUserController(w http.ResponseWriter, r *http.Request) {
 	ticket := mux.Vars(r)["ticket"]
 	username, err := isTicketValid(ticket)
 
@@ -105,24 +93,20 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	var login Login
-	decoder.Decode(&login)
-	login.Username = strings.ToLower(username)
-
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("user")
 
 	count, _ := db.Find(bson.M{
-		"username": login.Username,
+		"username": username,
 	}).Count()
 
 	var user User
 	if count == 0 {
-		user = AddUser(NewUser(login.Username))
+		user = AddUser(NewUser(username))
 	} else {
 		db.Find(bson.M{
-			"username": login.Username,
+			"username": username,
 		}).One(&user)
 	}
 
@@ -130,14 +114,42 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// If there is an error in creating the JWT return an internal server error
 		w.WriteHeader(http.StatusInternalServerError)
+
 		json.NewEncoder(w).Encode(bson.M{
 			"error": err,
 		})
-	} else {
-		// Set the cookies to these newly created tokens
-		setAuthAndRefreshCookies(&w, authToken, refreshToken)
-		w.WriteHeader(http.StatusOK)
+		return
 	}
+
+	// Set the cookies to these newly created tokens
+	setAuthAndRefreshCookies(&w, authToken, refreshToken)
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(user)
+}
+
+func LogAssociationController(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var login AssociationLogin
+	decoder.Decode(&login)
+
+	_, _, err := checkLoginForAssociation(login)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+
+		json.NewEncoder(w).Encode(bson.M{
+			"error": "failed to authenticate",
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	/*
+		sessionToken := logAssociation(auth, master)
+		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "master": master, "associationID": auth})
+	*/
 }
 
 // isTicketValid checks the validity of the given ticket with the CAS
@@ -165,7 +177,25 @@ func isTicketValid(ticket string) (string, error) {
 		return "", errors.New("unable to verify identity")
 	}
 
-	return username, nil
+	return strings.ToLower(username), nil
+}
+
+func checkLoginForAssociation(login AssociationLogin) (bson.ObjectId, bool, error) {
+	session := GetMongoSession()
+	defer session.Close()
+	db := session.DB("insapp").C("association_user")
+
+	var result []AssociationUser
+	db.Find(bson.M{
+		"username": login.Username,
+		"password": GetMD5Hash(login.Password),
+	}).All(&result)
+
+	if len(result) > 0 {
+		return result[0].Association, result[0].Master, nil
+	}
+
+	return bson.ObjectId(""), false, errors.New("failed to authenticate")
 }
 
 func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshToken string) {
@@ -213,24 +243,6 @@ func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
 	}
 
 	RevokeRefreshToken(RefreshCookie.Value)
-}
-
-func checkLoginForAssociation(login Login) (bson.ObjectId, bool, error) {
-	session := GetMongoSession()
-	defer session.Close()
-	db := session.DB("insapp").C("association_user")
-
-	var result []AssociationUser
-	db.Find(bson.M{
-		"username": login.Username,
-		"password": GetMD5Hash(login.Password),
-	}).All(&result)
-
-	if len(result) > 0 {
-		return result[0].Association, result[0].Master, nil
-	}
-
-	return bson.ObjectId(""), false, errors.New("failed to authenticate")
 }
 
 func CheckRefreshToken(jti string) bool {

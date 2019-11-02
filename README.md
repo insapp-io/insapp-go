@@ -72,8 +72,7 @@ The FCM HTTP v1 API requires some credentials to send push notifications. The `s
 | `GET`     | `/credit`                                         | `Get the credits`
 | `GET`     | `/legal`                                          | `Get the legal conditions`
 | `POST`    | `/login/association`                              | `Log an association in`
-| `POST`    | `/login/user`                                     | `Log a user in`
-| `POST`    | `/signin/user/{ticket}`                           | `Sign a user in with the ticket {ticket} and generate his token`
+| `POST`    | `/login/user/{ticket}`                            | `Log a user in with the ticket {ticket} provided by CAS`
 
 ### User routes
 

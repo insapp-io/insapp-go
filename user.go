@@ -28,6 +28,16 @@ type User struct {
 	PostsLiked  []bson.ObjectId `json:"postsliked"`
 }
 
+// AssociationUser defines how to model an AssociationUser
+type AssociationUser struct {
+	ID          bson.ObjectId `bson:"_id,omitempty"`
+	Username    string        `json:"username"`
+	Association bson.ObjectId `json:"association" bson:"association"`
+	Password    string        `json:"password"`
+	Master      bool          `json:"master"`
+	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
+}
+
 // Users is an array of User
 type Users []User
 
