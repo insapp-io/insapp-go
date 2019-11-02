@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -19,12 +18,13 @@ type TokenJTI struct {
 	JTI string        `json:"jti"`
 }
 
-// Login is the data provided by the user to authenticate
+// Login is the data provided by the user to authenticate.
 type Login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
+// AssociationUser is the data provided by an association to authenticate.
 type AssociationUser struct {
 	ID          bson.ObjectId `bson:"_id,omitempty"`
 	Username    string        `json:"username"`
@@ -34,20 +34,20 @@ type AssociationUser struct {
 	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
 }
 
+// AuthMiddleware makes sure the user is authenticated before handling the request.
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		AuthCookie, authErr := r.Cookie("AuthToken")
 
+		// Unauthorized attempt: no auth cookie
 		if authErr == http.ErrNoCookie {
-			log.Println("Unauthorized attempt! No auth cookie")
 			nullifyTokenCookies(&w, r)
-			// http.Redirect(w, r, "/login", 302)
 			http.Error(w, http.StatusText(401), 401)
 			return
 		}
 
+		// Internal error
 		if authErr != nil {
-			log.Panic("panic: %+v", authErr)
 			nullifyTokenCookies(&w, r)
 			http.Error(w, http.StatusText(500), 500)
 			return
@@ -55,28 +55,27 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		RefreshCookie, refreshErr := r.Cookie("RefreshToken")
 
+		// Unauthorized attempt: no refresh cookie
 		if refreshErr == http.ErrNoCookie {
-			log.Println("Unauthorized attempt! No refresh cookie")
 			nullifyTokenCookies(&w, r)
-			http.Redirect(w, r, "/login", 302)
+			http.Error(w, http.StatusText(401), 401)
 			return
 		}
 
+		// Internal error
 		if refreshErr != nil {
 			nullifyTokenCookies(&w, r)
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
 
-		// Check the jwt's for validity
-		authTokenString, refreshTokenString, err := CheckAndRefreshTokens(AuthCookie.Value, RefreshCookie.Value)
+		// Check the JWT for validity
+		authToken, refreshToken, err := CheckAndRefreshTokens(AuthCookie.Value, RefreshCookie.Value)
 		if err != nil {
+			// Unauthorized attempt: JWT is not valid
 			if err.Error() == "Unauthorized" {
-				log.Println("Unauthorized attempt! JWT's not valid!")
 				nullifyTokenCookies(&w, r)
-				// http.Redirect(w, r, "/login", 302)
 				http.Error(w, http.StatusText(401), 401)
-
 				return
 			}
 
@@ -85,7 +84,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		setAuthAndRefreshCookies(&w, authTokenString, refreshTokenString)
+		setAuthAndRefreshCookies(&w, authToken, refreshToken)
 
 		next.ServeHTTP(w, r)
 	})
@@ -97,7 +96,7 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	ticket := mux.Vars(r)["ticket"]
-	username, err := verifyTicket(ticket)
+	username, err := isTicketValid(ticket)
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -141,8 +140,8 @@ func LogInUserController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// verifyTicket checks the validity of the given ticket with the CAS
-func verifyTicket(ticket string) (string, error) {
+// isTicketValid checks the validity of the given ticket with the CAS
+func isTicketValid(ticket string) (string, error) {
 	response, err := http.Get("https://cas.insa-rennes.fr/cas/serviceValidate?service=https%3A%2F%2Finsapp.fr%2F&ticket=" + ticket)
 	if err != nil {
 		return "", errors.New("unable to verify identity")

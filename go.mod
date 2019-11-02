@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/firestore v1.0.0 // indirect
 	cloud.google.com/go/storage v1.1.1 // indirect
 	firebase.google.com/go v3.9.0+incompatible
-	github.com/adam-hanna/goLang-jwt-auth-example v0.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/freehaha/token-auth v0.0.0-20151005051521-fbcb870ca8c0
 	github.com/gorilla/context v1.1.1 // indirect
