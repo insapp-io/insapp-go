@@ -80,12 +80,12 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-// LogUserController logs the user using CAS.
-// If the credentials are correct, a JWT access token is generated.
+// LogUserController logs a user in using CAS.
+// If the ticket is valid, auth and refresh tokens are generated.
 func LogUserController(w http.ResponseWriter, r *http.Request) {
 	ticket := mux.Vars(r)["ticket"]
-	username, err := isTicketValid(ticket)
 
+	username, err := isTicketValid(ticket)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{
@@ -128,6 +128,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+// LogAssociationController logs an association in.
 func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login AssociationLogin
@@ -243,41 +244,4 @@ func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
 	}
 
 	RevokeRefreshToken(RefreshCookie.Value)
-}
-
-func CheckRefreshToken(jti string) bool {
-	session := GetMongoSession()
-	defer session.Close()
-	db := session.DB("insapp").C("tokens")
-
-	count, err := db.Find(bson.M{
-		"jti": jti,
-	}).Count()
-
-	return err != nil && count > 0
-}
-
-func StoreRefreshToken() TokenJTI {
-	session := GetMongoSession()
-	defer session.Close()
-	db := session.DB("insapp").C("tokens")
-
-	jti, _ := GenerateRandomString(32)
-	for CheckRefreshToken(jti) {
-		jti, _ = GenerateRandomString(32)
-	}
-
-	var token TokenJTI
-	token.JTI = jti
-	db.Insert(token)
-
-	return token
-}
-
-func DeleteRefreshToken(jti string) {
-	session := GetMongoSession()
-	defer session.Close()
-	db := session.DB("insapp").C("tokens")
-
-	db.Remove(bson.M{"jti": jti})
 }

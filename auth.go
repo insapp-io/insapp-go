@@ -7,6 +7,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // TokenClaims is the JWT encoding format.
@@ -51,7 +52,7 @@ func InitJWT(config Config) error {
 	return nil
 }
 
-// CreateNewTokens creates auth and refresh tokens
+// CreateNewTokens creates auth and refresh tokens.
 func CreateNewTokens(username string, role string) (string, string, error) {
 	// Generate the auth token
 	authTokenString, err := createAuthTokenString(username, role)
@@ -66,6 +67,65 @@ func CreateNewTokens(username string, role string) (string, string, error) {
 	}
 
 	return authTokenString, refreshTokenString, nil
+}
+
+// CheckAndRefreshTokens renews the auth token, if needed.
+func CheckAndRefreshTokens(authTokenString string, refreshTokenString string) (string, string, error) {
+	var newAuthTokenString string
+	var newRefreshTokenString string
+
+	// Check that it matches with the auth token claims
+	authToken, err := jwt.ParseWithClaims(authTokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return verifyKey, nil
+	})
+
+	// The auth token is still valid
+	if _, ok := authToken.Claims.(*TokenClaims); ok && authToken.Valid {
+		// Update the expiration time of refresh token
+		newRefreshTokenString, err = updateRefreshTokenExpiration(refreshTokenString)
+
+		return authTokenString, newRefreshTokenString, nil
+	}
+
+	if ve, ok := err.(*jwt.ValidationError); ok {
+		// The auth token has expired
+		if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			newAuthTokenString, err = updateAuthTokenString(authTokenString, refreshTokenString)
+			if err != nil {
+				return "", "", err
+			}
+
+			// Update the expiration time of refresh token string
+			newRefreshTokenString, err = updateRefreshTokenExpiration(refreshTokenString)
+			if err != nil {
+				return "", "", err
+			}
+
+			return newAuthTokenString, newRefreshTokenString, nil
+		}
+	}
+
+	return "", "", err
+}
+
+// RevokeRefreshToken deletes the given token from the database, if valid.
+func RevokeRefreshToken(refreshTokenString string) error {
+	refreshToken, err := jwt.ParseWithClaims(refreshTokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return verifyKey, nil
+	})
+
+	if err != nil {
+		return errors.New("Could not parse refresh token with claims")
+	}
+
+	refreshTokenClaims, ok := refreshToken.Claims.(*TokenClaims)
+	if !ok {
+		return errors.New("Could not read refresh token claims")
+	}
+
+	deleteRefreshToken(refreshTokenClaims.StandardClaims.Id)
+
+	return nil
 }
 
 // createAuthTokenString creates an auth token
@@ -98,7 +158,7 @@ func updateAuthTokenString(authTokenString string, refreshTokenString string) (s
 	}
 
 	// Check that the refresh token has not been revoked
-	if CheckRefreshToken(refreshTokenClaims.StandardClaims.Id) {
+	if checkRefreshToken(refreshTokenClaims.StandardClaims.Id) {
 		// Has the refresh token expired?
 		if refreshToken.Valid {
 			// We can issue a new auth token
@@ -115,7 +175,7 @@ func updateAuthTokenString(authTokenString string, refreshTokenString string) (s
 		}
 
 		// The refresh token has expired: revoke the token
-		DeleteRefreshToken(refreshTokenClaims.StandardClaims.Id)
+		deleteRefreshToken(refreshTokenClaims.StandardClaims.Id)
 
 		return "", errors.New("Unauthorized")
 	}
@@ -157,7 +217,7 @@ func createRefreshTokenString(username string, role string) (string, error) {
 	refreshTokenExpiration := time.Now().Add(refreshTokenValidTime).Unix()
 
 	// Store a token in the database
-	token := StoreRefreshToken()
+	token := storeRefreshToken()
 
 	refreshClaims := TokenClaims{
 		Username: username,
@@ -175,60 +235,39 @@ func createRefreshTokenString(username string, role string) (string, error) {
 	return refreshJwt.SignedString(signKey)
 }
 
-// CheckAndRefreshTokens renews the auth token if needed
-func CheckAndRefreshTokens(authTokenString string, refreshTokenString string) (string, string, error) {
-	var newAuthTokenString string
-	var newRefreshTokenString string
+func checkRefreshToken(jti string) bool {
+	session := GetMongoSession()
+	defer session.Close()
+	db := session.DB("insapp").C("tokens")
 
-	// Check that it matches with the auth token claims
-	authToken, err := jwt.ParseWithClaims(authTokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return verifyKey, nil
-	})
+	count, err := db.Find(bson.M{
+		"jti": jti,
+	}).Count()
 
-	// The auth token is still valid
-	if _, ok := authToken.Claims.(*TokenClaims); ok && authToken.Valid {
-		// Update the expiration time of refresh token
-		newRefreshTokenString, err = updateRefreshTokenExpiration(refreshTokenString)
-
-		return authTokenString, newRefreshTokenString, nil
-	}
-
-	if ve, ok := err.(*jwt.ValidationError); ok {
-		// The auth token has expired
-		if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-			newAuthTokenString, err = updateAuthTokenString(authTokenString, refreshTokenString)
-			if err != nil {
-				return "", "", err
-			}
-
-			// Update the expiration time of refresh token string
-			newRefreshTokenString, err = updateRefreshTokenExpiration(refreshTokenString)
-			if err != nil {
-				return "", "", err
-			}
-
-			return newAuthTokenString, newRefreshTokenString, nil
-		}
-	}
-
-	return "", "", err
+	return err != nil && count > 0
 }
 
-func RevokeRefreshToken(refreshTokenString string) error {
-	refreshToken, err := jwt.ParseWithClaims(refreshTokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return verifyKey, nil
-	})
+func storeRefreshToken() TokenJTI {
+	session := GetMongoSession()
+	defer session.Close()
+	db := session.DB("insapp").C("tokens")
 
-	if err != nil {
-		return errors.New("Could not parse refresh token with claims")
+	jti, _ := GenerateRandomString(32)
+	for checkRefreshToken(jti) {
+		jti, _ = GenerateRandomString(32)
 	}
 
-	refreshTokenClaims, ok := refreshToken.Claims.(*TokenClaims)
-	if !ok {
-		return errors.New("Could not read refresh token claims")
-	}
+	var token TokenJTI
+	token.JTI = jti
+	db.Insert(token)
 
-	DeleteRefreshToken(refreshTokenClaims.StandardClaims.Id)
+	return token
+}
 
-	return nil
+func deleteRefreshToken(jti string) {
+	session := GetMongoSession()
+	defer session.Close()
+	db := session.DB("insapp").C("tokens")
+
+	db.Remove(bson.M{"jti": jti})
 }
