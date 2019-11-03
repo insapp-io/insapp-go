@@ -27,6 +27,8 @@ RUN chmod +x ./insapp-cli
 # The CDN is added by the docker-compose file
 COPY ./config.json .
 COPY ./service-account.json .
+COPY ./app.rsa .
+COPY ./app.rsa.pub .
 COPY ./pages ./pages
 COPY ./templates ./templates
 
