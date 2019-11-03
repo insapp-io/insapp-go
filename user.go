@@ -114,7 +114,6 @@ func DeleteUser(user User) User {
 	defer session.Close()
 	db := session.DB("insapp").C("user")
 
-	//DeleteCredentialsForUser(user.ID)
 	DeleteNotificationsForUser(user.ID)
 	DeleteNotificationTokenForUser(user.ID)
 
@@ -222,7 +221,7 @@ func AddEventToUser(id bson.ObjectId, eventID bson.ObjectId) User {
 }
 
 // RemoveEventFromUser will remove the eventID from the list
-// of the user's event linked to the given id
+// of the user's event linked to the given ID.
 func RemoveEventFromUser(id bson.ObjectId, eventID bson.ObjectId) User {
 	session := GetMongoSession()
 	defer session.Close()
@@ -247,7 +246,9 @@ func SearchUser(name string) Users {
 
 	var result Users
 	db.Find(bson.M{"$or": []interface{}{
-		bson.M{"username": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}, bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}}}}).All(&result)
+		bson.M{"username": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}},
+		bson.M{"name": bson.M{"$regex": bson.RegEx{`^.*` + name + `.*`, "i"}}},
+	}}).All(&result)
 
 	return result
 }

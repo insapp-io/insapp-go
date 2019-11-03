@@ -245,3 +245,21 @@ func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
 
 	RevokeRefreshToken(RefreshCookie.Value)
 }
+
+func DeleteTokenCookies(w *http.ResponseWriter, r *http.Request) {
+	_, authErr := r.Cookie("AuthToken")
+
+	if authErr == http.ErrNoCookie {
+		nullifyTokenCookies(w, r)
+		return
+	}
+
+	if authErr != nil {
+		nullifyTokenCookies(w, r)
+		http.Error(*w, http.StatusText(500), 500)
+		return
+	}
+
+	// Remove this user's ability to make requests
+	nullifyTokenCookies(w, r)
+}

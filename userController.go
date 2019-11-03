@@ -53,19 +53,24 @@ func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteUserController will answer a JSON of an
-// empty user if the deletation has succeed
+// empty user if the deletion succeeded.
 func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
 	isUserValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
 	isAssociationValid := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
+
 	if !isUserValid && !isAssociationValid {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
+
+	DeleteTokenCookies(&w, r)
+
 	user := GetUser(bson.ObjectIdHex(userID))
 	res := DeleteUser(user)
+
 	json.NewEncoder(w).Encode(res)
 }
 
