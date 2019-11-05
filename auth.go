@@ -79,6 +79,10 @@ func CheckAndRefreshTokens(authTokenString string, refreshTokenString string) (s
 		return verifyKey, nil
 	})
 
+	if err != nil {
+		return "", "", err
+	}
+
 	// The auth token is still valid
 	if _, ok := authToken.Claims.(*TokenClaims); ok && authToken.Valid {
 		// Update the expiration time of refresh token
