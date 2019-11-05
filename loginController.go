@@ -3,8 +3,10 @@ package insapp
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 	"time"
 
@@ -27,6 +29,13 @@ type AssociationLogin struct {
 // AuthMiddleware makes sure the user is authenticated before handling the request.
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(string(requestDump))
+		}
+
 		AuthCookie, authErr := r.Cookie("AuthToken")
 
 		// Unauthorized attempt: no auth cookie
@@ -246,6 +255,7 @@ func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
 	RevokeRefreshToken(RefreshCookie.Value)
 }
 
+// DeleteTokenCookies deletes the cookies
 func DeleteTokenCookies(w *http.ResponseWriter, r *http.Request) {
 	_, authErr := r.Cookie("AuthToken")
 
