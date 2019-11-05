@@ -35,36 +35,24 @@ func AddUserController(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUserController will answer the JSON of the
 // modified user (from the JSON Body)
+// Should be protected
 func UpdateUserController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var user User
 	decoder.Decode(&user)
 	vars := mux.Vars(r)
 	userID := vars["id"]
-	isValidUser := VerifyUserRequest(r, bson.ObjectIdHex(userID))
-	isValidAssociation := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
-	if !isValidUser && !isValidAssociation {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	res := UpdateUser(bson.ObjectIdHex(userID), user)
 	json.NewEncoder(w).Encode(res)
 }
 
 // DeleteUserController will answer a JSON of an
 // empty user if the deletion succeeded.
+// Should be protected
 func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
-	isUserValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
-	isAssociationValid := VerifyAssociationRequest(r, bson.ObjectIdHex(userID))
-
-	if !isUserValid && !isAssociationValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
 
 	DeleteTokenCookies(&w, r)
 
@@ -81,12 +69,6 @@ func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	reporterID := token.Claims("id").(string)
 	ReportUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(reporterID))
 	json.NewEncoder(w).Encode(bson.M{})
-}
-
-func VerifyUserRequest(r *http.Request, userID bson.ObjectId) bool {
-	token := tauth.Get(r)
-	id := token.Claims("id").(string)
-	return bson.ObjectIdHex(id) == userID
 }
 
 func GetUserFromRequest(r *http.Request) string {

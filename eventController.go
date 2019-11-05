@@ -2,12 +2,13 @@ package insapp
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // GetEventController will answer a JSON of the event
@@ -22,9 +23,9 @@ func GetEventController(w http.ResponseWriter, r *http.Request) {
 // GetFutureEventsController will answer a JSON
 // containing all future events from "NOW"
 func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
-	userId := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userId))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userId)).Os
+	userID := GetUserFromRequest(r)
+	user := GetUser(bson.ObjectIdHex(userID))
+	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
 	events := GetFutureEvents()
 	res := Events{}
 	if user.ID != "" {
@@ -48,17 +49,11 @@ func GetEventsForAssociationController(w http.ResponseWriter, r *http.Request) {
 
 // AddEventController will answer the JSON
 // of the brand new created Event from the JSON body
+// Should be protected
 func AddEventController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var event Event
 	_ = decoder.Decode(&event)
-
-	isValid := VerifyAssociationRequest(r, event.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
 
 	res := AddEvent(event)
 	association := GetAssociation(event.Association)
@@ -68,6 +63,7 @@ func AddEventController(w http.ResponseWriter, r *http.Request) {
 
 // UpdateEventController will answer the JSON
 // of the modified Event from the JSON body
+// Should be protected
 func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var event Event
@@ -75,29 +71,16 @@ func UpdateEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := vars["id"]
 
-	isValid := VerifyAssociationRequest(r, event.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
-
 	res := UpdateEvent(bson.ObjectIdHex(eventID), event)
 	_ = json.NewEncoder(w).Encode(res)
 }
 
 // DeleteEventController will answer an empty JSON
 // if the deletion has succeed
+// Should be protected
 func DeleteEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := GetEvent(bson.ObjectIdHex(vars["id"]))
-
-	isValid := VerifyAssociationRequest(r, event.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
 
 	res := DeleteEvent(event)
 	_ = json.NewEncoder(w).Encode(res)
@@ -107,13 +90,9 @@ func AddAttendeeController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
-	isValid := VerifyUserRequest(r, userID)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	event, user := AddAttendeeToGoingList(eventID, userID)
+
 	_ = json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
@@ -124,12 +103,7 @@ func ChangeAttendeeStatusController(w http.ResponseWriter, r *http.Request) {
 	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
 	status := vars["status"]
-	isValid := VerifyUserRequest(r, userID)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	if status == "going" {
 		event, user := AddAttendeeToGoingList(eventID, userID)
 		_ = json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
@@ -151,19 +125,15 @@ func RemoveAttendeeController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := bson.ObjectIdHex(vars["id"])
 	userID := bson.ObjectIdHex(vars["userID"])
-	isValid := VerifyUserRequest(r, userID)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	RemoveAttendee(eventID, userID, "participants")
 	RemoveAttendee(eventID, userID, "notgoing")
 	event, user := RemoveAttendee(eventID, userID, "maybe")
+
 	_ = json.NewEncoder(w).Encode(bson.M{"event": event, "user": user})
 }
 
-// CommentPostController will answer a JSON of the post
+// CommentEventController will answer a JSON of the event
 func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -174,13 +144,6 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "wrong format"})
-		return
-	}
-
-	isValid := VerifyUserRequest(r, comment.User)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -205,25 +168,13 @@ func CommentEventController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UncommentPostController will answer a JSON of the Post
+// UncommentEventController will answer a JSON of the event
 func UncommentEventController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventID := vars["id"]
 	commentID := vars["commentID"]
-	comment, err := GetCommentForEvent(bson.ObjectIdHex(eventID), bson.ObjectIdHex(commentID))
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "content not found"})
-		return
-	}
-	event := GetEvent(bson.ObjectIdHex(eventID))
-	isUserValid := VerifyUserRequest(r, comment.User)
-	isAssociationValid := VerifyAssociationRequest(r, event.Association)
-	if !isUserValid && !isAssociationValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	res := UncommentEvent(bson.ObjectIdHex(eventID), bson.ObjectIdHex(commentID))
+
 	_ = json.NewEncoder(w).Encode(res)
 }

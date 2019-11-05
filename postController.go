@@ -90,18 +90,12 @@ func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 
 // AddPostController will answer a JSON of the
 // brand new created post (from the JSON Body)
+// Should be protected
 func AddPostController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var post Post
 	_ = decoder.Decode(&post)
 	post.Date = time.Now()
-
-	isValid := VerifyAssociationRequest(r, post.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
 
 	res := AddPost(post)
 	association := GetAssociation(post.Association)
@@ -111,6 +105,7 @@ func AddPostController(w http.ResponseWriter, r *http.Request) {
 
 // UpdatePostController will answer the JSON of the
 // modified post (from the JSON Body)
+// Should be protected
 func UpdatePostController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var post Post
@@ -118,29 +113,16 @@ func UpdatePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 
-	isValid := VerifyAssociationRequest(r, post.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
-
 	res := UpdatePost(bson.ObjectIdHex(postID), post)
 	_ = json.NewEncoder(w).Encode(res)
 }
 
 // DeletePostController will answer a JSON of an
 // empty post if the deletion has succeed
+// Should be protected
 func DeletePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	post := GetPost(bson.ObjectIdHex(vars["id"]))
-
-	isValid := VerifyAssociationRequest(r, post.Association)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
 
 	res := DeletePost(post)
 	_ = json.NewEncoder(w).Encode(res)
@@ -152,13 +134,9 @@ func LikePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	userID := vars["userID"]
-	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	post, user := LikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
+
 	_ = json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
@@ -168,13 +146,9 @@ func DislikePostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	userID := vars["userID"]
-	isValid := VerifyUserRequest(r, bson.ObjectIdHex(userID))
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	post, user := DislikePostWithUser(bson.ObjectIdHex(postID), bson.ObjectIdHex(userID))
+
 	_ = json.NewEncoder(w).Encode(bson.M{"post": post, "user": user})
 }
 
@@ -189,13 +163,6 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal([]byte(string(body)), &comment); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "wrong format"})
-		return
-	}
-
-	isValid := VerifyUserRequest(r, comment.User)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
 		return
 	}
 
@@ -221,25 +188,14 @@ func CommentPostController(w http.ResponseWriter, r *http.Request) {
 }
 
 // UncommentPostController will answer a JSON of the post
+// Should be protected
 func UncommentPostController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	commentID := vars["commentID"]
-	comment, err := GetComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "content not available"})
-		return
-	}
-	post := GetPost(bson.ObjectIdHex(postID))
-	isUserValid := VerifyUserRequest(r, comment.User)
-	isAssociationValid := VerifyAssociationRequest(r, post.Association)
-	if !isUserValid && !isAssociationValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	res := UncommentPost(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID))
+
 	_ = json.NewEncoder(w).Encode(res)
 }
 

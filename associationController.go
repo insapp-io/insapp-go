@@ -32,50 +32,21 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(res)
 }
 
-// Now unused function
-/*func CreateUserForAssociationController(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	associationID := vars["id"]
-	var res = GetAssociation(bson.ObjectIdHex(associationID))
-
-	decoder := json.NewDecoder(r.Body)
-	var user AssociationUser
-	_ = decoder.Decode(&user)
-
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
-
-	password := GeneratePassword()
-	user.Association = res.ID
-	user.Username = res.Email
-	user.Password = GetMD5Hash(password)
-	AddAssociationUser(user)
-	_ = SendAssociationEmailSubscription(user.Username, password)
-	_ = json.NewEncoder(w).Encode(res)
-}*/
-
 // AddAssociationController will answer a JSON of the
 // brand new created association (from the JSON Body)
+// Should be protected
 func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
 	_ = decoder.Decode(&association)
-	isValid := VerifyAssociationRequest(r, association.ID)
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	isValidMail := VerifyEmail(association.Email)
 	if !isValidMail {
 		w.WriteHeader(http.StatusConflict)
 		_ = json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
 		return
 	}
+
 	res := AddAssociation(association)
 	password := GeneratePassword()
 	token := tauth.Get(r)
@@ -94,47 +65,29 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 
 // UpdateAssociationController will answer the JSON of the
 // modified association (from the JSON Body)
+// Should be protected
 func UpdateAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
 	_ = decoder.Decode(&association)
 	vars := mux.Vars(r)
 	associationID := vars["id"]
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
+
 	res := UpdateAssociation(bson.ObjectIdHex(associationID), association)
+
 	_ = json.NewEncoder(w).Encode(res)
 }
 
 // DeleteAssociationController will answer a JSON of an
 // empty association if the deletion has succeed
+// Should be protected
 func DeleteAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
-	isValid := VerifyAssociationRequest(r, bson.ObjectIdHex(associationID))
-	if !isValid {
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "protected content"})
-		return
-	}
-	res := DeleteAssociation(bson.ObjectIdHex(associationID))
-	_ = json.NewEncoder(w).Encode(res)
-}
 
-// VerifyAssociationRequest return true if requester association is a master account
-func VerifyAssociationRequest(r *http.Request, associationID bson.ObjectId) bool {
-	token := tauth.Get(r)
-	id := token.Claims("id").(string)
-	// Request come from a master association
-	if bson.ObjectIdHex(id) != associationID {
-		result := GetAssociationUser(bson.ObjectIdHex(id))
-		return result.Master
-	}
-	return true
+	res := DeleteAssociation(bson.ObjectIdHex(associationID))
+
+	_ = json.NewEncoder(w).Encode(res)
 }
 
 // VerifyEmail return true if email is not already used
