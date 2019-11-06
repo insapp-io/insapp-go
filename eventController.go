@@ -23,9 +23,15 @@ func GetEventController(w http.ResponseWriter, r *http.Request) {
 // GetFutureEventsController will answer a JSON
 // containing all future events from "NOW"
 func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserFromRequest(r)
-	user := GetUser(userID)
-	os := GetNotificationUserForUser(userID).Os
+	id, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
+	user := GetUser(id)
+	os := GetNotificationUserForUser(id).Os
 	events := GetFutureEvents()
 	res := Events{}
 	if user.ID != "" {
@@ -37,7 +43,7 @@ func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res = events
 	}
-	_ = json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(res)
 }
 
 func GetEventsForAssociationController(w http.ResponseWriter, r *http.Request) {

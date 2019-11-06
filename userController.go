@@ -63,9 +63,16 @@ func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 
 func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userID := vars["id"]
+	id := vars["id"]
 
-	ReportUser(bson.ObjectIdHex(userID), GetUserFromRequest(r))
+	userID, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
+	ReportUser(bson.ObjectIdHex(id), userID)
 	json.NewEncoder(w).Encode(bson.M{})
 }
 

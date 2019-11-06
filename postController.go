@@ -25,9 +25,15 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 // GetAllPostsController will answer a JSON of the
 // N latest posts. Here N = 50.
 func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserFromRequest(r)
-	user := GetUser(userID)
-	os := GetNotificationUserForUser(userID).Os
+	id, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
+	user := GetUser(id)
+	os := GetNotificationUserForUser(id).Os
 	posts := GetLatestPosts(10)
 	filteredPosts := Posts{}
 	if user.ID != "" {
@@ -68,7 +74,14 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
-	userID := GetUserFromRequest(r)
+
+	userID, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
 	user := GetUser(userID)
 	os := GetNotificationUserForUser(userID).Os
 	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
@@ -202,19 +215,14 @@ func ReportCommentController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	commentID := vars["commentID"]
-	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), GetUserFromRequest(r))
-	_ = json.NewEncoder(w).Encode(bson.M{})
-}
 
-// // AddImagePostController will set the image of the post and return the post
-// func AddImagePostController(w http.ResponseWriter, r *http.Request) {
-// 	fileName := UploadImage(r)
-// 	if fileName == "error" {
-// 		w.Header().Set("status", "400")
-// 		fmt.Fprintln(w, "{}")
-// 	} else {
-// 		vars := mux.Vars(r)
-// 		res := SetImagePost(bson.ObjectIdHex(vars["id"]), fileName)
-// 		json.NewEncoder(w).Encode(res)
-// 	}
-// }
+	userID, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
+	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), userID)
+	json.NewEncoder(w).Encode(bson.M{})
+}

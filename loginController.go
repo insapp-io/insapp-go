@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -69,7 +70,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Check the JWT for validity
-		authToken, refreshToken, err := CheckAndRefreshTokens(authCookie.Value, refreshCookie.Value, "user")
+		authToken, refreshToken, err := CheckAndRefreshStringTokens(authCookie.Value, refreshCookie.Value, "user")
 		if err != nil {
 			// Unauthorized attempt: JWT is not valid
 			if err.Error() == "Unauthorized" {
@@ -119,16 +120,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 		}).One(&user)
 	}
 
-	authToken, refreshToken, err := CreateNewTokens(user.ID, "user")
-	if err != nil {
-		// If there is an error in creating the JWT return an internal server error
-		w.WriteHeader(http.StatusInternalServerError)
-
-		json.NewEncoder(w).Encode(bson.M{
-			"error": err,
-		})
-		return
-	}
+	authToken, refreshToken := CreateNewTokens(user.ID, "user")
 
 	// Set the cookies to these newly created tokens
 	setAuthAndRefreshCookies(&w, authToken, refreshToken)
@@ -153,16 +145,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authToken, refreshToken, err := CreateNewTokens(id, "association")
-	if err != nil {
-		// If there is an error in creating the JWT return an internal server error
-		w.WriteHeader(http.StatusInternalServerError)
-
-		json.NewEncoder(w).Encode(bson.M{
-			"error": err,
-		})
-		return
-	}
+	authToken, refreshToken := CreateNewTokens(id, "association")
 
 	// Set the cookies to these newly created tokens
 	setAuthAndRefreshCookies(&w, authToken, refreshToken)
@@ -215,10 +198,20 @@ func checkLoginForAssociation(login AssociationLogin) (bson.ObjectId, bool, erro
 	return bson.ObjectId(""), false, errors.New("failed to authenticate")
 }
 
-func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshToken string) {
+func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refreshToken *jwt.Token) error {
+	authStringToken, err1 := authToken.SignedString(signKey)
+	if err1 != nil {
+		return err1
+	}
+
+	refreshStringToken, err2 := refreshToken.SignedString(signKey)
+	if err2 != nil {
+		return err2
+	}
+
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "AuthToken",
-		Value:    authToken,
+		Value:    authStringToken,
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
@@ -227,12 +220,14 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshT
 
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "RefreshToken",
-		Value:    refreshToken,
+		Value:    refreshStringToken,
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
 	})
+
+	return nil
 }
 
 func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
@@ -265,7 +260,7 @@ func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
 		http.Error(*w, http.StatusText(500), 500)
 	}
 
-	RevokeRefreshToken(RefreshCookie.Value)
+	RevokeRefreshStringToken(RefreshCookie.Value)
 }
 
 // DeleteTokenCookies deletes the cookies

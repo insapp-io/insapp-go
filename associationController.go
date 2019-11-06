@@ -37,25 +37,33 @@ func GetAllAssociationsController(w http.ResponseWriter, r *http.Request) {
 func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var association Association
-	_ = decoder.Decode(&association)
+	decoder.Decode(&association)
 
 	isValidMail := VerifyEmail(association.Email)
 	if !isValidMail {
 		w.WriteHeader(http.StatusConflict)
-		_ = json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
+		json.NewEncoder(w).Encode(bson.M{"error": "email already used"})
 		return
 	}
 
 	res := AddAssociation(association)
 	password := GeneratePassword()
 
+	userID, err := GetUserFromRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(bson.M{"error": "could not get user ID"})
+		return
+	}
+
 	var user AssociationUser
 	user.Association = res.ID
 	user.Username = res.Email
 	user.Master = false
-	user.Owner = GetUserFromRequest(r)
+	user.Owner = userID
 	user.Password = GetMD5Hash(password)
 	AddAssociationUser(user)
+
 	_ = SendAssociationEmailSubscription(user.Username, password)
 	_ = json.NewEncoder(w).Encode(res)
 }
