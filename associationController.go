@@ -49,6 +49,7 @@ func AddAssociationController(w http.ResponseWriter, r *http.Request) {
 
 	res := AddAssociation(association)
 	password := GeneratePassword()
+
 	token := tauth.Get(r)
 	id := bson.ObjectIdHex(token.Claims("id").(string))
 

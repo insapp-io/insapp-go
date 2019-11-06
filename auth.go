@@ -12,8 +12,8 @@ import (
 
 // TokenClaims is the JWT encoding format.
 type TokenClaims struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	ID   bson.ObjectId `json:"id"`
+	Role string        `json:"role"`
 	jwt.StandardClaims
 }
 
@@ -53,15 +53,15 @@ func InitJWT(config Config) error {
 }
 
 // CreateNewTokens creates auth and refresh tokens.
-func CreateNewTokens(username string, role string) (string, string, error) {
+func CreateNewTokens(ID bson.ObjectId, role string) (string, string, error) {
 	// Generate the auth token
-	authTokenString, err := createAuthTokenString(username, role)
+	authTokenString, err := createAuthTokenString(ID, role)
 	if err != nil {
 		return "", "", err
 	}
 
 	// Generate the refresh token
-	refreshTokenString, err := createRefreshTokenString(username, role)
+	refreshTokenString, err := createRefreshTokenString(ID, role)
 	if err != nil {
 		return "", "", err
 	}
@@ -133,12 +133,12 @@ func RevokeRefreshToken(refreshTokenString string) error {
 }
 
 // createAuthTokenString creates an auth token
-func createAuthTokenString(username string, role string) (string, error) {
+func createAuthTokenString(id bson.ObjectId, role string) (string, error) {
 	authTokenExpiration := time.Now().Add(authTokenValidTime).Unix()
 
 	authClaims := TokenClaims{
-		Username: username,
-		Role:     role,
+		ID:   id,
+		Role: role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: authTokenExpiration,
 		},
@@ -175,7 +175,7 @@ func updateAuthTokenString(authTokenString string, refreshTokenString string) (s
 				return "", err
 			}
 
-			return createAuthTokenString(authTokenClaims.Username, authTokenClaims.Role)
+			return createAuthTokenString(authTokenClaims.ID, authTokenClaims.Role)
 		}
 
 		// The refresh token has expired: revoke the token
@@ -201,8 +201,8 @@ func updateRefreshTokenExpiration(refreshTokenString string) (string, error) {
 	refreshTokenExpiration := time.Now().Add(refreshTokenValidTime).Unix()
 
 	refreshClaims := TokenClaims{
-		Username: refreshTokenClaims.Username,
-		Role:     refreshTokenClaims.Role,
+		ID:   refreshTokenClaims.ID,
+		Role: refreshTokenClaims.Role,
 		StandardClaims: jwt.StandardClaims{
 			Id:        refreshTokenClaims.StandardClaims.Id,
 			ExpiresAt: refreshTokenExpiration,
@@ -217,15 +217,15 @@ func updateRefreshTokenExpiration(refreshTokenString string) (string, error) {
 }
 
 // createRefreshTokenString create a refresh token
-func createRefreshTokenString(username string, role string) (string, error) {
+func createRefreshTokenString(id bson.ObjectId, role string) (string, error) {
 	refreshTokenExpiration := time.Now().Add(refreshTokenValidTime).Unix()
 
 	// Store a token in the database
 	token := storeRefreshToken()
 
 	refreshClaims := TokenClaims{
-		Username: username,
-		Role:     role,
+		ID:   id,
+		Role: role,
 		StandardClaims: jwt.StandardClaims{
 			Id:        token.JTI,
 			ExpiresAt: refreshTokenExpiration,

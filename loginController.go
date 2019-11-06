@@ -98,7 +98,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{
-			"error": err,
+			"error": "failed to authenticate",
 		})
 	}
 
@@ -119,7 +119,7 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 		}).One(&user)
 	}
 
-	authToken, refreshToken, err := CreateNewTokens(user.Username, "user")
+	authToken, refreshToken, err := CreateNewTokens(user.ID, "user")
 	if err != nil {
 		// If there is an error in creating the JWT return an internal server error
 		w.WriteHeader(http.StatusInternalServerError)
@@ -143,8 +143,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	var login AssociationLogin
 	decoder.Decode(&login)
 
-	_, _, err := checkLoginForAssociation(login)
-
+	id, _, err := checkLoginForAssociation(login)
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
 
@@ -154,12 +153,20 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	authToken, refreshToken, err := CreateNewTokens(id, "association")
+	if err != nil {
+		// If there is an error in creating the JWT return an internal server error
+		w.WriteHeader(http.StatusInternalServerError)
 
-	/*
-		sessionToken := logAssociation(auth, master)
-		json.NewEncoder(w).Encode(bson.M{"token": sessionToken.Token, "master": master, "associationID": auth})
-	*/
+		json.NewEncoder(w).Encode(bson.M{
+			"error": err,
+		})
+		return
+	}
+
+	// Set the cookies to these newly created tokens
+	setAuthAndRefreshCookies(&w, authToken, refreshToken)
+	w.WriteHeader(http.StatusOK)
 }
 
 // isTicketValid checks the validity of the given ticket with the CAS
