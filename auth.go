@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"io/ioutil"
+	"net/http"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -70,7 +71,7 @@ func CreateNewTokens(ID bson.ObjectId, role string) (string, string, error) {
 }
 
 // CheckAndRefreshTokens renews the auth token, if needed.
-func CheckAndRefreshTokens(authTokenString string, refreshTokenString string) (string, string, error) {
+func CheckAndRefreshTokens(authTokenString string, refreshTokenString string, role string) (string, string, error) {
 	var newAuthTokenString string
 	var newRefreshTokenString string
 
@@ -85,6 +86,11 @@ func CheckAndRefreshTokens(authTokenString string, refreshTokenString string) (s
 
 	// The auth token is still valid
 	if _, ok := authToken.Claims.(*TokenClaims); ok && authToken.Valid {
+		// Check the role
+		if authToken.Claims.(*TokenClaims).Role != role {
+			return "", "", errors.New("Unauthorized")
+		}
+
 		// Update the expiration time of refresh token
 		newRefreshTokenString, err = updateRefreshTokenExpiration(refreshTokenString)
 
@@ -130,6 +136,17 @@ func RevokeRefreshToken(refreshTokenString string) error {
 	deleteRefreshToken(refreshTokenClaims.StandardClaims.Id)
 
 	return nil
+}
+
+func GetUserFromRequest(r *http.Request) bson.ObjectId {
+	authCookie, _ := r.Cookie("AuthToken")
+
+	// Check that it matches with the auth token claims
+	authToken, _ := jwt.ParseWithClaims(authCookie.Value, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return verifyKey, nil
+	})
+
+	return authToken.Claims.(*TokenClaims).ID
 }
 
 // createAuthTokenString creates an auth token

@@ -7,7 +7,6 @@ require (
 	cloud.google.com/go/storage v1.1.1 // indirect
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/freehaha/token-auth v0.0.0-20151005051521-fbcb870ca8c0
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.3
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646

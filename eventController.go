@@ -24,8 +24,8 @@ func GetEventController(w http.ResponseWriter, r *http.Request) {
 // containing all future events from "NOW"
 func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userID))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
+	user := GetUser(userID)
+	os := GetNotificationUserForUser(userID).Os
 	events := GetFutureEvents()
 	res := Events{}
 	if user.ID != "" {

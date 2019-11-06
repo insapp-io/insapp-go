@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	tauth "github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -65,16 +64,9 @@ func DeleteUserController(w http.ResponseWriter, r *http.Request) {
 func ReportUserController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
-	token := tauth.Get(r)
-	reporterID := token.Claims("id").(string)
-	ReportUser(bson.ObjectIdHex(userID), bson.ObjectIdHex(reporterID))
-	json.NewEncoder(w).Encode(bson.M{})
-}
 
-func GetUserFromRequest(r *http.Request) string {
-	token := tauth.Get(r)
-	id := token.Claims("id").(string)
-	return id
+	ReportUser(bson.ObjectIdHex(userID), GetUserFromRequest(r))
+	json.NewEncoder(w).Encode(bson.M{})
 }
 
 func Contains(a string, list []string) bool {

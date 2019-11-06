@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	tauth "github.com/freehaha/token-auth"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -27,8 +26,8 @@ func GetPostController(w http.ResponseWriter, r *http.Request) {
 // N latest posts. Here N = 50.
 func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userID))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
+	user := GetUser(userID)
+	os := GetNotificationUserForUser(userID).Os
 	posts := GetLatestPosts(10)
 	filteredPosts := Posts{}
 	if user.ID != "" {
@@ -70,8 +69,8 @@ func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	associationID := vars["id"]
 	userID := GetUserFromRequest(r)
-	user := GetUser(bson.ObjectIdHex(userID))
-	os := GetNotificationUserForUser(bson.ObjectIdHex(userID)).Os
+	user := GetUser(userID)
+	os := GetNotificationUserForUser(userID).Os
 	posts := GetPostsForAssociation(bson.ObjectIdHex(associationID))
 
 	filteredPosts := Posts{}
@@ -203,9 +202,7 @@ func ReportCommentController(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	commentID := vars["commentID"]
-	token := tauth.Get(r)
-	userID := token.Claims("id").(string)
-	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), bson.ObjectIdHex(userID))
+	ReportComment(bson.ObjectIdHex(postID), bson.ObjectIdHex(commentID), GetUserFromRequest(r))
 	_ = json.NewEncoder(w).Encode(bson.M{})
 }
 

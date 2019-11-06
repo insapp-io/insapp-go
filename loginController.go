@@ -36,7 +36,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			fmt.Println(string(requestDump))
 		}
 
-		AuthCookie, authErr := r.Cookie("AuthToken")
+		authCookie, authErr := r.Cookie("AuthToken")
 
 		// Unauthorized attempt: no auth cookie
 		if authErr == http.ErrNoCookie {
@@ -52,7 +52,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		RefreshCookie, refreshErr := r.Cookie("RefreshToken")
+		refreshCookie, refreshErr := r.Cookie("RefreshToken")
 
 		// Unauthorized attempt: no refresh cookie
 		if refreshErr == http.ErrNoCookie {
@@ -69,7 +69,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Check the JWT for validity
-		authToken, refreshToken, err := CheckAndRefreshTokens(AuthCookie.Value, RefreshCookie.Value)
+		authToken, refreshToken, err := CheckAndRefreshTokens(authCookie.Value, refreshCookie.Value, "user")
 		if err != nil {
 			// Unauthorized attempt: JWT is not valid
 			if err.Error() == "Unauthorized" {
