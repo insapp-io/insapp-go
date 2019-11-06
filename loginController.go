@@ -219,12 +219,14 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshT
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "AuthToken",
 		Value:    authToken,
+		Domain:   config.Domain,
 		HttpOnly: true,
 	})
 
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "RefreshToken",
 		Value:    refreshToken,
+		Domain:   config.Domain,
 		HttpOnly: true,
 	})
 }

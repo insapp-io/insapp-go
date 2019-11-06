@@ -22,8 +22,8 @@ type Routes []Route
 
 // NewRouter is the constructor of the Router
 // It will create every routes from the routes variable just above
-func NewRouter(config Config) *mux.Router {
-	err := InitJWT(config)
+func NewRouter() *mux.Router {
+	err := InitJWT()
 	if err != nil {
 		log.Fatal(err)
 	}

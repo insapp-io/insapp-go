@@ -29,7 +29,7 @@ const (
 )
 
 // InitJWT reads the key files before starting http handlers
-func InitJWT(config Config) error {
+func InitJWT() error {
 	signBytes, err := ioutil.ReadFile(config.PrivateKeyPath)
 	if err != nil {
 		return err

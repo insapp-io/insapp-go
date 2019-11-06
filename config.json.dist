@@ -1,4 +1,6 @@
 {
+  "domain":"REPLACE_WITH_YOUR_DOMAIN",
+  "env":"REPLACE_WITH_THE_ENVIRONMENT_TYPE",
   "google_email":"REPLACE_WITH_YOUR_GOOGLE_EMAIL",
   "google_password":"REPLACE_WITH_YOUR_GOOGLE_PASSWORD",
   "mongo_database_name":"insapp",
@@ -7,6 +9,5 @@
   "mongo_database_password":"REPLACE_WITH_THE_MONGO_PASSWORD",
   "private_key_path":"REPLACE_WITH_THE_PRIVATE_KEY_PATH",
   "public_key_path":"REPLACE_WITH_THE_PUBLIC_KEY_PATH",
-  "env":"REPLACE_WITH_THE_ENVIRONMENT_TYPE",
   "port":"REPLACE_WITH_THE_API_PORT"
 }

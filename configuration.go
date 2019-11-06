@@ -11,6 +11,8 @@ import (
 
 // Config defines how to model a Config
 type Config struct {
+	Domain           string `json:"domain"`
+	Environment      string `json:"env"`
 	GoogleEmail      string `json:"google_email"`
 	GooglePassword   string `json:"google_password"`
 	FirebaseKey      string `json:"firebase_key"`
@@ -20,14 +22,14 @@ type Config struct {
 	DatabasePassword string `json:"mongo_database_password"`
 	PrivateKeyPath   string `json:"private_key_path"`
 	PublicKeyPath    string `json:"public_key_path"`
-	Environment      string `json:"env"`
 	Port             string `json:"port"`
 }
 
 var mgoSession *mgo.Session
+var config *Config
 
 // InitConfig loads the configuration from the filesystem.
-func InitConfig() (Config, *mgo.DialInfo) {
+func InitConfig() *Config {
 	file, err1 := os.Open("config.json")
 	decoder := json.NewDecoder(file)
 
@@ -35,29 +37,12 @@ func InitConfig() (Config, *mgo.DialInfo) {
 		log.Fatal(err1)
 	}
 
-	config := Config{}
 	err2 := decoder.Decode(&config)
 	if err2 != nil {
 		log.Fatal("Error when parsing config file. Make sure the configuration file (config.json) is valid.")
 	}
 
-	var address []string
-	if config.Environment == "local" {
-		address = append(address, "localhost:27017")
-	} else {
-		address = append(address, "db")
-	}
-
-	info := &mgo.DialInfo{
-		Addrs:    address,
-		Database: config.DatabaseName,
-		Source:   config.DatabaseSource,
-		Username: config.DatabaseUsername,
-		Password: config.DatabasePassword,
-		Timeout:  time.Second * 10,
-	}
-
-	return config, info
+	return config
 }
 
 // GetMongoSession creates a new session.
@@ -65,8 +50,7 @@ func InitConfig() (Config, *mgo.DialInfo) {
 func GetMongoSession() *mgo.Session {
 	if mgoSession == nil {
 		var err error
-		_, info := InitConfig()
-		mgoSession, err = mgo.DialWithInfo(info)
+		mgoSession, err = mgo.DialWithInfo(initMongoConfig())
 
 		if err != nil {
 			log.Fatal(err)
@@ -85,12 +69,30 @@ func (config Config) GetCDN() string {
 
 	switch config.Environment {
 	case "prod":
-		cdn = "https://insapp.fr/cdn/"
+		cdn = config.Domain + "/cdn/"
 	case "dev":
-		cdn = "https://insapp.insa-rennes.fr/cdn/"
+		cdn = config.Domain + "/cdn/"
 	case "local":
 		cdn = "test"
 	}
 
 	return cdn
+}
+
+func initMongoConfig() *mgo.DialInfo {
+	var address []string
+	if config.Environment == "local" {
+		address = append(address, "localhost:27017")
+	} else {
+		address = append(address, "db")
+	}
+
+	return &mgo.DialInfo{
+		Addrs:    address,
+		Database: config.DatabaseName,
+		Source:   config.DatabaseSource,
+		Username: config.DatabaseUsername,
+		Password: config.DatabasePassword,
+		Timeout:  time.Second * 10,
+	}
 }

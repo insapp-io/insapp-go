@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/thomas-bouvier/palette-extractor v0.0.0-20180722182330-7ab9b90f05ff
+	github.com/urfave/cli v1.22.1
 	golang.org/x/net v0.0.0-20191014212845-da9a3fd4c582
 	google.golang.org/api v0.11.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22

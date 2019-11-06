@@ -13,10 +13,10 @@ type withCORS struct {
 }
 
 func main() {
-	config, _ := insapp.InitConfig()
+	config := insapp.InitConfig()
 
 	log.Println("Starting server on 0.0.0.0:" + config.Port)
-	log.Fatal(http.ListenAndServe(":"+config.Port, &withCORS{insapp.NewRouter(config)}))
+	log.Fatal(http.ListenAndServe(":"+config.Port, &withCORS{insapp.NewRouter()}))
 }
 
 // Simple wrapper to Allow CORS
