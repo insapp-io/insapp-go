@@ -220,6 +220,8 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshT
 		Name:     "AuthToken",
 		Value:    authToken,
 		Domain:   config.Domain,
+		Path:     "/",
+		Secure:   true,
 		HttpOnly: true,
 	})
 
@@ -227,6 +229,8 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken string, refreshT
 		Name:     "RefreshToken",
 		Value:    refreshToken,
 		Domain:   config.Domain,
+		Path:     "/",
+		Secure:   true,
 		HttpOnly: true,
 	})
 }
