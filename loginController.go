@@ -217,7 +217,7 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
-		Expires:  time.Unix(refreshToken.Claims.(*TokenClaims).ExpiresAt, 0),
+		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
 	})
 
@@ -227,7 +227,7 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
-		Expires:  time.Unix(refreshToken.Claims.(*TokenClaims).ExpiresAt, 0),
+		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
 	})
 
