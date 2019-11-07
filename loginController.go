@@ -209,12 +209,15 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		return err2
 	}
 
+	// The expiration times are set to the refresh token expiration time
+
 	http.SetCookie(*w, &http.Cookie{
 		Name:     "AuthToken",
 		Value:    authStringToken,
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
+		Expires:  time.Unix(refreshToken.Claims.(*TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
 	})
 
@@ -224,6 +227,7 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		Domain:   config.Domain,
 		Path:     "/",
 		Secure:   true,
+		Expires:  time.Unix(refreshToken.Claims.(*TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
 	})
 
