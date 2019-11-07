@@ -60,9 +60,19 @@ func CreateNewTokens(ID bson.ObjectId, role string) (*jwt.Token, *jwt.Token) {
 
 // CheckAndRefreshStringTokens renews the auth token, if needed.
 func CheckAndRefreshStringTokens(authStringToken string, refreshStringToken string, role string) (*jwt.Token, *jwt.Token, error) {
-	authToken, refreshToken, err := parseStringTokens(authStringToken, refreshStringToken)
+	refreshToken, err := parseRefreshStringToken(refreshStringToken)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Don't use parseAuthStringToken:
+	// if err2 is not nil, it could be a validation error handled later in this function
+	authToken, err2 := jwt.ParseWithClaims(authStringToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return verifyKey, nil
+	})
+	_, ok := authToken.Claims.(*TokenClaims)
+	if !ok {
+		return nil, nil, errors.New("Auth token parse error")
 	}
 
 	// The auth token is still valid
@@ -76,9 +86,7 @@ func CheckAndRefreshStringTokens(authStringToken string, refreshStringToken stri
 		newRefreshToken := updateRefreshTokenExpiration(refreshToken)
 
 		return authToken, newRefreshToken, nil
-	}
-
-	if ve, ok := err.(*jwt.ValidationError); ok {
+	} else if ve, ok := err2.(*jwt.ValidationError); ok {
 		// The auth token has expired
 		if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			newAuthToken, err := updateAuthToken(authToken, refreshToken)
@@ -93,7 +101,7 @@ func CheckAndRefreshStringTokens(authStringToken string, refreshStringToken stri
 		}
 	}
 
-	return nil, nil, err
+	return nil, nil, err2
 }
 
 // RevokeRefreshStringToken deletes the given token from the database, if valid.
@@ -121,20 +129,6 @@ func GetUserFromRequest(r *http.Request) (bson.ObjectId, error) {
 	}
 
 	return authToken.Claims.(*TokenClaims).ID, nil
-}
-
-func parseStringTokens(authStringToken string, refreshStringToken string) (*jwt.Token, *jwt.Token, error) {
-	authToken, err1 := parseAuthStringToken(authStringToken)
-	if err1 != nil {
-		return nil, nil, err1
-	}
-
-	refreshToken, err2 := parseRefreshStringToken(refreshStringToken)
-	if err2 != nil {
-		return nil, nil, err2
-	}
-
-	return authToken, refreshToken, nil
 }
 
 func parseAuthStringToken(authStringToken string) (*jwt.Token, error) {
