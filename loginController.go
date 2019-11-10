@@ -135,7 +135,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	var login AssociationLogin
 	decoder.Decode(&login)
 
-	id, _, err := checkLoginForAssociation(login)
+	id, master, err := checkLoginForAssociation(login)
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
 
@@ -145,7 +145,13 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authToken, refreshToken := CreateNewTokens(id, "association")
+	var role string
+	if master {
+		role = "admin"
+	} else {
+		role = "association"
+	}
+	authToken, refreshToken := CreateNewTokens(id, role)
 
 	// Set the cookies to these newly created tokens
 	setAuthAndRefreshCookies(&w, authToken, refreshToken)
