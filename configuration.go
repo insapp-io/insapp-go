@@ -69,9 +69,9 @@ func (config Config) GetCDN() string {
 
 	switch config.Environment {
 	case "prod":
-		cdn = config.Domain + "/cdn/"
+		cdn = "https://" + config.Domain + "/cdn/"
 	case "dev":
-		cdn = config.Domain + "/cdn/"
+		cdn = "https://" + config.Domain + "/cdn/"
 	case "local":
 		cdn = "test"
 	}
