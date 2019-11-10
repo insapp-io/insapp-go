@@ -78,7 +78,20 @@ func CheckAndRefreshStringTokens(authStringToken string, refreshStringToken stri
 	// The auth token is still valid
 	if authToken.Valid {
 		// Check the role
-		if authToken.Claims.(*TokenClaims).Role != role {
+		roles := map[string]int{
+			"user":        0,
+			"association": 1,
+			"admin":       2,
+		}
+		var level int
+		var requiredLevel int
+		if level, ok = roles[authToken.Claims.(*TokenClaims).Role]; ok {
+			return nil, nil, errors.New("Unauthorized")
+		}
+		if requiredLevel, ok = roles[role]; ok {
+			return nil, nil, errors.New("Unauthorized")
+		}
+		if level < requiredLevel {
 			return nil, nil, errors.New("Unauthorized")
 		}
 

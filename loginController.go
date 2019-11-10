@@ -28,7 +28,7 @@ type AssociationLogin struct {
 }
 
 // AuthMiddleware makes sure the user is authenticated before handling the request.
-func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+func AuthMiddleware(next http.HandlerFunc, role string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestDump, err := httputil.DumpRequest(r, true)
 		if err != nil {
@@ -70,7 +70,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Check the JWT for validity
-		authToken, refreshToken, err := CheckAndRefreshStringTokens(authCookie.Value, refreshCookie.Value, "user")
+		authToken, refreshToken, err := CheckAndRefreshStringTokens(authCookie.Value, refreshCookie.Value, role)
 		if err != nil {
 			// Unauthorized attempt: JWT is not valid
 			if err.Error() == "Unauthorized" {
@@ -135,7 +135,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	var login AssociationLogin
 	decoder.Decode(&login)
 
-	id, master, err := checkLoginForAssociation(login)
+	user, err := checkLoginForAssociation(login)
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
 
@@ -146,16 +146,18 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var role string
-	if master {
+	if user.Master {
 		role = "admin"
 	} else {
 		role = "association"
 	}
-	authToken, refreshToken := CreateNewTokens(id, role)
+	authToken, refreshToken := CreateNewTokens(user.ID, role)
 
 	// Set the cookies to these newly created tokens
 	setAuthAndRefreshCookies(&w, authToken, refreshToken)
 	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(user)
 }
 
 // isTicketValid checks the validity of the given ticket with the CAS
@@ -186,7 +188,7 @@ func isTicketValid(ticket string) (string, error) {
 	return strings.ToLower(username), nil
 }
 
-func checkLoginForAssociation(login AssociationLogin) (bson.ObjectId, bool, error) {
+func checkLoginForAssociation(login AssociationLogin) (*AssociationUser, error) {
 	session := GetMongoSession()
 	defer session.Close()
 	db := session.DB("insapp").C("association_user")
@@ -198,10 +200,10 @@ func checkLoginForAssociation(login AssociationLogin) (bson.ObjectId, bool, erro
 	}).All(&result)
 
 	if len(result) > 0 {
-		return result[0].Association, result[0].Master, nil
+		return &result[0], nil
 	}
 
-	return bson.ObjectId(""), false, errors.New("failed to authenticate")
+	return nil, errors.New("failed to authenticate")
 }
 
 func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refreshToken *jwt.Token) error {

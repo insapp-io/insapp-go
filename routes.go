@@ -7,7 +7,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Middleware func(http.HandlerFunc) http.HandlerFunc
+// Middleware is the type wrapping http handlers.
+type Middleware func(http.HandlerFunc, string) http.HandlerFunc
 
 // Route type is used to define a route of the API
 type Route struct {
@@ -37,34 +38,24 @@ func NewRouter() *mux.Router {
 	}
 
 	for _, route := range userRoutes {
-		chain := chain(route.HandlerFunc, AuthMiddleware)
 		router.
-			HandleFunc(route.Pattern, chain).
+			HandleFunc(route.Pattern, AuthMiddleware(route.HandlerFunc, "user")).
 			Methods(route.Method)
 	}
 
 	for _, route := range associationRoutes {
-		chain := chain(route.HandlerFunc, AuthMiddleware)
 		router.
-			HandleFunc(route.Pattern, chain).
+			HandleFunc(route.Pattern, AuthMiddleware(route.HandlerFunc, "association")).
 			Methods(route.Method)
 	}
 
 	for _, route := range superRoutes {
-		chain := chain(route.HandlerFunc, AuthMiddleware)
 		router.
-			HandleFunc(route.Pattern, chain).
+			HandleFunc(route.Pattern, AuthMiddleware(route.HandlerFunc, "admin")).
 			Methods(route.Method)
 	}
 
 	return router
-}
-
-func chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
-	for _, m := range middlewares {
-		f = m(f)
-	}
-	return f
 }
 
 var publicRoutes = Routes{

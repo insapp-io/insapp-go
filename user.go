@@ -33,7 +33,7 @@ type AssociationUser struct {
 	ID          bson.ObjectId `bson:"_id,omitempty"`
 	Username    string        `json:"username"`
 	Association bson.ObjectId `json:"association" bson:"association"`
-	Password    string        `json:"password"`
+	Password    string        `json:"-"`
 	Master      bool          `json:"master"`
 	Owner       bson.ObjectId `json:"owner" bson:"owner,omitempty"`
 }
