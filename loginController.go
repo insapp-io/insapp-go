@@ -138,10 +138,10 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	user, err := checkLoginForAssociation(login)
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
-
 		json.NewEncoder(w).Encode(bson.M{
 			"error": "failed to authenticate",
 		})
+
 		return
 	}
 

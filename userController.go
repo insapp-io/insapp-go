@@ -8,6 +8,43 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func GetAssociationUserController(w http.ResponseWriter, r *http.Request) {
+	authCookie, err1 := r.Cookie("AuthToken")
+	if err1 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(bson.M{
+			"error": "failed to retrieve current user",
+		})
+	}
+
+	authToken, err2 := parseAuthStringToken(authCookie.Value)
+	if err2 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(bson.M{
+			"error": "failed to retrieve current user",
+		})
+	}
+
+	session := GetMongoSession()
+	defer session.Close()
+	db := session.DB("insapp").C("association_user")
+
+	var user AssociationUser
+	err := db.Find(bson.M{
+		"ID": authToken.Claims.(*TokenClaims).ID,
+	}).One(&user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(bson.M{
+			"error": "failed to retrieve current user",
+		})
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
+
 // GetUserController will answer a JSON of the user
 // linked to the given id in the URL
 func GetUserController(w http.ResponseWriter, r *http.Request) {
@@ -74,13 +111,4 @@ func ReportUserController(w http.ResponseWriter, r *http.Request) {
 
 	ReportUser(bson.ObjectIdHex(id), userID)
 	json.NewEncoder(w).Encode(bson.M{})
-}
-
-func Contains(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

@@ -38,7 +38,7 @@ func GetAllPostsController(w http.ResponseWriter, r *http.Request) {
 	filteredPosts := Posts{}
 	if user.ID != "" {
 		for _, post := range posts {
-			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
+			if contains(strings.ToUpper(user.Promotion), post.Promotions) && (contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
 				filteredPosts = append(filteredPosts, post)
 			}
 		}
@@ -89,7 +89,7 @@ func GetPostsForAssociationController(w http.ResponseWriter, r *http.Request) {
 	filteredPosts := Posts{}
 	if user.ID != "" {
 		for _, post := range posts {
-			if Contains(strings.ToUpper(user.Promotion), post.Promotions) && (Contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
+			if contains(strings.ToUpper(user.Promotion), post.Promotions) && (contains(os, post.Plateforms) || os == "") || len(post.Promotions) == 0 || len(post.Plateforms) == 0 {
 				filteredPosts = append(filteredPosts, post)
 			}
 		}

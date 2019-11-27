@@ -36,7 +36,7 @@ func GetFutureEventsController(w http.ResponseWriter, r *http.Request) {
 	res := Events{}
 	if user.ID != "" {
 		for _, event := range events {
-			if Contains(strings.ToUpper(user.Promotion), event.Promotions) && (Contains(os, event.Plateforms) || os == "") || len(event.Promotions) == 0 || len(event.Plateforms) == 0 {
+			if contains(strings.ToUpper(user.Promotion), event.Promotions) && (contains(os, event.Plateforms) || os == "") || len(event.Promotions) == 0 || len(event.Plateforms) == 0 {
 				res = append(res, event)
 			}
 		}

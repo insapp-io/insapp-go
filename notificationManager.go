@@ -119,20 +119,20 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 
 	var platforms string
 
-	if Contains("iOS", event.Plateforms) && Contains("android", event.Plateforms) {
+	if contains("iOS", event.Plateforms) && contains("android", event.Plateforms) {
 		filteredUsers = getAllUsers()
 		platforms = "('events-android' in topics || 'events-ios' in topics)"
-	} else if Contains("iOS", event.Plateforms) {
+	} else if contains("iOS", event.Plateforms) {
 		filteredUsers = getiOSUsers("")
 		platforms = "'events-ios' in topics"
-	} else if Contains("android", event.Plateforms) {
+	} else if contains("android", event.Plateforms) {
 		filteredUsers = getAndroidUsers("")
 		platforms = "'events-android' in topics"
 	}
 
 	for _, notificationUser := range filteredUsers {
 		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), event.Promotions) {
+		if contains(strings.ToUpper(user.Promotion), event.Promotions) {
 			users = append(users, notificationUser)
 		}
 	}
@@ -156,20 +156,20 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 
 	var platforms string
 
-	if Contains("iOS", post.Plateforms) && Contains("android", post.Plateforms) {
+	if contains("iOS", post.Plateforms) && contains("android", post.Plateforms) {
 		filteredUsers = getAllUsers()
 		platforms = "('posts-android' in topics || 'posts-ios' in topics)"
-	} else if Contains("iOS", post.Plateforms) {
+	} else if contains("iOS", post.Plateforms) {
 		filteredUsers = getiOSUsers("")
 		platforms = "'posts-ios' in topics"
-	} else if Contains("android", post.Plateforms) {
+	} else if contains("android", post.Plateforms) {
 		filteredUsers = getAndroidUsers("")
 		platforms = "'posts-android' in topics"
 	}
 
 	for _, notificationUser := range filteredUsers {
 		var user = GetUser(notificationUser.UserId)
-		if Contains(strings.ToUpper(user.Promotion), post.Promotions) {
+		if contains(strings.ToUpper(user.Promotion), post.Promotions) {
 			users = append(users, notificationUser)
 		}
 	}

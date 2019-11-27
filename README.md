@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/thomas-bouvier/insapp-go)](https://goreportcard.com/report/thomas-bouvier/insapp-go)
 
-Backend part of the Insapp project written in Go
+Backend part of Insapp written in Go
 
 ## Installation
 
@@ -114,6 +114,7 @@ These endpoints must include the user token as a query string : `?token=<token>`
 
 | Type      | Endpoint calls                                    | Description
 |-----------|---------------------------------------------------|--------------------------------------
+| `GET`     | `/association`                                    | `Get the current association`
 | `PUT`     | `/associations/{id}`                              | `Update the association with id {id}`
 | `POST`    | `/events`                                         | `Create an event`
 | `PUT`     | `/events/{id}`                                    | `Update the event with id {id}`
