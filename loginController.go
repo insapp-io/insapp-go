@@ -137,7 +137,7 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 
 	user, err := checkLoginForAssociation(login)
 	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{
 			"error": "failed to authenticate",
 		})
@@ -193,17 +193,17 @@ func checkLoginForAssociation(login AssociationLogin) (*AssociationUser, error) 
 	defer session.Close()
 	db := session.DB("insapp").C("association_user")
 
-	var result []AssociationUser
-	db.Find(bson.M{
+	var result AssociationUser
+	err := db.Find(bson.M{
 		"username": login.Username,
 		"password": GetMD5Hash(login.Password),
-	}).All(&result)
+	}).One(&result)
 
-	if len(result) > 0 {
-		return &result[0], nil
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("failed to authenticate")
+	return &result, nil
 }
 
 func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refreshToken *jwt.Token) error {
