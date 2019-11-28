@@ -61,6 +61,13 @@ Attributes `google_email` and `google_password` refer to the credentials of your
 
 The FCM HTTP v1 API requires some credentials to send push notifications. The `service-account.json` file can be downloaded from the Firebase Cloud Messaging dashboard, and should be copied at the root of this directory. This way, it will be included in the Docker container.
 
+The authentication mechanism relies on JWT tokens and thus needs a secret key. Please generate the following keys at the root of this directory:
+
+```bash
+openssl genrsa -out app.rsa 2048
+openssl rsa -in app.rsa -pubout > app.rsa.pub
+```
+
 ## API Endpoints
 
 ### Public routes
