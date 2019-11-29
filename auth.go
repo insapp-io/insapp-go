@@ -85,10 +85,10 @@ func CheckAndRefreshStringTokens(authStringToken string, refreshStringToken stri
 		}
 		var level int
 		var requiredLevel int
-		if level, ok = roles[authToken.Claims.(*TokenClaims).Role]; ok {
+		if level, ok = roles[authToken.Claims.(*TokenClaims).Role]; !ok {
 			return nil, nil, errors.New("Unauthorized")
 		}
-		if requiredLevel, ok = roles[role]; ok {
+		if requiredLevel, ok = roles[role]; !ok {
 			return nil, nil, errors.New("Unauthorized")
 		}
 		if level < requiredLevel {
