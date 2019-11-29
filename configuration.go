@@ -73,7 +73,7 @@ func (config Config) GetCDN() string {
 	case "dev":
 		cdn = "https://" + config.Domain + "/cdn/"
 	case "local":
-		cdn = "test"
+		cdn = "http://" + config.Domain + "/cdn/"
 	}
 
 	return cdn
@@ -81,11 +81,7 @@ func (config Config) GetCDN() string {
 
 func initMongoConfig() *mgo.DialInfo {
 	var address []string
-	if config.Environment == "local" {
-		address = append(address, "localhost:27017")
-	} else {
-		address = append(address, "db")
-	}
+	address = append(address, "db")
 
 	return &mgo.DialInfo{
 		Addrs:    address,

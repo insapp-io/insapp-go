@@ -219,25 +219,47 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 
 	// The expiration times are set to the refresh token expiration time
 
-	http.SetCookie(*w, &http.Cookie{
-		Name:     "AuthToken",
-		Value:    authStringToken,
-		Domain:   config.Domain,
-		Path:     "/",
-		Secure:   true,
-		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
-		HttpOnly: true,
-	})
+	if config.Environment == "local" {
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "AuthToken",
+			Value:    authStringToken,
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   false,
+			Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
+			HttpOnly: true,
+		})
 
-	http.SetCookie(*w, &http.Cookie{
-		Name:     "RefreshToken",
-		Value:    refreshStringToken,
-		Domain:   config.Domain,
-		Path:     "/",
-		Secure:   true,
-		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
-		HttpOnly: true,
-	})
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "RefreshToken",
+			Value:    refreshStringToken,
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   false,
+			Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
+			HttpOnly: true,
+		})
+	} else {
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "AuthToken",
+			Value:    authStringToken,
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   true,
+			Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
+			HttpOnly: true,
+		})
+
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "RefreshToken",
+			Value:    refreshStringToken,
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   true,
+			Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
+			HttpOnly: true,
+		})
+	}
 
 	return nil
 }
