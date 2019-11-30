@@ -15,6 +15,8 @@ func GetAssociationUserController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{
 			"error": "failed to retrieve current user",
 		})
+
+		return
 	}
 
 	authToken, err2 := parseAuthStringToken(authCookie.Value)
@@ -23,6 +25,8 @@ func GetAssociationUserController(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(bson.M{
 			"error": "failed to retrieve current user",
 		})
+
+		return
 	}
 
 	session := GetMongoSession()
@@ -30,15 +34,17 @@ func GetAssociationUserController(w http.ResponseWriter, r *http.Request) {
 	db := session.DB("insapp").C("association_user")
 
 	var user AssociationUser
-	err := db.Find(bson.M{
-		"ID": authToken.Claims.(*TokenClaims).ID,
-	}).One(&user)
+	err := db.FindId(
+		authToken.Claims.(*TokenClaims).ID,
+	).One(&user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(bson.M{
-			"error": "failed to retrieve current user",
+			"error": "failed to retrieve current user: not found",
 		})
+
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
