@@ -63,8 +63,9 @@ var publicRoutes = Routes{
 	Route{"GET", "/credit", Credit},
 	Route{"GET", "/legal", Legal},
 
-	Route{"POST", "/login/user/{ticket}", LogUserController},
-	Route{"POST", "/login/association", LogAssociationController},
+	// Login
+	Route{"POST", "/login/user/{ticket}", LoginUserController},
+	Route{"POST", "/login/association", LoginAssociationController},
 }
 
 var userRoutes = Routes{
@@ -118,6 +119,9 @@ var userRoutes = Routes{
 	Route{"POST", "/search/events", SearchEventController},
 	Route{"POST", "/search/posts", SearchPostController},
 	Route{"POST", "/search", SearchUniversalController},
+
+	// Logout
+	Route{"POST", "/logout/user", LogoutUserController},
 }
 
 var associationRoutes = Routes{
@@ -142,6 +146,9 @@ var associationRoutes = Routes{
 
 	// Image
 	Route{"POST", "/images", UploadNewImageController},
+
+	// Logout
+	Route{"POST", "/logout/association", LogoutAssociationController},
 }
 
 var superRoutes = Routes{

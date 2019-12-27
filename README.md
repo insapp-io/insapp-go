@@ -83,8 +83,6 @@ openssl rsa -in app.rsa -pubout > app.rsa.pub
 
 ### User routes
 
-These endpoints must include the user token as a query string : `?token=<token>`.
-
 | Type      | Endpoint calls                                    | Description
 |-----------|---------------------------------------------------|--------------------------------------
 | `GET`     | `/associations`                                   | `Get all associations`
@@ -116,6 +114,7 @@ These endpoints must include the user token as a query string : `?token=<token>`
 | `POST`    | `/search/associations`                            | `Search for associations`
 | `POST`    | `/search/events`                                  | `Search for events`
 | `POST`    | `/search/posts`                                   | `Search for posts`
+| `POST`    | `/logout/user`                                    | `Logout the current user`
 
 ### Association routes
 
@@ -130,6 +129,7 @@ These endpoints must include the user token as a query string : `?token=<token>`
 | `PUT`     | `/posts/{id}`                                     | `Update the post with id {id}`
 | `DELETE`  | `/posts/{id}`                                     | `Delete the post with id {id}`
 | `POST`    | `/images`                                         | `Post an image`
+| `POST`    | `/logout/association`                             | `Logout the current association user`
 
 ### Super user routes
 

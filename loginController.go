@@ -90,9 +90,9 @@ func AuthMiddleware(next http.HandlerFunc, role string) http.HandlerFunc {
 	})
 }
 
-// LogUserController logs a user in using CAS.
+// LoginUserController logs a user in using CAS.
 // If the ticket is valid, auth and refresh tokens are generated.
-func LogUserController(w http.ResponseWriter, r *http.Request) {
+func LoginUserController(w http.ResponseWriter, r *http.Request) {
 	ticket := mux.Vars(r)["ticket"]
 
 	username, err := isTicketValid(ticket)
@@ -129,8 +129,8 @@ func LogUserController(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// LogAssociationController logs an association in.
-func LogAssociationController(w http.ResponseWriter, r *http.Request) {
+// LoginAssociationController logs an association in.
+func LoginAssociationController(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var login AssociationLogin
 	decoder.Decode(&login)
@@ -158,6 +158,20 @@ func LogAssociationController(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(user)
+}
+
+// LogoutUserController logs a user out.
+func LogoutUserController(w http.ResponseWriter, r *http.Request) {
+	DeleteTokenCookies(&w, r)
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// LogoutAssociationController logs an association out.
+func LogoutAssociationController(w http.ResponseWriter, r *http.Request) {
+	DeleteTokenCookies(&w, r)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 // isTicketValid checks the validity of the given ticket with the CAS

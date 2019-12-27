@@ -151,7 +151,7 @@ func GetMyAssociations(id bson.ObjectId) []bson.ObjectId {
 	return res
 }
 
-// SearchAssociation will return an array of all Association found given a search string
+// SearchAssociation return an array of all Association found with the given search string.
 func SearchAssociation(name string) Associations {
 	session := GetMongoSession()
 	defer session.Close()
@@ -235,6 +235,7 @@ func RemovePostFromAssociation(id bson.ObjectId, post bson.ObjectId) Association
 	return result
 }
 
+// GetAssociationUser return the AssociationUser object with the given ID.
 func GetAssociationUser(id bson.ObjectId) AssociationUser {
 	session := GetMongoSession()
 	defer session.Close()

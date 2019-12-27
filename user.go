@@ -151,7 +151,7 @@ func GetAllUser() Users {
 	return result
 }
 
-// GetUser will return an User object from the given ID
+// GetUser return the User object with the given ID.
 func GetUser(id bson.ObjectId) User {
 	session := GetMongoSession()
 	defer session.Close()
