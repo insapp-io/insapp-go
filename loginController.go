@@ -279,23 +279,47 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 }
 
 func nullifyTokenCookies(w *http.ResponseWriter, r *http.Request) {
-	authCookie := http.Cookie{
-		Name:     "AuthToken",
-		Value:    "",
-		Expires:  time.Now().Add(-1000 * time.Hour),
-		HttpOnly: true,
+	if config.Environment == "local" {
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "AuthToken",
+			Value:    "",
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   false,
+			Expires:  time.Now().Add(-1000 * time.Hour),
+			HttpOnly: true,
+		})
+
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "RefreshToken",
+			Value:    "",
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   false,
+			Expires:  time.Now().Add(-1000 * time.Hour),
+			HttpOnly: true,
+		})
+	} else {
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "AuthToken",
+			Value:    "",
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   true,
+			Expires:  time.Now().Add(-1000 * time.Hour),
+			HttpOnly: true,
+		})
+
+		http.SetCookie(*w, &http.Cookie{
+			Name:     "RefreshToken",
+			Value:    "",
+			Domain:   config.Domain,
+			Path:     "/",
+			Secure:   true,
+			Expires:  time.Now().Add(-1000 * time.Hour),
+			HttpOnly: true,
+		})
 	}
-
-	http.SetCookie(*w, &authCookie)
-
-	refreshCookie := http.Cookie{
-		Name:     "RefreshToken",
-		Value:    "",
-		Expires:  time.Now().Add(-1000 * time.Hour),
-		HttpOnly: true,
-	}
-
-	http.SetCookie(*w, &refreshCookie)
 
 	// If present, revoke the refresh cookie from the database
 	RefreshCookie, refreshErr := r.Cookie("RefreshToken")
