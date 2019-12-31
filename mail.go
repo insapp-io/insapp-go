@@ -6,6 +6,7 @@ import (
 	"net/smtp"
 )
 
+// SendEmail sends an email to the given recipient.
 func SendEmail(to string, subject string, body string) {
 	from := config.GoogleEmail
 	pass := config.GooglePassword
@@ -26,6 +27,7 @@ func SendEmail(to string, subject string, body string) {
 	smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, pass, "smtp.gmail.com"), from, []string{to}, []byte(msg))
 }
 
+// SendAssociationEmailSubscription sends a subscription email containing the credentials.
 func SendAssociationEmailSubscription(email string, password string) error {
 	data := struct {
 		Email    string
@@ -43,6 +45,8 @@ func SendAssociationEmailSubscription(email string, password string) error {
 	return err
 }
 
+// SendAssociationEmailForCommentOnEvent sends an email indicating
+// a new comment has been added on an event
 func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Comment, user User) error {
 	data := struct {
 		EventName        string
@@ -66,6 +70,8 @@ func SendAssociationEmailForCommentOnEvent(email string, event Event, comment Co
 	return err
 }
 
+// SendAssociationEmailForCommentOnPost sends an email indicating
+// a new comment has been added on a post
 func SendAssociationEmailForCommentOnPost(email string, post Post, comment Comment, user User) error {
 	data := struct {
 		PostName        string

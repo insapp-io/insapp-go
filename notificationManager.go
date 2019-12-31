@@ -87,30 +87,37 @@ func buildTopicsStringForPromotions(prefix string, promotions []string) string {
 	return topics
 }
 
-// TriggerNotificationForUserFromPost will send a Notification as well as a FCM push
-// notification to the given user
+// TriggerNotificationForUserFromPost sends a notification and a push
+// notification to the given user.
+// Push notifications are not sent in a local environment.
 func TriggerNotificationForUserFromPost(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
 	user := getNotificationUserForUser(receiver)
 
 	sendNotificationToUsers(notification, []NotificationUser{user})
 
-	sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.PostActivity", user.Token)
+	if config.Environment != "local" {
+		sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.PostActivity", user.Token)
+	}
 }
 
-// TriggerNotificationForUserFromEvent will send a Notification as well as a FCM push
-// notification to the given user
+// TriggerNotificationForUserFromEvent sends a notification and a push
+// notification to the given user.
+// Push notifications are not sent in a local environment.
 func TriggerNotificationForUserFromEvent(sender bson.ObjectId, receiver bson.ObjectId, content bson.ObjectId, message string, comment Comment, tagType string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Comment: comment, Type: tagType}
 	user := getNotificationUserForUser(receiver)
 
 	sendNotificationToUsers(notification, []NotificationUser{user})
 
-	sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.EventActivity", user.Token)
+	if config.Environment != "local" {
+		sendPushNotificationToDevice(GetUser(sender).Username, message, content.Hex(), ".activities.EventActivity", user.Token)
+	}
 }
 
-// TriggerNotificationForEvent will send a Notification as well as a FCM push
-// notification to users targeted by the Event platform and promotion
+// TriggerNotificationForEvent sends a notification and a push
+// notification to users targeted by the promotion.
+// Push notifications are not sent in a local environment.
 func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "event"}
 
@@ -139,15 +146,18 @@ func TriggerNotificationForEvent(event Event, sender bson.ObjectId, content bson
 
 	sendNotificationToUsers(notification, users)
 
-	for _, promotion := range event.Promotions {
-		var topics = fmt.Sprintf(`%s && 'events-%s' in topics`, platforms, promotion)
-		sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", topics)
+	if config.Environment != "local" {
+		for _, promotion := range event.Promotions {
+			var topics = fmt.Sprintf(`%s && 'events-%s' in topics`, platforms, promotion)
+			sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", topics)
+		}
+		sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", fmt.Sprintf(`%s && 'events-unknown-class' in topics`, platforms))
 	}
-	sendPushNotificationToTopics(event.Name, message, content.Hex(), ".activities.EventActivity", fmt.Sprintf(`%s && 'events-unknown-class' in topics`, platforms))
 }
 
-// TriggerNotificationForPost will send a Notification as well as a FCM push
-// notification to users targeted by the Post platform and promotion
+// TriggerNotificationForPost sends a notification and a push
+// notification to users targeted by the promotion.
+// Push notifications are not sent in a local environment.
 func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.ObjectId, message string) {
 	notification := Notification{Sender: sender, Content: content, Message: message, Type: "post"}
 
@@ -176,11 +186,13 @@ func TriggerNotificationForPost(post Post, sender bson.ObjectId, content bson.Ob
 
 	sendNotificationToUsers(notification, users)
 
-	for _, promotion := range post.Promotions {
-		var topics = fmt.Sprintf(`%s && 'posts-%s' in topics`, platforms, promotion)
-		sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", topics)
+	if config.Environment != "local" {
+		for _, promotion := range post.Promotions {
+			var topics = fmt.Sprintf(`%s && 'posts-%s' in topics`, platforms, promotion)
+			sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", topics)
+		}
+		sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", fmt.Sprintf(`%s && 'posts-unknown-class' in topics`, platforms))
 	}
-	sendPushNotificationToTopics(post.Title, message, content.Hex(), ".activities.PostActivity", fmt.Sprintf(`%s && 'posts-unknown-class' in topics`, platforms))
 }
 
 func sendNotificationToUsers(notification Notification, users []NotificationUser) {
