@@ -139,7 +139,7 @@ func LoginAssociationController(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(bson.M{
-			"error": "failed to authenticate",
+			"error": fmt.Sprintf("failed to authenticate: %s", err.Error()),
 		})
 
 		return
@@ -208,13 +208,21 @@ func checkLoginForAssociation(login AssociationLogin) (*AssociationUser, error) 
 	db := session.DB("insapp").C("association_user")
 
 	var result AssociationUser
-	err := db.Find(bson.M{
+	err1 := db.Find(bson.M{
+		"username": login.Username,
+	}).One(&result)
+
+	if err1 != nil {
+		return nil, errors.New("unknown user")
+	}
+
+	err2 := db.Find(bson.M{
 		"username": login.Username,
 		"password": GetMD5Hash(login.Password),
 	}).One(&result)
 
-	if err != nil {
-		return nil, err
+	if err2 != nil {
+		return nil, errors.New("wrong password")
 	}
 
 	return &result, nil
