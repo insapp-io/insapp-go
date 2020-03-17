@@ -253,7 +253,7 @@ func checkRefreshToken(jti string) bool {
 		"jti": jti,
 	}).Count()
 
-	return err != nil && count > 0
+	return err == nil && count > 0
 }
 
 func storeRefreshToken() TokenJTI {
