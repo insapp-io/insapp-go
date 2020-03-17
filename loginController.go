@@ -84,7 +84,7 @@ func AuthMiddleware(next http.HandlerFunc, role string) http.HandlerFunc {
 			return
 		}
 
-		setAuthAndRefreshCookies(&w, authToken, refreshToken)
+		setAuthAndRefreshCookies(&w, r, authToken, refreshToken)
 
 		next.ServeHTTP(w, r)
 	})
@@ -123,7 +123,7 @@ func LoginUserController(w http.ResponseWriter, r *http.Request) {
 	authToken, refreshToken := CreateNewTokens(user.ID, "user")
 
 	// Set the cookies to these newly created tokens
-	setAuthAndRefreshCookies(&w, authToken, refreshToken)
+	setAuthAndRefreshCookies(&w, r, authToken, refreshToken)
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(user)
@@ -154,7 +154,7 @@ func LoginAssociationController(w http.ResponseWriter, r *http.Request) {
 	authToken, refreshToken := CreateNewTokens(user.ID, role)
 
 	// Set the cookies to these newly created tokens
-	setAuthAndRefreshCookies(&w, authToken, refreshToken)
+	setAuthAndRefreshCookies(&w, r, authToken, refreshToken)
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(user)
@@ -228,7 +228,8 @@ func checkLoginForAssociation(login AssociationLogin) (*AssociationUser, error) 
 	return &result, nil
 }
 
-func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refreshToken *jwt.Token) error {
+// Tell to set cookies and edit the given request if the authCookie is renewed
+func setAuthAndRefreshCookies(w *http.ResponseWriter, r *http.Request, authToken *jwt.Token, refreshToken *jwt.Token) error {
 	authStringToken, err1 := authToken.SignedString(signKey)
 	if err1 != nil {
 		return err1
@@ -240,7 +241,7 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 	}
 
 	// The expiration times are set to the refresh token expiration time
-	http.SetCookie(*w, &http.Cookie{
+	authCookie := http.Cookie{
 		Name:     "AuthToken",
 		Value:    authStringToken,
 		Domain:   config.Domain,
@@ -248,9 +249,9 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		Secure:   config.Environment != "local",
 		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
-	})
+	}
 
-	http.SetCookie(*w, &http.Cookie{
+	refreshCookie := http.Cookie{
 		Name:     "RefreshToken",
 		Value:    refreshStringToken,
 		Domain:   config.Domain,
@@ -258,7 +259,18 @@ func setAuthAndRefreshCookies(w *http.ResponseWriter, authToken *jwt.Token, refr
 		Secure:   config.Environment != "local",
 		Expires:  time.Unix(refreshToken.Claims.(TokenClaims).ExpiresAt, 0),
 		HttpOnly: true,
-	})
+	}
+
+	http.SetCookie(*w, &authCookie)
+	http.SetCookie(*w, &refreshCookie)
+
+	oldAuthCookie, authErr := r.Cookie("AuthToken")
+	// The auth cookie changed, we fake that the request was made with the new cookie
+	if authErr == nil && authCookie.Value != oldAuthCookie.Value {
+		r.Header.Del("Cookie")
+		r.AddCookie(&authCookie)
+		r.AddCookie(&refreshCookie)
+	}
 
 	return nil
 }
