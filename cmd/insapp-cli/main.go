@@ -21,7 +21,7 @@ func main() {
 			Email: "pitou.games@gmail.com",
 		},
 	}
-	app.Copyright = "(c) 2019 Insapp"
+	app.Copyright = "(c) 2020 Insapp"
 	//app.UseShortOptionHandling = true
 	app.Commands = []cli.Command{
 
